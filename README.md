@@ -6,8 +6,8 @@
 | 项目 | 内容 |
 |------|------|
 | 文档编号 | VT-SITE-RD-001 |
-| 版本 | V1.1 |
-| 发布日期 | 2026-08-10 |
+| 版本 | V1.2 |
+| 发布日期 | 2026-08-14 |
 | 责任人（Owner） | 车载测试学堂前端研发组 |
 | 文档状态 | 正式发布（Released） |
 | 密级 | 公开（Public） |
@@ -19,6 +19,7 @@
 |------|------|--------|------|
 | V1.0 | 2026-08-10 | 研发组 | 初版，覆盖架构、数据模型、内容规范、质量门 |
 | V1.1 | 2026-08-10 | 研发组 | 按企业对外标准扩写：补充文档信息表、架构图、完整 Schema 参考、内容创作 Runbook、设计规范与安全合规 |
+| V1.2 | 2026-08-14 | 研发组 | 同步部署形态变更：新增 Cloudflare Pages 生产部署、双形态构建（本地内联 / CI 按需加载） |
 
 > **文档同步维护约定（P0）**：本站点任何迭代变动（新增/调整章节、修改数据模型、调整质量门基线、变更部署形态等），都必须同步更新本文件与《部署运维手册 DEPLOY.md》中的对应数字与章节，保持文档与代码/数据持续一致。当前基线数字：chapters=55、chapterContent=55、glossary=91、quiz=404；质量门 regression 失败=0/警告=32、scan_emoji UI 层=3（豁免）。
 
@@ -100,9 +101,9 @@
 ### 4.2 分层说明
 - **展示层**：5 个静态 HTML 页面 + `main.css` / `chapter-detail.css`。
 - **逻辑层**：`app.js`（单文件核心，无框架），负责 SPA 式路由、内容渲染、搜索、主题切换、图标注入、缓存戳校验。
-- **数据层**：`data-bundle.js`（构建产物，内联章节目录 / 术语 / 题库 / 章节正文）；`data/chapter-content/NN.json` 为章节正文权威源。
-- **构建层**：Python 脚本把 `data/` 下的 JSON 聚合并写入 `assets/js/`；Node 脚本做回归与 emoji 校验。
-- **无服务端**：部署形态为任意静态文件服务，无 API、无数据库。
+- **数据层**：`data-bundle.js`（构建产物，内联章节目录 / 术语 / 题库；章节正文根据构建参数选择内联或按需 fetch）；`data/chapter-content/NN.json` 为章节正文权威源。
+- **构建层**：Python 脚本把 `data/` 下的 JSON 聚合并写入 `assets/js/`；Node 脚本做回归与 emoji 校验。支持双形态构建：默认内联（本地 file://）与 `INCLUDE_CONTENT=0`（Cloudflare Pages 生产环境按需加载）。
+- **无服务端**：部署形态为任意静态文件服务，无 API、无数据库。当前生产环境使用 Cloudflare Pages。
 
 ### 4.3 数据驱动渲染流（时序）
 1. 浏览器加载 `index.html`，引入 `data-bundle.js`，得到 `window.__SITE_DATA__`。
@@ -161,7 +162,7 @@ vehicle-test-site/
 | 校验 | Node.js 22+ | `regression_check.js`、`scan_emoji.js` |
 | 图标 | 内联 SVG（`app.js` 的 `ICON(name)`） | 禁止 emoji 作 UI 图标 |
 | 图片 | 本地 PNG / SVG | 禁止外部图片 |
-| 部署 | 任意静态服务器 / CloudStudio 快照 | 无容器编排 |
+| 部署 | Cloudflare Pages（主用）/ 任意静态服务器 / CloudStudio 快照 | 无容器编排 |
 
 **依赖最小化原则**：不引入前端 CDN、不引入运行时第三方 JS 库，保证离线可用与供应链安全。
 
@@ -405,7 +406,7 @@ UI 图标禁 emoji；`scan_emoji.js` 对代码内正则命中的 `✅/✓/√` �
 ## 15. 常见问题 FAQ
 
 **Q1：改了内容线上没变？**
-未跑 `bump_version.py`，浏览器命中旧缓存。改完必 bump 并重部署，用户硬刷新（Ctrl/Cmd+Shift+R）。
+未跑 `bump_version.py`，或 Cloudflare Pages 构建尚未完成。改完必 bump，push 到 `main` 后等 CF 构建完成，用户硬刷新（Ctrl/Cmd+Shift+R）。
 
 **Q2：章节点进去空白？**
 `?id=NN` 对应的 `data/chapter-content/NN.json` 缺失或编号与 `chapters.json` 不一致；确认文件存在且 `num` 匹配。

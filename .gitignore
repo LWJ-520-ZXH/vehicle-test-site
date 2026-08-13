@@ -30,6 +30,9 @@ overview.md
 # 开发期回归工具（非站点运行所需）
 tools/
 
+# 生成的 D1 种子 SQL（由 tools/migrate_to_d1.py 生成，Git JSON 为真源，可重跑）
+migrations/seed.sql
+
 # ── 补充排除（Git / Cloudflare Pages 部署前补齐）──
 # 第三方依赖（绝不入库）
 node_modules/

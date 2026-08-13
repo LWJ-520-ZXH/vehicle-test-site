@@ -1,0 +1,1489 @@
+[
+  {
+    "id": "Q-08-00-01",
+    "chapterNum": 8,
+    "sectionIndex": 0,
+    "sectionTitle": "一、工程配置结构",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "CANoe",
+      ".cfg",
+      "工程文件"
+    ],
+    "stem": "CANoe 的 .cfg 文件是什么？",
+    "options": [
+      {
+        "key": "A",
+        "text": "启动用的工程文件，把数据库、网络拓扑、仿真节点、面板、测试模块、硬件通道映射全部打包在一起"
+      },
+      {
+        "key": "B",
+        "text": "总线报文的日志文件，记录带时间戳的原始数据"
+      },
+      {
+        "key": "C",
+        "text": "DBC 数据库的文本导出格式，只描述信号与报文"
+      },
+      {
+        "key": "D",
+        "text": "CAPL 脚本的源文件，编译后挂到仿真节点上运行"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节开篇明确：.cfg 是 CANoe 的启动文件，它把数据库（DBC/ODX/CDD）、网络拓扑、仿真节点、面板、测试模块、硬件通道映射打包成一个整体，双击即可还原整套工作环境。由此引出一句关键理念——『工程即文档』：交接时只要把 .cfg 连同数据库一起发给对方，对方就能 1:1 复现你的测试现场，不需要口头交代一堆设置。B 说的是 .blf/.asc 日志，C 说的是 DBC，D 说的是 .can 脚本文件，都是 CANoe 工程里的组成部分而不是 .cfg 本身。",
+    "keyPoints": [
+      ".cfg = CANoe 工程文件，打包数据库/拓扑/节点/面板/测试/硬件映射",
+      "双击即可 1:1 还原测试环境",
+      "『工程即文档』：交接只需 .cfg + 数据库"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "一、工程配置结构·.cfg 工程文件说明段"
+    },
+    "relatedTerms": [
+      "DBC",
+      "CDD",
+      ".blf"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-00-02",
+    "chapterNum": 8,
+    "sectionIndex": 0,
+    "sectionTitle": "一、工程配置结构",
+    "module": "B",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "Simulation Setup",
+      "Channel Mapping",
+      "工程结构"
+    ],
+    "stem": "关于 CANoe 工程的五大配置区，下列描述正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Database 用于导入 DBC（信号层）与 CDD/ODX（诊断层），决定 CANoe 能否看懂总线上的字节"
+      },
+      {
+        "key": "B",
+        "text": "Simulation Setup 图形化呈现总线、节点、通道，可单独激活或屏蔽某个 ECU 节点"
+      },
+      {
+        "key": "C",
+        "text": "Hardware 把逻辑通道映射到真实硬件的物理通道，并设置总线类型与波特率"
+      },
+      {
+        "key": "D",
+        "text": "Environment 专门用于存放录制的 .blf 日志文件，供 Replay 调用"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 逐条对应配置区清单：Database 决定解析能力（没有 DBC，Trace 里只能看到裸 ID 和字节）；Simulation Setup 是拓扑视图，可以把某个真实 ECU 对应的仿真节点单独屏蔽，做『替身』或『共存』实验；Hardware 负责逻辑通道到物理接口（如 VN1630）的映射，并设定总线类型与波特率。D 错在把 Environment 说成日志仓库——Environment 存放的是系统变量、面板、符号映射，是交互与数据绑定的中枢；日志由 Analysis → Logging 录制成 .blf/.asc 文件。剩下的 Test Setup 则用来挂载 CAPL/.NET/XML 编写的测试模块，承载自动化用例。",
+    "keyPoints": [
+      "Database 决定解析能力，Simulation Setup 管拓扑与节点激活",
+      "Hardware 管通道映射、总线类型与波特率",
+      "Environment = 系统变量/面板/符号映射；Test Setup = 测试模块"
+    ],
+    "sourceRef": {
+      "kind": "list",
+      "label": "工程配置结构·五大配置区清单（Database/Simulation Setup/Test Setup/Hardware/Environment）"
+    },
+    "relatedTerms": [
+      "ODX",
+      "系统变量",
+      "Panel"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-00-03",
+    "chapterNum": 8,
+    "sectionIndex": 0,
+    "sectionTitle": "一、工程配置结构",
+    "module": "B",
+    "type": "judge",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "Sample Configuration",
+      "学习路径",
+      "入门"
+    ],
+    "stem": "判断：初学 CANoe 时，最推荐的做法是从零新建一个空白工程，逐项手工配置，这样理解最透彻。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误。章节明确指出：汽车行业封闭、网络资料少，最容易踩的坑恰恰是『从零新建工程』——你不知道哪些选项必须设、哪些默认值有坑。正确做法是先打开安装目录自带的 Sample Configuration（示例工程），在它基础上改。Vector 的示例覆盖 CAN/LIN/FlexRay/以太网、诊断、测试模块，是免费且权威的教科书，原话是『吃透三五个示例比看十篇博客有用』。这条经验在实际工作中同样适用：接手新项目时优先找现成的 .cfg 基线，而不是重造轮子。",
+    "keyPoints": [
+      "推荐从 Sample Configuration 示例工程改起",
+      "Vector 示例覆盖多总线、诊断、测试模块，权威且免费",
+      "从零新建是新手最常见的坑"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "工程配置结构·关于 Sample Configuration 的学习建议"
+    },
+    "relatedTerms": [
+      ".cfg",
+      "FlexRay",
+      "示例工程"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-01-01",
+    "chapterNum": 8,
+    "sectionIndex": 1,
+    "sectionTitle": "二、三大运行模式",
+    "module": "B",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Offline",
+      "Replay",
+      "运行模式"
+    ],
+    "stem": "CANoe 的 Offline（离线回放）模式，其数据来源与硬件要求是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "读取 .blf/.asc 日志文件，不接真实硬件，也无需 CAN 接口卡"
+      },
+      {
+        "key": "B",
+        "text": "接真实 ECU/整车，必须配 CAN 接口卡"
+      },
+      {
+        "key": "C",
+        "text": "由 Simulation Setup 里的 CAPL 节点实时产生，需要虚拟通道授权"
+      },
+      {
+        "key": "D",
+        "text": "从 DBC 数据库中随机生成信号值，用于压力测试"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "三大运行模式对比表把数据来源写得很清楚：Real Bus 接真实 ECU/整车、需要 CAN 接口卡；Simulation 由 Simulation Setup 里的节点（含 CAPL）产生、可无硬件（虚拟通道）；Offline 读取 .blf/.asc 日志文件、不接真实硬件、无需硬件。Offline 的典型用途是问题复现、发给他人离线分析、回归对比，总线负载等于日志录制时的负载。B 描述的是 Real Bus，C 描述的是 Simulation。理解这三种模式的分工，是判断『我现在该怎么搭环境』的第一步。",
+    "keyPoints": [
+      "Offline = 读 .blf/.asc 日志，无需硬件",
+      "Real Bus 接真实 ECU 需接口卡；Simulation 由仿真节点产生可无硬件",
+      "Offline 负载等于录制时的负载"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "三大运行模式对比表（Real Bus / Simulation / Offline）"
+    },
+    "relatedTerms": [
+      ".blf",
+      "虚拟通道",
+      "回归对比"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-01-02",
+    "chapterNum": 8,
+    "sectionIndex": 1,
+    "sectionTitle": "二、三大运行模式",
+    "module": "B",
+    "type": "multi",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "Real Bus",
+      "Simulation",
+      "适用场景"
+    ],
+    "stem": "依据三大运行模式对比表，下列关于典型用途与总线负载的说法正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Real Bus 适合台架/实车联调与信号验证，总线负载反映真实网络"
+      },
+      {
+        "key": "B",
+        "text": "Simulation 适合早期没有样件时做功能仿真与面板联调"
+      },
+      {
+        "key": "C",
+        "text": "Simulation 模式下的总线负载由仿真节点的发送节奏决定"
+      },
+      {
+        "key": "D",
+        "text": "Offline 模式下可以对真实 ECU 施加激励，实现闭环故障注入"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 都能在对比表中直接找到：Real Bus 用于台架/实车联调、信号验证，负载反映真实网络；Simulation 用于早期无样件时的功能仿真与面板联调；Simulation 的负载由仿真节点发送节奏决定（所以仿真里也能做负载压力实验）。D 是典型误解——Offline 不接真实硬件，只是把日志按原始时间戳重放到 CANoe 内部做分析，无法对真实 ECU 施加激励、更不可能形成闭环；要做闭环故障注入得用 Real Bus 配合 VT 系统硬件。",
+    "keyPoints": [
+      "Real Bus：真实联调，负载真实",
+      "Simulation：无样件早期开发，负载由节点节奏决定",
+      "Offline 不接硬件，无法对真实 ECU 施加激励"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "三大运行模式对比表·典型用途与总线负载行"
+    },
+    "relatedTerms": [
+      "VT 系统",
+      "故障注入",
+      "面板联调"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-01-03",
+    "chapterNum": 8,
+    "sectionIndex": 1,
+    "sectionTitle": "二、三大运行模式",
+    "module": "B",
+    "type": "single",
+    "cat": "故障定位",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "Real Bus",
+      "仿真节点",
+      "排错"
+    ],
+    "stem": "新手把 Home 功能区切到 Real Bus 后启动测量，却发现 Trace 里始终看不到自己写的仿真节点发出的报文。最可能的原因是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Real Bus 模式下仿真节点是哑的，必须切到 Simulation 或确保该节点被激活"
+      },
+      {
+        "key": "B",
+        "text": "Trace 窗口默认隐藏 Tx 方向的报文，需要重新配置列"
+      },
+      {
+        "key": "C",
+        "text": "仿真节点必须先编译成 .cfg 才能发送报文"
+      },
+      {
+        "key": "D",
+        "text": "Real Bus 模式不支持 CAPL，需要改用 .NET 编写节点"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节把这条列为『新手最常犯的错』：Home 功能区的 Real Bus / Simulation 开关是切换『在线真实总线』与『仿真节点』的总闸，在 Real Bus 模式下节点是哑的，此时指望看到仿真报文自然落空，必须切到 Simulation 或确保节点被激活。B 不成立——Trace 的 Dir 列本就区分 Rx/Tx 并默认显示；C 混淆了 .can 脚本编译与 .cfg 工程；D 更是错误，CAPL 在 Real Bus 下同样可以运行（比如做监听、判定），只是节点的发送行为受模式与激活状态约束。排错口诀：看不到报文先查三件事——模式对不对、节点激活没、Filter 是不是把它滤掉了。",
+    "keyPoints": [
+      "Real Bus / Simulation 是节点发送行为的总闸",
+      "Real Bus 下仿真节点默认是哑的",
+      "看不到报文三查：模式 / 节点激活 / Filter"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "三大运行模式·Real Bus 与 Simulation 切换的新手常见错误"
+    },
+    "relatedTerms": [
+      "Simulation Setup",
+      "CAPL",
+      "Trace"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-02-01",
+    "chapterNum": 8,
+    "sectionIndex": 2,
+    "sectionTitle": "三、核心窗口详解",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Trace",
+      "排障",
+      "核心窗口"
+    ],
+    "stem": "排查『丢帧、周期漂移、错误帧、信号跳变』这类问题时，第一个应该打开的窗口是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Trace 窗口"
+      },
+      {
+        "key": "B",
+        "text": "Graphics 窗口"
+      },
+      {
+        "key": "C",
+        "text": "Panel 面板"
+      },
+      {
+        "key": "D",
+        "text": "Write 窗口"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节称 Trace 是 CANoe 的『示波器 + 逻辑分析仪合一』，按时间轴实时刷新总线上所有报文、信号、环境变量、系统变量和文本输出，明确是『排障第一窗口』——丢帧、周期漂移、错误帧、信号跳变第一眼都该看 Trace。Graphics 看的是连续趋势（转速爬升、电压跌落），Panel 是交互控件，Write 只承载 CAPL 的 write() 文本输出。三窗口分工要记牢：Trace 看离散事件，Graphics 看连续趋势，Statistics 看全局统计。",
+    "keyPoints": [
+      "Trace = 排障第一窗口，看离散事件",
+      "实时刷新报文/信号/环境变量/系统变量/文本",
+      "Graphics 看趋势，Statistics 看统计，Write 看脚本输出"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "三、核心窗口详解·Trace 窗口（最常用）"
+    },
+    "relatedTerms": [
+      "错误帧",
+      "周期漂移",
+      "Statistics"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-02-02",
+    "chapterNum": 8,
+    "sectionIndex": 2,
+    "sectionTitle": "三、核心窗口详解",
+    "module": "B",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "Trace列",
+      "DBC",
+      "Dir"
+    ],
+    "stem": "关于 Trace 窗口的列与能力，下列说法正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Name 列显示由 DBC 解析出的报文名，没有 DBC 时只显示原始 ID"
+      },
+      {
+        "key": "B",
+        "text": "Dir 列区分 Rx 接收与 Tx 发送，可判断报文是节点发出还是收到的"
+      },
+      {
+        "key": "C",
+        "text": "点击 ID 列表头可以排序，便于在海量报文中快速找到目标帧"
+      },
+      {
+        "key": "D",
+        "text": "Trace 会直接给出总线负载百分比与错误帧总数等聚合统计"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 对应 Trace 列能力表：Name 由 DBC 解析（这也是为什么没导数据库时 Trace 全是裸 ID）；Dir 标 Rx/Tx，是判断『到底是谁在发』的关键列；ID 列可点表头排序快速定位。表中还有 Time（绝对/相对时间戳）、Channel（多总线时区分 CAN1/CAN2）、Data（原始或解析后的字节/信号值）、Error（错误帧、过载帧标记）。D 属于 Statistics 窗口的职责——它给出错误帧数、Bus Load %、收发报文计数等聚合指标，是网络健康度仪表盘，Trace 只做逐帧明细。",
+    "keyPoints": [
+      "Name 依赖 DBC 解析，无库则只有裸 ID",
+      "Dir 区分 Rx/Tx；ID 可排序定位",
+      "聚合统计（Bus Load、错误帧数）属于 Statistics"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "Trace 窗口列/能力说明表（Time/Channel/ID/Name/Data/Dir/Error）"
+    },
+    "relatedTerms": [
+      "Bus Load",
+      "过载帧",
+      "多总线"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-02-03",
+    "chapterNum": 8,
+    "sectionIndex": 2,
+    "sectionTitle": "三、核心窗口详解",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Graphics",
+      "信号曲线",
+      "标定"
+    ],
+    "stem": "关于 Graphics 窗口，下列描述最准确的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "以 X 轴时间、Y 轴信号值画实时曲线，适合看转速爬升/电压跌落等连续变化量，还可拖动信号值下发做交互式标定"
+      },
+      {
+        "key": "B",
+        "text": "以表格形式逐帧列出报文，适合定位单次错误帧"
+      },
+      {
+        "key": "C",
+        "text": "只能离线打开已录制的 .blf 文件，不能实时刷新"
+      },
+      {
+        "key": "D",
+        "text": "用于配置逻辑通道到物理硬件通道的映射关系"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节对 Graphics 的定义：X 轴时间、Y 轴信号值，把选中信号画成实时曲线，适合观察转速爬升、电压跌落、占空比变化等『随时间连续变化』的量——这是 Trace 表格做不到的；并且可以在 Graphics 里直接拖动信号值下发（写访问），做交互式标定。B 说的是 Trace，D 说的是 Hardware → Channel Mapping。另外要记住 Data 窗口的功能已被 Graphics 覆盖，日常基本不用，这是章节特意提示的一条实践经验。",
+    "keyPoints": [
+      "Graphics = 信号随时间的连续趋势曲线",
+      "支持拖动信号值下发，做交互式标定",
+      "Data 窗口功能被 Graphics 覆盖，日常不用"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "三、核心窗口详解·Graphics 窗口"
+    },
+    "relatedTerms": [
+      "Trace",
+      "占空比",
+      "写访问"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-02-04",
+    "chapterNum": 8,
+    "sectionIndex": 2,
+    "sectionTitle": "三、核心窗口详解",
+    "module": "B",
+    "type": "judge",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      ".blf",
+      ".asc",
+      "Logging"
+    ],
+    "stem": "判断：在 CANoe 的 Logging 中，.asc 是二进制格式、体积小且推荐使用，.blf 是文本格式、便于人工阅读。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误，两者说反了。章节原文：Logging 负责把 Trace 全程录成 .blf（二进制，体积小、含时间戳与通道信息，推荐）或 .asc（文本，可读但占空间）。面试速查表里也是『.blf 与 .asc 区别 = 二进制高效 vs 文本可读』。实践建议：长时间实车/台架录制一律用 .blf，既省空间又保留完整通道与时间戳信息；只有在需要用文本工具 grep、或交给不装 CANoe 的同事粗看时，才导出 .asc。两种格式都能拖进 Replay 块做离线回放。",
+    "keyPoints": [
+      ".blf = 二进制，体积小、含时间戳与通道信息，推荐",
+      ".asc = 文本，可读但占空间",
+      "两者都可用于 Replay 离线回放"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "三、核心窗口详解·Statistics / Logging 窗口"
+    },
+    "relatedTerms": [
+      "Logging",
+      "Replay",
+      "Statistics"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-02-05",
+    "chapterNum": 8,
+    "sectionIndex": 2,
+    "sectionTitle": "三、核心窗口详解",
+    "module": "B",
+    "type": "short",
+    "cat": "故障定位",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "Statistics",
+      "Trace",
+      "Graphics"
+    ],
+    "stem": "台架联调时发现网络『偶尔卡顿、某个信号显示跳变』。请说明如何配合使用 Statistics、Trace、Graphics 三个窗口逐层定位问题，并说明每个窗口分别能给出什么结论。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题考察章节反复强调的三窗口分工与配合顺序：Statistics 发现全局异常 → Trace 锁定异常报文 → Graphics 复盘信号波形，是 CANoe 排障的标准动作。",
+    "keyPoints": [
+      "Statistics 看全局统计：Bus Load、错误帧数、收发计数",
+      "Trace 看离散事件：定位具体报文、时间戳、Dir、Error 标记",
+      "Graphics 看连续趋势：复盘信号随时间的波形"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "核心窗口·Trace 看离散事件、Graphics 看连续趋势、Statistics 看全局统计的配合说明"
+    },
+    "relatedTerms": [
+      "Bus Load",
+      "错误帧",
+      "Logging"
+    ],
+    "refAnswer": "分三层推进：①先用 Statistics 做体检。Statistics 给出错误帧数、总线负载（Bus Load %）、收发报文计数等聚合指标，是判断网络健康度的仪表盘。如果 Bus Load 明显偏高（例如接近或超过设计上限）或错误帧计数持续增长，就说明问题在网络层面而非单个信号，先排查波特率设置、终端电阻、是否有节点疯狂重发。②再用 Trace 锁定异常报文。Trace 逐帧列出 Time、Channel、ID、Name、Data、Dir、Error，可以按 ID 排序、配合 Filter 只留目标帧，从而确认：该报文是否周期性丢失、周期是否漂移、是不是被标了 Error（错误帧/过载帧）、方向是 Rx 还是 Tx（判断是我方节点发的还是对端发的）。这一步给出的是『哪一条帧、在什么时刻、出了什么性质的问题』。③最后用 Graphics 复盘信号波形。把跳变的信号拖进 Graphics，以时间为 X 轴看它的连续变化：如果是阶跃式突跳到默认值/无效值，多半是报文丢失后接收端进入替代值策略；如果是连续抖动，则更可能是传感器或标定问题。④配合 Logging 与 Replay 固化证据：全程用 Logging 录成 .blf，异常复现后把日志带回实验室用 Offline 模式反复回放分析，也可以发给异地同事或作为回归基线。⑤总结分工：Statistics 回答『网络整体健不健康』，Trace 回答『是哪条报文、什么时候出的问题』，Graphics 回答『这个信号的变化过程是什么样』。"
+  },
+  {
+    "id": "Q-08-03-01",
+    "chapterNum": 8,
+    "sectionIndex": 3,
+    "sectionTitle": "四、Filter（过滤器）",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Filter",
+      "Trace",
+      "噪声筛除"
+    ],
+    "stem": "总线跑起来后 Trace 每秒刷几百帧，肉眼根本抓不住目标报文。CANoe 中解决这一问题的功能是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Filter：按报文 ID、通道、节点、方向等维度筛掉噪声，只留关心的帧"
+      },
+      {
+        "key": "B",
+        "text": "Replay：把日志按原始时间戳重放，降低刷新速度"
+      },
+      {
+        "key": "C",
+        "text": "Channel Mapping：把不需要的物理通道解除映射"
+      },
+      {
+        "key": "D",
+        "text": "Panel：用面板控件遮挡无关报文的显示"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "Filter 一节开门见山：总线一跑起来 Trace 里可能每秒几百帧，Filter 按报文 ID、通道、节点、方向等维度筛掉噪声，只留你关心的帧。除了在 Trace 上做显示过滤，Measurement Setup 里还能对整条总线配置『只记录特定报文』，从源头减少日志体积——这对长时间录制尤其重要，能显著缩小 .blf 文件。B 的 Replay 是离线回放不是过滤，C 的 Channel Mapping 是硬件通道分配，D 的 Panel 是交互控件，都不解决刷屏问题。",
+    "keyPoints": [
+      "Filter 按 ID/通道/节点/方向筛除噪声",
+      "Measurement Setup 可配置只记录特定报文，从源头减小日志",
+      "过滤是海量报文场景的必备操作"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "四、Filter（过滤器）·功能说明段"
+    },
+    "relatedTerms": [
+      "Measurement Setup",
+      "Trace",
+      ".blf"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-03-02",
+    "chapterNum": 8,
+    "sectionIndex": 3,
+    "sectionTitle": "四、Filter（过滤器）",
+    "module": "B",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "反向",
+    "tags": [
+      "过滤维度",
+      "错误帧",
+      "多总线"
+    ],
+    "stem": "依据过滤维度表，下列『维度—场景』的配对正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "按报文 ID（如 0x100、0x18DAF1）过滤 —— 只看某个 ECU 的几条关键帧"
+      },
+      {
+        "key": "B",
+        "text": "按通道（如 CAN1）过滤 —— 多总线并行时只看某一路"
+      },
+      {
+        "key": "C",
+        "text": "按节点/方向（如 NodeA + Rx）过滤 —— 确认某节点是否真的在收/发"
+      },
+      {
+        "key": "D",
+        "text": "按 Error Frame only 过滤 —— 专项排查总线错误"
+      },
+      {
+        "key": "E",
+        "text": "按信号物理值区间（如车速 > 80 km/h）过滤 —— 在 Trace 的 Filter 栏直接填数值范围即可"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "explanation": "四条全部正确，它们就是过滤维度表的完整四行：报文 ID（0x100、0x18DAF1 这类，注意 0x18DAF1 是 29 位诊断响应 ID 的典型写法）用于盯住某 ECU 的关键帧；通道用于多总线并行时只看 CAN1；节点/方向用于确认某节点到底有没有在收发，这在排查『节点不发帧』时特别有用；Error Frame only 用于专项排查总线错误，常配合波特率/终端电阻问题定位。实践中这几个维度会叠加使用，例如『CAN2 + NodeA + Tx + ID 0x100』能把范围缩到极小。 E 是典型误解：Trace 的 Filter 按「帧属性」过滤（报文 ID、通道、节点/方向、帧类型），拿不到解析后的物理值。要按车速大于某个阈值筛，得用 Analysis Filter、CAPL 里写条件判断，或者配 Trigger 只记触发段。实际排查时先用 Filter 把帧数量砍下来，再用信号视角的工具做二次分析，顺序反了会很痛苦。",
+    "keyPoints": [
+      "四大过滤维度：报文 ID、通道、节点/方向、错误帧",
+      "节点+方向过滤用于确认收发行为",
+      "多维度可叠加，快速缩小排查范围"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "Filter 过滤维度表（报文 ID / 通道 / 节点方向 / 错误帧）"
+    },
+    "relatedTerms": [
+      "0x18DAF1",
+      "CAN1",
+      "Error Frame"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-04-01",
+    "chapterNum": 8,
+    "sectionIndex": 4,
+    "sectionTitle": "五、离线回放（Replay）",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Replay",
+      "问题复现",
+      "回归基线"
+    ],
+    "stem": "关于 CANoe 的 Replay（离线回放）功能，描述正确的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "把录制的 .blf/.asc 拖进 Replay 块，按原始时间戳重放报文，可用于问题复现、异地分析和回归基线"
+      },
+      {
+        "key": "B",
+        "text": "把 Trace 中的报文按 ID 排序后重新导出为 Excel 报表"
+      },
+      {
+        "key": "C",
+        "text": "把 CAPL 脚本反编译成可读的伪代码，便于复查逻辑"
+      },
+      {
+        "key": "D",
+        "text": "把真实 ECU 的固件回滚到上一个版本，用于对比测试"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节原文：把录制的 .blf/.asc 拖进 Replay 块，CANoe 能按原始时间戳把报文重放到总线上。它的核心价值有三点：①实车上偶发的故障不可能天天蹲在车里复现，但可以把日志带回实验室无限回放；②可以发给异地同事协同分析；③可以作为回归测试的基线，每次改动后重放同一份日志比对结果。注意『按原始时间戳』这个细节很关键——它保证了时序关系与录制时一致，否则时序类问题就复现不出来了。",
+    "keyPoints": [
+      "Replay 按原始时间戳重放 .blf/.asc",
+      "三大价值：复现偶发问题、异地协同、回归基线",
+      "保持原始时序才能复现时序类缺陷"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "五、离线回放（Replay）·功能与价值说明段"
+    },
+    "relatedTerms": [
+      "Offline",
+      "Logging",
+      "回归测试"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-04-02",
+    "chapterNum": 8,
+    "sectionIndex": 4,
+    "sectionTitle": "五、离线回放（Replay）",
+    "module": "B",
+    "type": "short",
+    "cat": "故障定位",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "排查闭环",
+      "面试高频",
+      "DBC"
+    ],
+    "stem": "面试高频题：『请描述一次你用 CANoe 排查问题的完整链路。』请按章节给出的标准答法组织一段回答。",
+    "options": [],
+    "answer": [],
+    "explanation": "章节直接给出了这道题的标准答法骨架：Logging 录日志 → 用 Filter/Statistics 定位异常报文 → Replay 复现 → 结合 DBC 解析信号值 → 比对预期给出根因。这套闭环体现的是『会用工具的人』而非『会点按钮的人』。",
+    "keyPoints": [
+      "标准闭环五步：录日志→过滤定位→回放复现→解析信号→比对给根因",
+      "闭环思维比单个按钮操作更能体现工程能力",
+      "日志是证据链，Replay 让偶发问题可重复"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "离线回放·面试高频题标准答法（Logging→Filter/Statistics→Replay→DBC→比对预期）"
+    },
+    "relatedTerms": [
+      "Filter",
+      "Statistics",
+      ".blf"
+    ],
+    "refAnswer": "标准答法按五步闭环组织：①录日志——问题出现的窗口期内用 Analysis → Logging 把总线全程录成 .blf（二进制、体积小、含时间戳与通道信息），保证证据完整且可复用；必要时在 Measurement Setup 里配置只记录相关报文，控制文件体积。②定位异常——用 Statistics 先看全局：总线负载、错误帧数、收发计数是否异常；再用 Filter 按报文 ID/通道/节点/方向逐层收敛，在 Trace 中锁定可疑帧，观察其周期是否漂移、是否丢失、Dir 是 Rx 还是 Tx、有没有 Error 标记。③回放复现——把日志拖进 Replay 块，在 Offline 模式下按原始时间戳无限次重放，把只在实车上偶发的问题变成实验室里可重复的现象，也便于发给异地同事同步排查。④解析信号——结合 DBC 把原始字节解析成信号名与工程值，必要时用 Graphics 画出该信号随时间的曲线，看清是阶跃跳变、抖动还是缓慢漂移。⑤比对预期给根因——把解析出的实际值/时序与规格书、通信矩阵的预期做比对，定位到具体是发送节点未按周期发、网关转发丢帧、信号缩放系数错误还是接收端替代值策略触发，形成结论并提单；修复后再用同一份日志做回归比对，验证问题闭环。这样回答既覆盖了工具链（Logging/Statistics/Filter/Trace/Replay/Graphics/DBC），又展示了从现象到根因的完整推理路径。"
+  },
+  {
+    "id": "Q-08-05-01",
+    "chapterNum": 8,
+    "sectionIndex": 5,
+    "sectionTitle": "六、CAPL 脚本快速入门",
+    "module": "B",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "CAPL",
+      "事件驱动",
+      "仿真节点"
+    ],
+    "stem": "关于 CAPL 在 CANoe 中的定位，描述正确的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "类 C 的事件驱动语言，挂在仿真节点上运行，让 CANoe 从观察员变成能主动发帧的演员"
+      },
+      {
+        "key": "B",
+        "text": "一种数据库描述语言，用于定义报文与信号的编解码规则"
+      },
+      {
+        "key": "C",
+        "text": "CANoe 内置的报表模板语言，只能用于生成 HTML 测试报告"
+      },
+      {
+        "key": "D",
+        "text": "运行在 ECU 内部的嵌入式脚本，需要刷写到目标板才能生效"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节定义：CAPL（CAN Access Programming Language）是类 C 的事件驱动语言，挂在某个仿真节点上运行；它让 CANoe 从『观察员』变成『演员』——可以模拟一个还没做出来的 ECU 的行为，或自动发送测试激励。事件类型包括 on key（按键）、on timer（定时器）、on message（收到报文）、on sysvar（系统变量变化）等。B 说的是 DBC，D 更是根本性误解——CAPL 运行在 PC 上的 CANoe 里，不需要也不能刷进 ECU。",
+    "keyPoints": [
+      "CAPL = 类 C 事件驱动语言，挂仿真节点运行",
+      "作用：模拟未完成的 ECU、自动注入测试激励",
+      "常用事件：on key / on timer / on message / on sysvar"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "六、CAPL 脚本快速入门·CAPL 定位说明段"
+    },
+    "relatedTerms": [
+      "DBC",
+      "仿真节点",
+      "on sysvar"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-05-02",
+    "chapterNum": 8,
+    "sectionIndex": 5,
+    "sectionTitle": "六、CAPL 脚本快速入门",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "on timer",
+      "setTimer",
+      "周期发送"
+    ],
+    "stem": "在半仿真示例代码的 on timer doorTimer 事件末尾写有 setTimer(doorTimer, 1000)，这一行的作用是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "复位定时器使其继续循环，从而实现 1s 周期发送；删掉它节点就只会发一帧"
+      },
+      {
+        "key": "B",
+        "text": "把定时器精度设置为 1000 微秒，与发送周期无关"
+      },
+      {
+        "key": "C",
+        "text": "停止定时器，防止重复发送造成总线负载过高"
+      },
+      {
+        "key": "D",
+        "text": "延迟 1000ms 后再执行前面的 output(doormsg)"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "示例代码注释写得很明确：『必须复位定时器才能循环』。CAPL 的 msTimer 是一次性的——on timer 事件触发一次后定时器就失效了，若不在事件末尾再调用一次 setTimer(doorTimer, 1000)，节点就只发出一帧 DoorState 报文然后归于沉默。整段代码的逻辑是：按下键盘 s（on key 's'）启动 1s 定时器 → 定时器到点构造 DoorState 报文、置位 Door_L/Door_R → output(doormsg) 发到总线 → 再次 setTimer 形成周期循环。这个『只发一帧』的坑在 09 章被列为新手 90% 的问题来源。",
+    "keyPoints": [
+      "CAPL 定时器是一次性的，需在事件末尾自复位",
+      "不复位的典型现象：节点只发一帧",
+      "半仿真链路：on key 启动 → on timer 构造并 output → 复位循环"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "CAPL 快速入门·半仿真示例代码（on key 's' + on timer doorTimer + output）"
+    },
+    "relatedTerms": [
+      "msTimer",
+      "output()",
+      "message"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-06-01",
+    "chapterNum": 8,
+    "sectionIndex": 6,
+    "sectionTitle": "七、自动化测试框架",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Test Module",
+      "Test Case",
+      "TFS"
+    ],
+    "stem": "CANoe 自动化测试框架中，Test Module 的组织层级与判定方式是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Test Module 由若干 Test Case 组成，每个 Case 由 Test Step 构成，调用 TFS 函数给出 pass/fail，最终汇总成结构化报告"
+      },
+      {
+        "key": "B",
+        "text": "Test Module 只能包含一个 Test Case，多个用例需建多个模块"
+      },
+      {
+        "key": "C",
+        "text": "Test Module 必须用 Python 编写，CAPL 只能写仿真节点"
+      },
+      {
+        "key": "D",
+        "text": "Test Module 的判定结果需人工在 Trace 中肉眼比对后手工填写"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节原文：Test Setup 里双击即可加入 Test Module，里面用 CAPL/.NET/XML 编排测试用例；一个 Test Module 由若干 Test Case 组成，每个 Case 由 Test Step 构成，并调用 Test Feature Set（TFS）函数给出 pass/fail 判定，最终汇总成结构化测试报告。B 与层级定义矛盾；C 错在语言支持——支持 CAPL/.NET/XML，并不含 Python；D 恰恰相反，自动化的意义就是把『人工看 Trace』变成『机器自动判定』。",
+    "keyPoints": [
+      "层级：Test Module → Test Case → Test Step",
+      "可用 CAPL/.NET/XML 编排，TFS 给出 pass/fail",
+      "自动汇总结构化测试报告"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "七、自动化测试框架·Test Module（测试模块）"
+    },
+    "relatedTerms": [
+      "Test Setup",
+      "Test Feature Set",
+      "XML"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-06-02",
+    "chapterNum": 8,
+    "sectionIndex": 6,
+    "sectionTitle": "七、自动化测试框架",
+    "module": "B",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "TFS",
+      "测试报告",
+      "ASPICE"
+    ],
+    "stem": "关于 TFS 的报告函数族与报告产出，下列说法正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "TestCaseDescription/TestStepPass/TestStepFail 用于写入用例描述与判定结果"
+      },
+      {
+        "key": "B",
+        "text": "TestReportAddSetupInfo/TestReportAddSUTInfo 用于记录测试环境与样品信息"
+      },
+      {
+        "key": "C",
+        "text": "TestGroupBegin/End 用于对用例做分组组织"
+      },
+      {
+        "key": "D",
+        "text": "报告只能在 CANoe 界面内查看，无法导出成独立文件"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 正是章节列举的 TFS 报告函数族三类用途：判定写入（TestCaseDescription、TestStepPass、TestStepFail）、环境与样品信息记录（TestReportAddSetupInfo、TestReportAddSUTInfo）、结构组织（TestGroupBegin/End）。D 说反了——报告可直接导出 HTML/XML，正是为了对接 ASPICE 与存档要求。这一点在面试里很加分：说明你不只会跑用例，还理解测试证据需要可归档、可追溯，符合过程改进模型的要求。",
+    "keyPoints": [
+      "判定：TestStepPass/Fail；描述：TestCaseDescription",
+      "环境与样品：TestReportAddSetupInfo/AddSUTInfo",
+      "报告可导出 HTML/XML，对接 ASPICE 与存档"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "七、自动化测试框架·测试报告生成（TFS 报告函数族）"
+    },
+    "relatedTerms": [
+      "ASPICE",
+      "SUT",
+      "TestGroupBegin"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-06-03",
+    "chapterNum": 8,
+    "sectionIndex": 6,
+    "sectionTitle": "七、自动化测试框架",
+    "module": "B",
+    "type": "short",
+    "cat": "工具操作",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "testcase",
+      "代码分析",
+      "系统变量"
+    ],
+    "stem": "阅读章节给出的测试用例代码 CheckEngineSpeedRange()，逐行说明它做了什么，并指出这类用例在实际工程中需要补充完善的地方。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题以真实 testcase 代码为载体，考察对 TFS 判定流程、系统变量激励下发、等待稳定时间的理解，以及从示例代码到工程级用例的差距意识。",
+    "keyPoints": [
+      "TestCaseDescription 写描述，@系统变量 下发激励",
+      "testWaitForTimeout 等待信号稳定后再判定",
+      "TestStepFail/TestStepPass 给出判定并写入报告"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "自动化测试框架·testcase CheckEngineSpeedRange() 示例代码"
+    },
+    "relatedTerms": [
+      "Test Feature Set",
+      "系统变量",
+      "边界值"
+    ],
+    "refAnswer": "【逐行说明】①testcase CheckEngineSpeedRange() { —— 定义一个测试用例，用例名会出现在测试报告中。②TestCaseDescription(『引擎转速应在 0~8000 rpm 内』) —— 写入用例描述，让报告可读、可追溯到需求。③@Engine::EngineSpeedEntry = 6500 —— 通过系统变量下发激励，把面板/仿真侧的转速输入设为 6500rpm，相当于模拟用户或上游节点给出的输入。④testWaitForTimeout(200) —— 等待 200ms 让信号在总线上传递并稳定，避免在数值尚未更新时就去读，这是自动化用例里极易被忽略却必须有的同步动作。⑤if (@Engine::EngineSpeedDspMeter > 8000) TestStepFail(『转速超上限』) else TestStepPass(『转速在合理范围』) —— 读取显示侧的系统变量做判定，超限调用 TestStepFail、正常调用 TestStepPass，判定结果自动写入结构化报告。\n【需要补充完善的地方】①边界值覆盖不足：只测了 6500 这一个点，工程上应至少覆盖 0、正常值、8000 上边界、8001 越界值以及负值/异常值。②缺少下限与有效性判定：当前只判上限 >8000，没有判 <0 或信号无效（如替代值/失效值）的情况。③等待方式偏弱：固定 testWaitForTimeout(200) 属于硬等待，更稳健的做法是使用条件等待（等待信号达到期望值或超时）避免受系统负载影响。④缺少前置与恢复：用例开始前应确认引擎状态开关等前置条件，结束后应把 @Engine::EngineSpeedEntry 复位，避免污染后续用例。⑤缺少环境与样品信息：配合 TestReportAddSetupInfo/TestReportAddSUTInfo 记录测试环境与被测样品版本，报告才具备存档与 ASPICE 追溯价值。⑥可用检测函数族（Signal Evaluation 等）替代手写 if，把信号数值、周期、稳定性的校验交给框架自动完成。"
+  },
+  {
+    "id": "Q-08-07-01",
+    "chapterNum": 8,
+    "sectionIndex": 7,
+    "sectionTitle": "八、硬件接口选型",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "VN5610",
+      "车载以太网",
+      "DoIP"
+    ],
+    "stem": "项目要做 SOME/IP 与 DoIP 诊断的车载以太网测试，依据硬件选型表应优先选用：",
+    "options": [
+      {
+        "key": "A",
+        "text": "VN1630/VN1640"
+      },
+      {
+        "key": "B",
+        "text": "VN5610"
+      },
+      {
+        "key": "C",
+        "text": "CANcaseXL"
+      },
+      {
+        "key": "D",
+        "text": "VT 系统"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "硬件选型表中 VN5610 的定位就是『多路 + 以太网，车载以太网网关卡』，典型场景写的正是 SOME/IP、DoIP 诊断。其余三项各有分工：VN1630/VN1640 是 2~4 路 CAN/LIN 的紧凑型接口卡，用于台架单/双总线联调；CANcaseXL 是 1~2 路的入门/便携卡，适合教学与外出排查；VT 系统集成 I/O 与负载，是硬件在环板卡，用于 HIL 台架与故障注入。选型思路：先看总线类型（CAN/LIN 还是以太网），再看通道数与是否需要 I/O 负载能力。",
+    "keyPoints": [
+      "VN5610 = 车载以太网网关卡，用于 SOME/IP、DoIP",
+      "VN1630/1640 = 2~4 路 CAN/LIN 紧凑型接口卡",
+      "VT 系统 = HIL 与故障注入；CANcaseXL = 入门便携"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "硬件接口选型表（VN1630/VN1640、VN5610、VT 系统、CANcaseXL）"
+    },
+    "relatedTerms": [
+      "SOME/IP",
+      "DoIP",
+      "HIL"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-07-02",
+    "chapterNum": 8,
+    "sectionIndex": 7,
+    "sectionTitle": "八、硬件接口选型",
+    "module": "B",
+    "type": "single",
+    "cat": "故障定位",
+    "difficulty": "进阶",
+    "direction": "反向",
+    "tags": [
+      "Channel Mapping",
+      "波特率",
+      "错误帧"
+    ],
+    "stem": "接口卡插好、线也接了，一启动测量 Trace 里却全是错误帧。依据章节提示，最应优先排查的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Hardware → Channel Mapping 是否分配了通道，以及总线类型/波特率是否设错（如该 500k 设成 250k）"
+      },
+      {
+        "key": "B",
+        "text": "Trace 窗口的列配置是否勾选了 Error 列"
+      },
+      {
+        "key": "C",
+        "text": "CAPL 脚本是否忘记调用 output() 发送报文"
+      },
+      {
+        "key": "D",
+        "text": "Logging 的输出格式是否误选成 .asc"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节把这条列为『常见翻车点』：Channel Mapping 是『逻辑通道 → 物理接口』的桥梁，硬件插上后忘了在 Hardware → Channel Mapping 里分配通道，或总线类型/波特率设错（如该 500k 设成 250k），结果 Trace 全是错误帧。波特率不匹配会导致采样点完全错位，节点无法正确应答，总线上表现为持续错误帧。标准处置顺序：接线后先用 Statistics 看 Bus Load 是否非零、有无错误帧，再开始正式测试。B/C/D 都只影响显示或发送行为，不会造成满屏错误帧。",
+    "keyPoints": [
+      "Channel Mapping 是逻辑通道到物理接口的桥梁",
+      "波特率/总线类型设错 → 满屏错误帧",
+      "接线后先看 Statistics 的 Bus Load 与错误帧再开测"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "硬件接口选型·Channel Mapping 常见翻车点说明"
+    },
+    "relatedTerms": [
+      "Bus Load",
+      "Statistics",
+      "VN1630"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-08-01",
+    "chapterNum": 8,
+    "sectionIndex": 8,
+    "sectionTitle": "九、常用操作速查",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Write窗口",
+      "write()",
+      "速查"
+    ],
+    "stem": "CAPL 脚本中 write() 函数打印的内容，会输出到哪个窗口？",
+    "options": [
+      {
+        "key": "A",
+        "text": "Write 窗口（Home → Write 打开）"
+      },
+      {
+        "key": "B",
+        "text": "Trace 窗口的 Data 列"
+      },
+      {
+        "key": "C",
+        "text": "Statistics 窗口的日志栏"
+      },
+      {
+        "key": "D",
+        "text": "测试报告的 HTML 文件中"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "常用操作速查表写明：『打开 Write 窗口 —— Home → Write（CAPL write() 输出到此）』。Write 窗口是 CAPL 调试最直接的手段，相当于 printf 调试台，脚本里打印变量值、状态跳转、进入了哪个事件，都在这里看。注意区分：Trace 窗口虽然也能显示文本类条目，但 write() 的标准落点是 Write 窗口；测试用例的 pass/fail 信息才通过 TFS 函数写进测试报告。",
+    "keyPoints": [
+      "write() 输出到 Write 窗口，Home → Write 打开",
+      "Write 是 CAPL 调试的 printf 台",
+      "TFS 函数才写入测试报告"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "常用操作速查表·打开 Write 窗口（Home → Write）"
+    },
+    "relatedTerms": [
+      "CAPL",
+      "TestStepPass",
+      "Trace"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-08-02",
+    "chapterNum": 8,
+    "sectionIndex": 8,
+    "sectionTitle": "九、常用操作速查",
+    "module": "B",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "CANdb++",
+      "Channel Mapping",
+      "菜单路径"
+    ],
+    "stem": "依据常用操作速查表，下列『操作—路径』配对正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "编辑 DBC —— Tools → CANdb++ Editor"
+      },
+      {
+        "key": "B",
+        "text": "加载诊断文件（CDD/ODX）—— Diagnostics → Diagnostic ISO TP"
+      },
+      {
+        "key": "C",
+        "text": "通道映射 —— Hardware → Channel Mapping；记录日志 —— Analysis → Logging（选 .blf）"
+      },
+      {
+        "key": "D",
+        "text": "切换 Real Bus / Simulation —— Tools → Simulation Switch"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 三条与速查表逐字一致：编辑 DBC 走 Tools → CANdb++ Editor（Vector 的数据库编辑器）；加载 CDD/ODX 走 Diagnostics → Diagnostic ISO TP；通道映射在 Hardware → Channel Mapping；记录日志在 Analysis → Logging 并优先选 .blf。D 是编造路径——切换 Real Bus / Simulation 在 Home 功能区，和 Start/Stop Measurement、Write 窗口一样属于 Home 下的常用开关。把这几条路径背熟，上机时能省下大量翻菜单的时间。",
+    "keyPoints": [
+      "Tools → CANdb++ Editor 编辑 DBC",
+      "Diagnostics → Diagnostic ISO TP 加载 CDD/ODX",
+      "Home 下：Start/Stop、Real Bus/Simulation、Write"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "常用操作速查表（开始测量/模式切换/Write/CANdb++/诊断加载/通道映射/Logging）"
+    },
+    "relatedTerms": [
+      "CDD",
+      "ODX",
+      ".blf"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-09-01",
+    "chapterNum": 8,
+    "sectionIndex": 9,
+    "sectionTitle": "十、面试高频考点",
+    "module": "B",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "面试",
+      "回归测试",
+      "进阶加分"
+    ],
+    "stem": "依据面试高频考点的进阶加分表，下列回答要点正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "CAPL 的事件类型有 on key / on timer / on message / on sysvar，属于事件驱动"
+      },
+      {
+        "key": "B",
+        "text": "Test Module 出报告靠 TFS 的 TestStepPass/Fail 加报告函数族"
+      },
+      {
+        "key": "C",
+        "text": "Channel Mapping 配错会导致总线无通信或全是错误帧"
+      },
+      {
+        "key": "D",
+        "text": "用 CANoe 做回归测试的做法是每次手工重跑一遍用例并截图存档"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 三条与进阶加分表完全对应。D 与表中答案相反——表里写的是『Replay 日志 + 自动化 Test Module 比对』：把一份稳定的日志作为基线，每次软件改动后用 Replay 重放同样的输入，再由 Test Module 自动判定输出是否与预期一致，这样回归才可重复、可自动化、可存档。手工重跑加截图既不可重复也无法规模化，正是自动化要消灭的对象。",
+    "keyPoints": [
+      "CAPL 事件驱动：on key/timer/message/sysvar",
+      "报告靠 TFS 判定函数 + 报告函数族",
+      "回归测试 = Replay 日志基线 + 自动化 Test Module 比对"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "面试高频考点·进阶加分表（CAPL 事件/报告/Channel Mapping/回归测试）"
+    },
+    "relatedTerms": [
+      "Replay",
+      "TFS",
+      "自动化"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-09-02",
+    "chapterNum": 8,
+    "sectionIndex": 9,
+    "sectionTitle": "十、面试高频考点",
+    "module": "B",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "面试必会",
+      "Trace vs Graphics",
+      "定位"
+    ],
+    "stem": "判断：面试必会表中对 CANoe 的定位是『整车网络仿真+测试平台，能收发报文、写 CAPL、做自动化并输出报告』，Trace 与 Graphics 的区别可概括为『离散事件 vs 连续趋势』。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "T"
+    ],
+    "explanation": "正确，两句都出自面试必会基础表：『CANoe 是干什么的 —— 整车网络仿真+测试平台，收发报文、写 CAPL、自动化、出报告』；『Trace 与 Graphics 区别 —— 离散事件 vs 连续趋势』。同表还有三条一并记住：.cfg 是打包数据库/拓扑/节点/测试/硬件映射的工程文件；Real Bus vs Simulation 是接真实 ECU 与由仿真节点产生数据的差别；.blf 与 .asc 是二进制高效与文本可读的差别。这五条是 CANoe 面试的『必答分』，答不上会被判定为没真正用过工具。",
+    "keyPoints": [
+      "CANoe = 整车网络仿真 + 测试平台",
+      "Trace 离散事件 / Graphics 连续趋势",
+      "必会五条：定位、.cfg、运行模式、窗口区别、日志格式"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "面试高频考点·必会基础表（CANoe 定位 / .cfg / Real Bus vs Simulation / Trace vs Graphics / blf vs asc）"
+    },
+    "relatedTerms": [
+      ".cfg",
+      "Real Bus",
+      ".blf"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-10-01",
+    "chapterNum": 8,
+    "sectionIndex": 10,
+    "sectionTitle": "十一、测试实战关联",
+    "module": "B",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "仪表测试",
+      "Panel",
+      "信号注入"
+    ],
+    "stem": "用 CANoe 做仪表/中控测试时，章节给出的做法包括（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "用 Simulation Setup 模拟网关/车身节点，向仪表灌车速、转速、油量等信号"
+      },
+      {
+        "key": "B",
+        "text": "用 Panel 做交互控件，联调大屏 UI 与信号映射的正确性"
+      },
+      {
+        "key": "C",
+        "text": "结合真实台架做电源上下电与信号注入"
+      },
+      {
+        "key": "D",
+        "text": "用 Replay 直接修改仪表 ECU 的固件版本以对比 UI 差异"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 就是『仪表/中控测试』小节列出的三条做法：仿真网关/车身节点灌信号（在真实 ECU 尚未齐备时把仪表先测起来）、用 Panel 交互控件联调大屏 UI 与信号映射、结合台架做电源上下电与信号注入（对应第 27 章台架搭建与 HIL）。D 不成立——Replay 只是把日志按原始时间戳重放，既不能改固件，也不具备刷写能力；刷写属于 UDS 的 $34/$36/$37 服务范畴。",
+    "keyPoints": [
+      "Simulation Setup 仿真上游节点向仪表灌信号",
+      "Panel 交互控件联调 UI 与信号映射",
+      "结合台架做电源上下电与信号注入"
+    ],
+    "sourceRef": {
+      "kind": "list",
+      "label": "测试实战关联·仪表 / 中控测试做法清单"
+    },
+    "relatedTerms": [
+      "Panel",
+      "HIL",
+      "信号映射"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-08-10-02",
+    "chapterNum": 8,
+    "sectionIndex": 10,
+    "sectionTitle": "十一、测试实战关联",
+    "module": "B",
+    "type": "short",
+    "cat": "工具操作",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "诊断测试",
+      "CDD/ODX",
+      "Diagnostic Console"
+    ],
+    "stem": "请说明用 CANoe 做 UDS 诊断测试的完整方法：从诊断文件准备到自动化落地，需要哪些步骤和窗口/组件？",
+    "options": [],
+    "answer": [],
+    "explanation": "本题对应『诊断测试』小节的三条做法，并串联工程配置结构、常用操作速查与自动化测试框架三个知识点，形成从手工验证到自动化回归的完整路径。",
+    "keyPoints": [
+      "先加载 CDD/ODX，CANoe 才能解析诊断服务",
+      "Diagnostic Console 手工发 UDS 请求验证",
+      "会话/安全访问/读写 DID 的自动化放 Test Module"
+    ],
+    "sourceRef": {
+      "kind": "list",
+      "label": "测试实战关联·诊断测试做法清单（加载 CDD/ODX、Diagnostic Console、Test Module）"
+    },
+    "relatedTerms": [
+      "UDS",
+      "DID",
+      "Test Feature Set"
+    ],
+    "refAnswer": "完整方法分五步：①准备诊断描述文件——向 OEM/供应商索取该 ECU 的 CDD 或 ODX 文件，通过 Diagnostics → Diagnostic ISO TP 加载到工程中；这一步决定了 CANoe 能否把 UDS 的服务与 DID 解析成可读的名称与工程值，相当于诊断层的『DBC』。②确认物理链路与寻址——在 Hardware → Channel Mapping 里把逻辑通道映射到实际接口卡并设对总线类型与波特率，确认诊断请求/响应的 CAN ID（物理寻址与功能寻址）与 ECU 一致；接线后先用 Statistics 看 Bus Load 与错误帧确认链路正常。③手工验证——用 Diagnostic Console 发送 UDS 请求，覆盖常用服务：$10 切换诊断会话、$22 读 DID、$2E 写 DID、$19 读 DTC、$27 安全访问等，在 Trace 中确认请求与响应的时序、正响应（SID+$40）或否定响应码（$7F + NRC），先把手工链路跑通。④自动化落地——把诊断会话切换、安全访问、读写 DID 等序列写进 Test Module（CAPL/.NET/XML），用 TFS 的 TestStepPass/TestStepFail 做判定，TestCaseDescription 写用例描述，TestReportAddSetupInfo/AddSUTInfo 记录环境与样品，导出 HTML/XML 报告存档。⑤回归与证据留存——全程用 Logging 录 .blf；对可回放的场景用 Replay 做回归基线比对，每次软件版本更新后重跑同一批诊断用例，比对判定结果。补充：协议层细节（服务定义、NRC 含义、CAN-TP 分段）需回到 UDS 章节，本章负责的是工具侧的落地路径。"
+  },
+  {
+    "id": "Q-08-10-03",
+    "chapterNum": 8,
+    "sectionIndex": 10,
+    "sectionTitle": "十一、测试实战关联",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "ADAS",
+      "多总线",
+      "VT硬件"
+    ],
+    "stem": "在 ADAS 台架测试中，CAN/FlexRay/以太网多路总线并行时，CANoe 靠什么区分不同总线？故障注入依赖什么？",
+    "options": [
+      {
+        "key": "A",
+        "text": "靠通道（Channel）区分；故障注入依赖 VT 硬件"
+      },
+      {
+        "key": "B",
+        "text": "靠报文 ID 的高低区分；故障注入依赖 Replay 回放"
+      },
+      {
+        "key": "C",
+        "text": "靠 DBC 文件名区分；故障注入依赖 Filter 屏蔽报文"
+      },
+      {
+        "key": "D",
+        "text": "靠 Panel 上的开关区分；故障注入依赖修改 .cfg 文件"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "ADAS 台架测试小节列出三条：多路总线（CAN/FlexRay/以太网）并行靠通道区分；传感器数据可用 CAPL 仿真节点注入，验证域控逻辑；故障注入依赖 VT 硬件（对应第 28 章 ISO 26262 的故障注入思路）。通道概念贯穿全章——Trace 有 Channel 列、Filter 能按通道过滤、Hardware 里做 Channel Mapping，都是同一套逻辑。B 的报文 ID 在不同总线上可以重复，不能用来区分；C、D 更是无中生有。",
+    "keyPoints": [
+      "多总线并行靠 Channel 区分，贯穿 Trace/Filter/Mapping",
+      "传感器数据可用 CAPL 仿真节点注入",
+      "故障注入依赖 VT 硬件（集成 I/O 与负载）"
+    ],
+    "sourceRef": {
+      "kind": "list",
+      "label": "测试实战关联·ADAS 台架测试做法清单"
+    },
+    "relatedTerms": [
+      "VT 系统",
+      "FlexRay",
+      "域控制器"
+    ],
+    "refAnswer": ""
+  }
+]

@@ -1,0 +1,1341 @@
+[
+  {
+    "id": "Q-05-01-01",
+    "chapterNum": 5,
+    "sectionIndex": 0,
+    "sectionTitle": "一、关键参数",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "100BASE-T1",
+      "单对双绞线",
+      "全双工"
+    ],
+    "stem": "100BASE-T1 车载以太网在物理层最显著的特征是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "使用 2 对双绞线（一对收、一对发）实现全双工"
+      },
+      {
+        "key": "B",
+        "text": "使用单对双绞线（1 对 = 2 根）就实现全双工，靠混合电路分离收发"
+      },
+      {
+        "key": "C",
+        "text": "使用 4 对双绞线共 8 根，与家用千兆网线一致"
+      },
+      {
+        "key": "D",
+        "text": "使用同轴电缆，靠频分复用实现双向传输"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "关键参数表写明 100BASE-T1 的线数是「单对双绞线（1 对 = 2 根）」，且全双工为 ✅。章节的警告块解释了原理：车里用单对非屏蔽双绞线就实现全双工——一对线同时收发，靠混合电路（Hybrid）分离收发信号。对照标准以太网：百兆 100BASE-TX 需 2 对 4 根（一对收、一对发），千兆 1000BASE-T 需 4 对 8 根。A、C 描述的正是这两种家用以太网。D 的同轴方案在 BroadR-Reach 时代用过，但现在退居摄像头连接，不是 100BASE-T1 的定义。",
+    "keyPoints": [
+      "100BASE-T1：单对双绞线（2 根），全双工，PAM-3 编码",
+      "对照：100BASE-TX 要 2 对 4 根，1000BASE-T 要 4 对 8 根",
+      "单对线全双工靠混合电路分离收发"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "关键参数表（100BASE-T1 / 1000BASE-T1 对照）"
+    },
+    "relatedTerms": [
+      "PAM-3",
+      "IEEE 802.3bw",
+      "全双工"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-01-02",
+    "chapterNum": 5,
+    "sectionIndex": 0,
+    "sectionTitle": "一、关键参数",
+    "module": "A",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "车载以太网",
+      "易错点",
+      "互通性"
+    ],
+    "stem": "判断：车载以太网本质上就是把家里的网线搬到车上，用转接头就能和普通 RJ45 百兆网口直接互通。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误。章节专门用警告块点名这个误区：车载以太网 ≠ 家里网线。100BASE-T1 用单对非屏蔽双绞线 + PAM-3 编码实现全双工，而 100BASE-TX 用 2 对线、MLT-3 编码，一对收一对发——两者物理层完全不同，不能直接互通。工程上要连普通网口必须经过 Media Converter（介质转换器 / T1 转 TX 的转换板），这不是简单的「转接头」而是要做编码与介质转换的有源设备。台架上误把二者当同一物理层，是新人最常踩的坑。",
+    "keyPoints": [
+      "100BASE-T1（单对、PAM-3）与 100BASE-TX（2 对、MLT-3）物理层不同",
+      "不能直接互通，需 Media Converter 转换",
+      "上层协议（IP/TCP/UDP）相同，差异只在物理层"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "关键参数节警告块——车载以太网≠家里网线"
+    },
+    "relatedTerms": [
+      "Media Converter",
+      "MLT-3",
+      "100BASE-TX"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-01-03",
+    "chapterNum": 5,
+    "sectionIndex": 0,
+    "sectionTitle": "一、关键参数",
+    "module": "A",
+    "type": "multi",
+    "cat": "参数记忆",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "100BASE-T1",
+      "1000BASE-T1",
+      "标准"
+    ],
+    "stem": "根据关键参数表，下列关于 100BASE-T1 与 1000BASE-T1 的描述正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "100BASE-T1 速率 100 Mbps，对应 IEEE 802.3bw；1000BASE-T1 速率 1 Gbps，对应 IEEE 802.3bp"
+      },
+      {
+        "key": "B",
+        "text": "两者最大传输距离都是 ≤15m"
+      },
+      {
+        "key": "C",
+        "text": "两者都支持全双工"
+      },
+      {
+        "key": "D",
+        "text": "1000BASE-T1 因为速率高，必须使用 4 对双绞线"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "参数表逐行核对：速率 100 Mbps / 1 Gbps；编码与标准 PAM-3 / IEEE 802.3bw 与 IEEE 802.3bp；最大距离都是 ≤15m（非屏蔽 UTP）；全双工都是 ✅。D 错在线数——表中「线数」一行写明 1000BASE-T1 同样是单对双绞线。这正是车载以太网的设计精髓：靠更复杂的编码与 PHY 技术在单对线上提速，而不是靠堆线对，因为车上最贵的成本之一就是线束重量与空间。需要 4 对 8 根的是家用 1000BASE-T。",
+    "keyPoints": [
+      "100BASE-T1 = 802.3bw，1000BASE-T1 = 802.3bp",
+      "两者都是单对双绞线、全双工、距离 ≤15m",
+      "车载提速靠 PHY 技术而非增加线对，为的是减重与省空间"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "关键参数表（速率/线数/编码/最大距离/全双工/标准以太网对比）"
+    },
+    "relatedTerms": [
+      "IEEE 802.3bp",
+      "UTP",
+      "线束减重"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-02-01",
+    "chapterNum": 5,
+    "sectionIndex": 1,
+    "sectionTitle": "二、物理层细节：连接器与标准",
+    "module": "A",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "MATEnet",
+      "H-MTD",
+      "连接器"
+    ],
+    "stem": "关于车载以太网的物理连接器，下列对应关系正确的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "MATEnet 是罗森伯格的小型化防水接头，欧洲车企（宝马/大众）偏好；H-MTD 是泰科的高密度 Mini 连接器，北美/日系偏好"
+      },
+      {
+        "key": "B",
+        "text": "MATEnet 是泰科产品，北美偏好；H-MTD 是罗森伯格产品，欧洲偏好"
+      },
+      {
+        "key": "C",
+        "text": "MATEnet 和 H-MTD 都只支持 100BASE-T1，千兆必须用同轴连接器"
+      },
+      {
+        "key": "D",
+        "text": "车载以太网统一使用 RJ45 连接器，只是外壳做了防水加固"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "物理连接器类型表：MATEnet（罗森伯格）——小型化防水接头，欧洲车企（宝马/大众）偏好，类似 USB-C 小型化，1 对线+屏蔽，符合 ISO 21195；H-MTD（泰科）——高密度 Mini 连接器，北美/日系偏好，比 MATEnet 更小、4 通道可堆叠、支持 1000BASE-T1；Coaxial（同轴）——BroadR-Reach 时代用，现在退居摄像头连接。B 把两家厂商与阵营对调；C 与表中「H-MTD 支持 1000BASE-T1」矛盾；D 与全章前提矛盾——车载以太网不用 RJ45。面试提示指出：能答出连接器型号的，比只说「一对线」的明显高一档。",
+    "keyPoints": [
+      "MATEnet = 罗森伯格 + 欧洲阵营（ISO 21195）",
+      "H-MTD = 泰科 + 北美/日系阵营，更小、可堆叠、支持千兆",
+      "同轴退居摄像头连接，车载不用 RJ45"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "物理连接器类型表（MATEnet / H-MTD / Coaxial）"
+    },
+    "relatedTerms": [
+      "ISO 21195",
+      "BroadR-Reach",
+      "屏蔽"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-02-02",
+    "chapterNum": 5,
+    "sectionIndex": 1,
+    "sectionTitle": "二、物理层细节：连接器与标准",
+    "module": "A",
+    "type": "multi",
+    "cat": "标准合规",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "OPEN Alliance",
+      "TC标准",
+      "测试依据"
+    ],
+    "stem": "根据 OPEN Alliance 标准体系表，下列标准与内容的对应正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "TC8 —— EMC/EMI 测试规范，实车 EMC 测试必做"
+      },
+      {
+        "key": "B",
+        "text": "TC9 —— 线束和连接器特性阻抗（100 欧姆）规范，用于线束质量检测"
+      },
+      {
+        "key": "C",
+        "text": "TC10 —— 休眠唤醒协议，是静态电流测试的依据"
+      },
+      {
+        "key": "D",
+        "text": "TC1 —— 1000BASE-T1 的 PHY 与 EMC 定义"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "OPEN Alliance 标准体系表：TC1 是 100BASE-T1 PHY 定义（IEEE 802.3bw），测试价值是物理层互操作性；TC8 是 EMC/EMI 测试规范；TC9 是线束和连接器特性阻抗（100 欧姆）规范；TC10 是休眠唤醒协议，对应静态电流测试；TC12 才是 1000BASE-T1 PHY 与 EMC。D 把 TC1 和 TC12 弄反了。记忆线索：编号小的管百兆基础（TC1），编号大的管千兆（TC12），中间三个分别管电磁兼容（TC8）、线束阻抗（TC9）、休眠唤醒（TC10）。TC10 在整车静态电流（暗电流）测试中被频繁引用，因为以太网 PHY 不休眠会显著拉高静态功耗。",
+    "keyPoints": [
+      "TC1=100BASE-T1 PHY，TC12=1000BASE-T1 PHY与EMC",
+      "TC8=EMC/EMI，TC9=线束阻抗100Ω，TC10=休眠唤醒",
+      "TC10 是静态电流（暗电流）测试的依据"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "OPEN Alliance 标准体系表（标准编号 / 内容 / 测试价值）"
+    },
+    "relatedTerms": [
+      "静态电流",
+      "特性阻抗",
+      "EMC"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-03-01",
+    "chapterNum": 5,
+    "sectionIndex": 2,
+    "sectionTitle": "三、协议栈全景",
+    "module": "A",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "VLAN",
+      "802.1Q",
+      "PCP"
+    ],
+    "stem": "在 802.1Q Tag 中，用于标识优先级的字段及其位宽是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "TPID，16bit"
+      },
+      {
+        "key": "B",
+        "text": "PCP（Priority Code Point），3bit，取值 0~7"
+      },
+      {
+        "key": "C",
+        "text": "VID（VLAN ID），12bit，取值 1~4094"
+      },
+      {
+        "key": "D",
+        "text": "DEI，1bit，取值 0 或 1"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "802.1Q Tag 共 4 字节，结构为 TPID（0x8100）+ PCP（3bit）+ DEI（1bit）+ VID（12bit）。PCP = Priority Code Point，取值 0~7，越高优先级越高：PCP=7 网络控制（gPTP 时钟同步帧）、PCP=6 安全关键（线控制动/转向）、PCP=5 实时音视频（AVB/TSN 流）、PCP=0 尽力而为（普通诊断/刷写）。VID 是 12bit 的域隔离标识（如 VID=10 ADAS 域、20 座舱域、30 动力域），负责「分家」不负责「排队」。把 VID 和 PCP 的职责混淆是常见错误——章节的面试提示把它们并列为 VLAN 的两件事：域隔离（VID）+ QoS 分级（PCP）。",
+    "keyPoints": [
+      "802.1Q Tag = TPID(0x8100) + PCP(3bit) + DEI(1bit) + VID(12bit)",
+      "PCP 定优先级：7 网络控制/gPTP，6 安全关键，5 音视频，0 尽力而为",
+      "VID 定域隔离：ADAS=10、座舱=20、动力=30"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "802.1Q Tag 结构图（TPID/PCP/DEI/VID + PCP 优先级分配）"
+    },
+    "relatedTerms": [
+      "QoS",
+      "gPTP",
+      "VLAN"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-03-02",
+    "chapterNum": 5,
+    "sectionIndex": 2,
+    "sectionTitle": "三、协议栈全景",
+    "module": "A",
+    "type": "multi",
+    "cat": "协议流程",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "协议栈",
+      "SOME/IP",
+      "分层"
+    ],
+    "stem": "根据车载以太网协议栈全景图，下列层次归属正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "SOME/IP（服务发现/Event/Method/Field）、DoIP、XCP over Ethernet 位于应用层"
+      },
+      {
+        "key": "B",
+        "text": "TCP（可靠）/ UDP（实时）位于传输层，IP（IPv4/IPv6）位于网络层"
+      },
+      {
+        "key": "C",
+        "text": "Ethernet MAC + VLAN(802.1Q) + TSN(Qav/Qbv) 位于链路层"
+      },
+      {
+        "key": "D",
+        "text": "SOME/IP 的序列化（大小端、TLV 编码）位于物理层"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "协议栈全景图自上而下依次是：应用层——SOME/IP、DoIP（UDS over IP）、XCP over Ethernet（标定）；表示层——SOME/IP 序列化（大小端、TLV 编码）；传输层——TCP（可靠）/ UDP（实时）；网络层——IP（IPv4/IPv6）；链路层——Ethernet MAC + VLAN(802.1Q) + TSN(Qav/Qbv)；物理层——100BASE-T1（单对双绞线、全双工、PAM-3 编码）。D 把表示层的序列化错放到了物理层。这张图的价值在于分层排障：抓不到包先查物理层与链路层，能抓包但服务发现失败就查应用层的 Service ID / Instance ID 配置。",
+    "keyPoints": [
+      "应用层：SOME/IP、DoIP、XCP over Ethernet",
+      "表示层：SOME/IP 序列化（大小端、TLV）",
+      "链路层：MAC + VLAN(802.1Q) + TSN(Qav/Qbv)；物理层：100BASE-T1"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "协议栈全景图（应用层→表示层→传输层→网络层→链路层→物理层）"
+    },
+    "relatedTerms": [
+      "XCP",
+      "TLV",
+      "序列化"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-04-01",
+    "chapterNum": 5,
+    "sectionIndex": 3,
+    "sectionTitle": "四、与CAN的深度对比",
+    "module": "A",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "SOA",
+      "信号广播",
+      "对比"
+    ],
+    "stem": "根据「与 CAN 的深度对比」表，CAN 与车载以太网在通信模式上的根本差异是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "CAN 是服务化（SOA）定向发送，以太网是信号广播"
+      },
+      {
+        "key": "B",
+        "text": "CAN 是信号广播（发一个信号所有人都能收到），以太网是服务化 SOA（谁订阅谁收到，定向发送）"
+      },
+      {
+        "key": "C",
+        "text": "两者都是广播，区别只在速率高低"
+      },
+      {
+        "key": "D",
+        "text": "两者都是点对点定向发送，区别只在寻址字段长度"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "对比表第一行：CAN 是信号广播——发一个信号，所有人都能收到；车载以太网是服务化 SOA——谁订阅谁收到，定向发送。这一差异带出后续一连串区别：寻址从 CAN ID（11/29bit）变成 IP 地址 + Port + Service ID；发现机制从 DBC 静态配置变成 SOME/IP-SD 动态服务发现；配置文件从 DBC 变成 ARXML（AUTOSAR 标准格式）。理解这条主线，才能明白为什么网关要做 Signal ↔ Service 转换。A 是选项对调的经典陷阱。",
+    "keyPoints": [
+      "CAN = 信号广播；以太网 = 服务化 SOA 定向发送",
+      "寻址：CAN ID vs IP + Port + Service ID",
+      "配置：DBC（离线静态） vs ARXML + SOME/IP-SD（动态发现）"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "与 CAN 的深度对比表（通信模式/寻址方式/发现机制/配置方式等）"
+    },
+    "relatedTerms": [
+      "ARXML",
+      "Service ID",
+      "SOME/IP-SD"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-04-02",
+    "chapterNum": 5,
+    "sectionIndex": 3,
+    "sectionTitle": "四、与CAN的深度对比",
+    "module": "A",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "以太网",
+      "CAN",
+      "混合架构"
+    ],
+    "stem": "判断：随着车载以太网普及，动力、底盘等控制类 ECU 也将全部改用以太网，CAN 总线将在新车型中被完全取代。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误。章节的面试提示与架构图都强调：以太网不是来取代 CAN 的，而是和 CAN 并存——以太网做高速骨干（域控互联、OTA、ADAS 大数据），CAN 继续管实时可靠的控制子网（动力、底盘），中间靠网关做 Signal ↔ Service 转换。架构图最后一行原文写着：控制类 ECU 仍走 CAN/CAN FD——可靠、便宜、实时，不会被以太网取代。典型形态是以太网骨干 + 动力 CAN 500K（EMS/TCU/VCU）、底盘 CAN 500K（ESP/EPS/EPB）、车身 CAN 125K（BCM 下挂 LIN）。面试高频考点表也把这条列为必会基础。",
+    "keyPoints": [
+      "长期是「以太网骨干 + CAN/CAN FD 子网」的混合架构",
+      "控制类 ECU 留在 CAN：可靠、便宜、实时",
+      "网关负责 Signal ↔ Service 转换"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "以太网骨干网架构图（域控/T-BOX/中央网关 + 动力/底盘/车身 CAN 子网）"
+    },
+    "relatedTerms": [
+      "中央网关",
+      "CAN FD",
+      "混合架构"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-05-01",
+    "chapterNum": 5,
+    "sectionIndex": 4,
+    "sectionTitle": "五、SOME/IP 详解",
+    "module": "A",
+    "type": "single",
+    "cat": "协议流程",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "SOME/IP",
+      "通信模式",
+      "Fire&Forget"
+    ],
+    "stem": "IVI 向氛围灯服务下发一条设置颜色的指令，不需要 Server 返回任何结果。这属于 SOME/IP 的哪种通信模式？",
+    "options": [
+      {
+        "key": "A",
+        "text": "Event（Server → 订阅的 Client）"
+      },
+      {
+        "key": "B",
+        "text": "Method（Request & Response）"
+      },
+      {
+        "key": "C",
+        "text": "Method（Fire & Forget）"
+      },
+      {
+        "key": "D",
+        "text": "Field（Get/Set/Notify）"
+      }
+    ],
+    "answer": [
+      "C"
+    ],
+    "explanation": "四种通信模式表：Event 是 Server 向已订阅的 Client 主动推送（如车速变化时主动推）；Method (R&R) 是 Client → Server → Client 的请求响应（如请求锁门并返回结果）；Method (Fire&Forget) 是 Client → Server 单向下发、无需回复，表中给的示例正是「设置氛围灯颜色，无需回复」；Field 是双向的属性访问（Get/Set/Notify），示例是空调温度可读可写、变化时通知。区分要点：看有没有返回值、由谁发起、是否带订阅。Fire&Forget 因为没有响应，测试时不能用「有无回复」判定成功，需要通过实际执行效果或 Field Notify 来验证。",
+    "keyPoints": [
+      "Event=推送、Method R&R=请求响应、Method FF=即发即忘、Field=读写+通知",
+      "Fire&Forget 无响应，验证要看执行效果而非回包",
+      "Field 兼具 Get/Set/Notify 三种能力"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "SOME/IP 四种通信模式表（模式 / 方向 / 示例）"
+    },
+    "relatedTerms": [
+      "Notify",
+      "订阅",
+      "Method"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-05-02",
+    "chapterNum": 5,
+    "sectionIndex": 4,
+    "sectionTitle": "五、SOME/IP 详解",
+    "module": "A",
+    "type": "multi",
+    "cat": "协议流程",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "SOME/IP-SD",
+      "服务发现",
+      "订阅"
+    ],
+    "stem": "关于 SOME/IP-SD（服务发现）流程，下列说法正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Server 启动后广播 OfferService，报文中携带 Service ID + Instance ID"
+      },
+      {
+        "key": "B",
+        "text": "Client 可以主动发 FindService 查询，也可以等待 Server 的 Offer 主动到来"
+      },
+      {
+        "key": "C",
+        "text": "Client 发 SubscribeEventGroup 订阅后，Server 回 SubscribeACK 确认，随后周期性推送 Event"
+      },
+      {
+        "key": "D",
+        "text": "SOME/IP-SD 依赖 DBC 文件做静态配置，不支持运行时动态发现"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "Service Discovery 流程图给出的顺序是：Server 启动 → OfferService（广播 Service ID + Instance ID）；Client 启动 → FindService（也可等 Offer 主动来）；Client → SubscribeEventGroup；Server → SubscribeACK；Server → Event 周期推送。D 完全说反——与 CAN 的深度对比表明确写着 CAN 的发现机制是 DBC 静态配置，而以太网是 SOME/IP-SD 动态服务发现，配置文件用 ARXML。这也是实战严重问题之一的根源：Service ID / Instance ID 在 ARXML 与 ECU 固件之间配置不一致，就会出现 ADAS 域控找不到摄像头服务。",
+    "keyPoints": [
+      "SD 流程：OfferService → FindService → Subscribe → SubscribeACK → Event",
+      "Offer 携带 Service ID + Instance ID，二者必须与 ARXML 一致",
+      "SOME/IP-SD 是运行时动态发现，不是 DBC 静态配置"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "Service Discovery (SD) 流程代码块"
+    },
+    "relatedTerms": [
+      "EventGroup",
+      "Instance ID",
+      "ARXML"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-05-03",
+    "chapterNum": 5,
+    "sectionIndex": 4,
+    "sectionTitle": "五、SOME/IP 详解",
+    "module": "A",
+    "type": "short",
+    "cat": "协议流程",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "SOME/IP-TP",
+      "分段",
+      "DoIP"
+    ],
+    "stem": "ADAS 摄像头一帧原始数据超过 1MB，而 SOME/IP 基于 UDP、单包 MTU 约 1400 字节。请说明 SOME/IP-TP 如何解决这个问题，并对比它与 DoIP 在传输层与分片机制上的差异。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题考察大数据传输的分段机制与选型判断。要点包括 TP Header 的关键字段、单段 1392 字节的由来，以及 SOME/IP-TP（UDP + 应用层自分段，面向实时大数据）与 DoIP（TCP + 流自动分段，面向可靠诊断刷写）的分工。",
+    "keyPoints": [
+      "TP Header：Message ID(Session ID 4B) + Offset(4B) + More Segments Flag",
+      "单段最大 1392 字节 = 1400 UDP - SOME/IP Header",
+      "SOME/IP-TP = UDP + 应用层自分段（实时流）；DoIP = TCP + 流自动分段（可靠传输）"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "SOME/IP-TP 分段示意图 + vs DoIP 对比表"
+    },
+    "relatedTerms": [
+      "MTU",
+      "UDP",
+      "TCP"
+    ],
+    "refAnswer": "一、SOME/IP-TP 的分段机制\n\nSOME/IP 承载在 UDP 之上，单包 MTU 约 1400 字节，无法直接装下 1.2MB 的摄像头原始帧，因此引入 SOME/IP-TP（Transport Protocol）在应用层自行分段：\n\n- 发送方把原始数据切成若干 Segment，每段带一个 TP Header 后独立作为 UDP 包发出：\n  Segment 1: [TP Header | offset=0 | 1392 bytes]\n  Segment 2: [TP Header | offset=1392 | 1392 bytes]\n  ……\n  Segment N: [TP Header | offset=… | 剩余字节，More Flag=0]\n\n- TP Header 关键字段：\n  1）Message ID / Session ID（4B）——标识这批分段属于同一条消息，避免多路数据交错时装错；\n  2）Offset（4B）——当前段在原始数据中的偏移量，接收方据此重组，即使乱序到达也能拼回；\n  3）More Segments Flag——1 表示后面还有，0 表示这是最后一段，作为重组结束的判据。\n\n- 单段最大 1392 字节的由来：1400 字节 UDP 载荷减去 SOME/IP Header 的开销，剩下的才是可用数据区。\n\n二、与 DoIP 的差异\n\n| 维度 | SOME/IP-TP | DoIP |\n| 传输层 | UDP | TCP |\n| 分片 | 应用层自分段（TP Header 管 offset 与 More Flag） | TCP 流自动分段，应用层无感 |\n| 适用 | 实时大数据，如摄像头原始流 | 可靠传输，如诊断与刷写 |\n\n三、为什么这样分工\n\n实时流要的是低延迟和高吞吐，丢一帧图像可以靠下一帧补上，用 UDP 避免 TCP 的重传与拥塞控制带来的抖动，代价是可靠性交给应用层自己权衡；诊断刷写要的是一个字节都不能错，用 TCP 让协议栈保证有序、不丢、不重，速度稍慢也值得。这也解释了为什么 DoIP 刷写能在 2-3 分钟完成却依然安全可靠。\n\n四、测试关注点\n\n分段传输要重点验证：乱序到达能否正确重组、丢段后的超时与错误处理、大包连续传输时的 UDP 丢包率，以及重组缓冲区是否会因超大消息而溢出。"
+  },
+  {
+    "id": "Q-05-05-04",
+    "chapterNum": 5,
+    "sectionIndex": 4,
+    "sectionTitle": "五、SOME/IP 详解",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "SOME/IP-TP",
+      "1392字节",
+      "MTU"
+    ],
+    "stem": "SOME/IP-TP 单个分段的最大数据长度是 1392 字节，这个数字是怎么来的？",
+    "options": [
+      {
+        "key": "A",
+        "text": "以太网 MTU 1500 字节减去 108 字节的 IP 头"
+      },
+      {
+        "key": "B",
+        "text": "UDP 载荷约 1400 字节减去 SOME/IP Header 的开销"
+      },
+      {
+        "key": "C",
+        "text": "TCP 窗口大小固定为 1392 字节"
+      },
+      {
+        "key": "D",
+        "text": "由 ARXML 中的自定义参数决定，各 OEM 不同"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "SOME/IP-TP 分段说明中注明：单段最大 1392 字节（1400 UDP - SOME/IP Header）。前提是 SOME/IP 基于 UDP、单包 MTU ≈ 1400 字节。C 是干扰项——SOME/IP-TP 走的是 UDP 不是 TCP，走 TCP 的是 DoIP；D 也不成立，这是协议层面的推导结果而非可随意配置的私有参数。理解这个数字的意义在于估算：1.2MB 的图像帧大约需要 1.2×1024×1024 / 1392 ≈ 900 个分段，这个量级直接决定了对交换机缓冲、UDP 丢包率的要求，也是性能测试要重点关注吞吐量与丢包率的原因。",
+    "keyPoints": [
+      "1392 = 1400（UDP 载荷）- SOME/IP Header",
+      "SOME/IP-TP 走 UDP，DoIP 才走 TCP",
+      "分段数量级直接影响丢包率与缓冲区要求"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "SOME/IP-TP 分段示意图（TP Header 字段与单段最大 1392 字节）"
+    },
+    "relatedTerms": [
+      "MTU",
+      "Offset",
+      "吞吐量"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-06-01",
+    "chapterNum": 5,
+    "sectionIndex": 5,
+    "sectionTitle": "六、DoIP：诊断飞起来",
+    "module": "A",
+    "type": "single",
+    "cat": "协议流程",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "DoIP",
+      "路由激活",
+      "流程"
+    ],
+    "stem": "在 DoIP 诊断流程中，「告诉网关我要访问哪个 ECU，由网关分配逻辑地址」对应的步骤是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "车辆发现（Vehicle ID Request 广播）"
+      },
+      {
+        "key": "B",
+        "text": "通信建立（TCP 连接 + TLS 握手）"
+      },
+      {
+        "key": "C",
+        "text": "路由激活（Routing Activation Request / Response）"
+      },
+      {
+        "key": "D",
+        "text": "诊断通信（UDS 请求封装在 DoIP 报文中）"
+      }
+    ],
+    "answer": [
+      "C"
+    ],
+    "explanation": "DoIP 步骤表的顺序是：车辆发现——Vehicle ID Request 广播，找到目标车辆的 VIN/EID/GID；通信建立——TCP 连接 + TLS 握手（安全通道，可选）；路由激活——Routing Activation Request 告诉网关要访问哪个 ECU，网关回 Routing Activation Response 分配逻辑地址；诊断通信——UDS 请求封装在 DoIP 报文中，内容和普通 UDS 一模一样；关闭——释放连接。路由激活是 DoIP 相对传统 CAN 诊断多出来的一道关卡，也是最容易失败的一步——常见故障表里「DoIP 连不上」的排查方向正是 13400 端口和以太网激活线电压。",
+    "keyPoints": [
+      "DoIP 五步：车辆发现 → 通信建立 → 路由激活 → 诊断通信 → 关闭",
+      "路由激活由网关分配逻辑地址，是 DoIP 特有关卡",
+      "诊断通信阶段的 UDS 内容与 CAN 诊断完全一致"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "DoIP 步骤表（车辆发现 / 通信建立 / 路由激活 / 诊断通信 / 关闭）"
+    },
+    "relatedTerms": [
+      "VIN",
+      "逻辑地址",
+      "13400 端口"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-06-02",
+    "chapterNum": 5,
+    "sectionIndex": 5,
+    "sectionTitle": "六、DoIP：诊断飞起来",
+    "module": "A",
+    "type": "short",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "DoIP",
+      "刷写",
+      "拓扑"
+    ],
+    "stem": "请完整描述 DoIP 的诊断流程步骤，并说明相比传统 CAN 诊断，DoIP 在速度与拓扑上分别带来了什么变化。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题串联 DoIP 的流程与价值。除了背出五个步骤，更要讲清 DoIP 网关的「路由中转」角色——诊断仪不再直连 ECU，而是通过网关分发到 CAN / CAN FD / 以太网上的各个 ECU。",
+    "keyPoints": [
+      "五步：车辆发现 → TCP+TLS 通信建立 → 路由激活 → 诊断通信 → 关闭",
+      "速度：500Kbps → 100Mbps，刷写从约 30 分钟降到 2-3 分钟",
+      "拓扑：诊断仪 → DoIP 网关 → 分发到 CAN / CAN FD / 以太网 ECU"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "传统 CAN 诊断 vs DoIP 以太网诊断对比图 + DoIP 步骤表"
+    },
+    "relatedTerms": [
+      "激活线",
+      "UDS",
+      "TLS"
+    ],
+    "refAnswer": "一、DoIP 完整流程\n\n1）车辆发现：诊断仪广播 Vehicle ID Request，获取目标车辆的 VIN / EID / GID，确认连的是哪一台车。\n2）通信建立：与车辆建立 TCP 连接，如启用安全通道则再做 TLS 握手（可选）。\n3）路由激活：发送 Routing Activation Request，告诉网关要访问哪个 ECU；网关回 Routing Activation Response，为诊断仪分配逻辑地址。这一步是 DoIP 特有的准入环节。\n4）诊断通信：把 UDS 请求封装在 DoIP 报文中收发，内容与传统 UDS 完全一样（$10/$22/$27/$34/$36/$37 等照旧）。\n5）关闭：结束路由激活并关闭 TCP 连接，释放资源。\n\n二、速度上的变化\n\n传统 CAN 诊断带宽 500Kbps，刷写一个 ECU 约 30 分钟；DoIP 走 100Mbps 以太网，刷写约 2-3 分钟。章节在实际车型应用表中也给出同样的数据：产线刷写从 30 分钟降到 3 分钟。对产线节拍而言这是数量级的改善，直接决定了整车下线效率，也是 OTA 能够落地的前提（升级包动辄几个 GB，CAN 根本传不动）。\n\n三、拓扑上的变化\n\n传统 CAN 诊断是「诊断仪 → OBD 口(CAN) → ECU 直接响应」的扁平结构。DoIP 变成分层结构：\n诊断仪（PC/LAN 口）→ OBD 口（含以太网激活线）→ DoIP 网关（负责路由激活）→ 分发到 ECU1(CAN) / ECU2(CAN FD) / ECU3(以太网)。\n\n网关成为统一入口与守门员，带来两点工程影响：\n- 好处：一个入口可访问异构总线上的所有 ECU，便于集中做权限与安全管控（TLS 加密、激活线物理保护、MAC 地址白名单）。\n- 代价：多了路由激活这道可能失败的关卡。常见故障是「诊断仪搜到车但路由激活被拒」，排查方向是激活线电压是否足够、TCP 端口是否为 13400、安全网关白名单是否包含该诊断仪的 MAC。"
+  },
+  {
+    "id": "Q-05-07-01",
+    "chapterNum": 5,
+    "sectionIndex": 6,
+    "sectionTitle": "七、TSN：时间敏感网络",
+    "module": "A",
+    "type": "single",
+    "cat": "标准合规",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "TSN",
+      "802.1Qbv",
+      "门控"
+    ],
+    "stem": "TSN 标准中，负责「给关键数据预留时间窗口、到点优先发」的时间感知调度是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "802.1AS"
+      },
+      {
+        "key": "B",
+        "text": "802.1Qbv"
+      },
+      {
+        "key": "C",
+        "text": "802.1Qav"
+      },
+      {
+        "key": "D",
+        "text": "802.1CB"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "TSN 标准表：802.1AS 是时钟同步（gPTP，全网时钟误差 < 1μs）；802.1Qbv 是时间感知调度，给关键数据预留时间窗口、到点优先发；802.1Qbu/802.3br 是帧抢占，高优先级帧可打断低优先级帧；802.1Qav 是流量整形，让音视频流平滑传输、防抖动；802.1CB 是无缝冗余，双链路发相同数据、单路故障无感知。Qbv 与 Qav 只差一个字母但职责不同——Qbv 是「门控开关」（TAS 时间门控），Qav 是「限速整形」（CBS 信用整形），这是最容易混淆的一对。另外要记住 Qbv 必须建立在 802.1AS 之上：门开对了但时钟不对，数据照样错过窗口。",
+    "keyPoints": [
+      "Qbv = 时间感知调度/门控窗口；Qav = 流量整形防抖动",
+      "AS = gPTP 时钟同步；Qbu/802.3br = 帧抢占；CB = 无缝冗余",
+      "Qbv 依赖 802.1AS 的统一时基才有意义"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "TSN 标准表（802.1AS / Qbv / Qbu / Qav / CB）"
+    },
+    "relatedTerms": [
+      "TAS",
+      "CBS",
+      "gPTP"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-07-02",
+    "chapterNum": 5,
+    "sectionIndex": 6,
+    "sectionTitle": "七、TSN：时间敏感网络",
+    "module": "A",
+    "type": "multi",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "AVB",
+      "TSN",
+      "演进"
+    ],
+    "stem": "根据 AVB vs TSN 对比表，下列说法正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "AVB（802.1BA）是 TSN 的前身，TSN 是 AVB 的超集和演进"
+      },
+      {
+        "key": "B",
+        "text": "AVB 不支持帧抢占和无缝冗余，TSN 通过 802.1Qbu/802.3br 和 802.1CB 补上了这两块"
+      },
+      {
+        "key": "C",
+        "text": "AVB 的确定性是软实时（毫秒级），TSN 可达硬实时（微秒级）"
+      },
+      {
+        "key": "D",
+        "text": "AVB 车载用途是 ADAS 融合与线控制动，TSN 则退回到音响与后座屏"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "对比表逐行核对：时间线上 AVB 是 2011 年面向车载音视频，TSN 是 2015 年后面向工业/自动驾驶；帧抢占 AVB ❌、TSN ✅（802.1Qbu/802.3br）；无缝冗余 AVB ❌、TSN ✅（802.1CB FRER）；确定性 AVB 软实时（毫秒级）、TSN 硬实时（微秒级）；车载用途 AVB 是音响、后座屏，TSN 是 ADAS 融合、线控制动。D 把两者的用途完全对调了。面试提示总结得很清楚：AVB 只管音视频的软实时，TSN 加了 Qbv 门控和帧抢占后能做到微秒级硬实时——这让以太网替代 FlexRay 成为可能。",
+    "keyPoints": [
+      "AVB(2011, 音视频) → TSN(2015后, 工业/自动驾驶)，TSN 是超集",
+      "TSN 新增：Qbu/802.3br 帧抢占、802.1CB FRER 无缝冗余、Qbv 时间门控",
+      "确定性：AVB 毫秒级软实时 → TSN 微秒级硬实时"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "AVB vs TSN 对比表（时间线/时钟同步/流预留/流量整形/帧抢占/无缝冗余/确定性/车载用途）"
+    },
+    "relatedTerms": [
+      "FRER",
+      "802.1Qcc",
+      "SRP"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-07-03",
+    "chapterNum": 5,
+    "sectionIndex": 6,
+    "sectionTitle": "七、TSN：时间敏感网络",
+    "module": "A",
+    "type": "short",
+    "cat": "协议流程",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "gPTP",
+      "802.1AS",
+      "BMCA"
+    ],
+    "stem": "请说明 gPTP（802.1AS）时钟同步的三步流程，写出链路延迟与时钟偏差的计算式，并解释为什么说「没有 gPTP，Qbv 门控就没有意义」。",
+    "options": [],
+    "answer": [],
+    "explanation": "gPTP 是 TSN 的基石，本题要求掌握 BMCA 选主、Pdelay 测延迟、Sync 校时三步以及两个计算式，并理解时钟同步与门控调度之间的依赖关系。",
+    "keyPoints": [
+      "三步：BMCA 选 Grandmaster → Pdelay 测链路延迟 → Sync 校准时钟",
+      "链路延迟 = ((t4-t1) - (t3-t2)) / 2；Clock_Offset = t2 - t1 - 链路延迟",
+      "Qbv 门控依赖统一时基，GM 故障需 BMCA 重选，切换 <100ms"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "gPTP (802.1AS) 时钟同步三步流程代码块（BMCA / Pdelay / Sync）"
+    },
+    "relatedTerms": [
+      "Grandmaster",
+      "Follow_Up",
+      "主时钟冗余"
+    ],
+    "refAnswer": "一、gPTP 三步流程\n\nStep 1 —— BMCA：选出主时钟（Grandmaster）\n所有节点周期性发送 Announce 报文，互相比较 clockQuality 与 priority 等属性，最优者成为 GM（Grandmaster），其余节点作为 Slave 向它对齐。\n\nStep 2 —— Pdelay：测量链路延迟\nSlave ──Pdelay_Req──→ Master，记录发出时刻 t1；\nSlave ←──Pdelay_Resp── Master，Master 记录接收时刻 t2；\nSlave ←──Pdelay_Resp_FollowUp── Master，携带 t2、t3（t3 为 Master 发出响应的时刻）；\nSlave 记录接收时刻 t4。\n于是：链路延迟 = ((t4 - t1) - (t3 - t2)) / 2\n含义是往返总耗时扣除对端处理时间后取一半，得到单向传播延迟。\n\nStep 3 —— Sync：时钟同步\nMaster ──Sync(t1)──→ Slave（Slave 记录接收时刻 t2）；\nMaster ──Follow_Up(t1)──→ Slave（携带精确的发送时戳，两步法可避免时戳打点误差）。\n于是：Clock_Offset = t2 - t1 - 链路延迟\nSlave 据此调整本地时钟，最终全网同步至 < 1μs。\n\n二、为什么没有 gPTP，Qbv 就没有意义\n\nQbv（时间感知调度）的工作方式是按预先编排的时间表在特定时刻打开/关闭某个优先级队列的门。这张时间表对所有交换机和端节点必须指向同一个「现在」。如果各节点的时钟没有对齐：\n- 发送端认为现在是窗口内，交换机却认为窗口尚未开启，帧被挡在门外排队，延迟不可控；\n- 或者门开了但没有数据到达，预留的带宽被浪费，紧急帧反而落到下一个周期。\n\n章节面试提示原话：gPTP 是 TSN 的基石，没有它 Qbv 门控就没意义——你门开对了但时钟不对，数据照样错过窗口。\n\n三、可靠性与测试要求\n\nGM 一旦故障，BMCA 会自动重选，要求切换 < 100ms。实战严重问题表把「TSN 时钟不同步」列为严重级：gPTP 主时钟故障 → 全网时间漂移 → Qbv 门控错位 → 关键帧被延迟，教训是 TSN 主时钟冗余必须验证，主备切换 < 100ms。台架上用 Vector TSN 测试工具测 gPTP 同步精度、Qbv 门控调度和帧抢占效果，并专门做 GM 拔除的故障注入。"
+  },
+  {
+    "id": "Q-05-08-01",
+    "chapterNum": 5,
+    "sectionIndex": 7,
+    "sectionTitle": "八、实际车型应用",
+    "module": "A",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "实车应用",
+      "1000BASE-T1",
+      "ADAS"
+    ],
+    "stem": "根据实际车型应用表，ADAS 域控之间传输摄像头原始数据主要采用：",
+    "options": [
+      {
+        "key": "A",
+        "text": "100BASE-T1 + LVDS"
+      },
+      {
+        "key": "B",
+        "text": "1000BASE-T1"
+      },
+      {
+        "key": "C",
+        "text": "CAN FD 8Mbps"
+      },
+      {
+        "key": "D",
+        "text": "4G/5G 蜂窝网络"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "实际车型应用表五行：T-BOX 到云端用 4G/5G + 车内以太网（OTA 升级包从云端→T-BOX→以太网→域控）；ADAS 域控用 1000BASE-T1（摄像头原始数据→域控融合）；座舱域控用 100BASE-T1 + LVDS（中控大屏、仪表投屏）；诊断刷写用 DoIP over 100BASE-T1（产线刷写 30 分钟→3 分钟）；中央网关用多路以太网交换（域间大数据互通）。ADAS 之所以必须上千兆，是因为摄像头原始流的数据量远超百兆链路的承载能力——这也是为什么这条链路还要配 MACsec 做线速加密而不能用 TLS。",
+    "keyPoints": [
+      "ADAS 域控 = 1000BASE-T1（摄像头原始数据融合）",
+      "座舱 = 100BASE-T1 + LVDS；诊断刷写 = DoIP",
+      "T-BOX = 4G/5G + 车内以太网做 OTA"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "实际车型应用表（场景 / 用什么 / 实际例子）"
+    },
+    "relatedTerms": [
+      "LVDS",
+      "T-BOX",
+      "OTA"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-09-01",
+    "chapterNum": 5,
+    "sectionIndex": 8,
+    "sectionTitle": "九、测试实战关联",
+    "module": "A",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "测试分层",
+      "眼图",
+      "工具"
+    ],
+    "stem": "根据测试实战关联表，做「眼图测试、开路/短路诊断、信号衰减」这类物理层测试，应使用的工具是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "CANoe Ethernet 模块"
+      },
+      {
+        "key": "B",
+        "text": "示波器 + 矢量网络分析仪"
+      },
+      {
+        "key": "C",
+        "text": "CANoe + DIVA"
+      },
+      {
+        "key": "D",
+        "text": "iperf"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "测试层与工具的对应是：物理层——眼图测试、开路/短路诊断、信号衰减，用示波器 + 矢量网络分析仪；SOME/IP——服务发现时间、订阅正确性、序列化/反序列化，用 CANoe Ethernet 模块；DoIP——车辆发现、路由激活、诊断响应时间，用 CANoe + DIVA；TSN——gPTP 同步精度、Qbv 门控调度、帧抢占效果，用 Vector TSN 测试工具；性能——吞吐量、UDP 丢包率、TCP 重传率，用 iperf/CANoe；安全——SecOC MAC 校验、TLS 证书、DoS 攻击防护，用渗透测试工具。物理层的模拟量特性决定了必须用示波器看波形质量，用网分测 S 参数看阻抗与衰减，协议分析工具无法替代。",
+    "keyPoints": [
+      "物理层 → 示波器 + 矢量网络分析仪（眼图、S 参数）",
+      "SOME/IP/DoIP → CANoe Ethernet / CANoe + DIVA",
+      "TSN → Vector TSN 工具；性能 → iperf/CANoe"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "测试实战关联表（测试层 / 测试项 / 工具）"
+    },
+    "relatedTerms": [
+      "眼图",
+      "S 参数",
+      "DIVA"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-09-02",
+    "chapterNum": 5,
+    "sectionIndex": 8,
+    "sectionTitle": "九、测试实战关联",
+    "module": "A",
+    "type": "multi",
+    "cat": "标准合规",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "MACsec",
+      "安全",
+      "分层"
+    ],
+    "stem": "根据安全方案对比表，下列关于车载网络安全机制的说法正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "MACsec 工作在 L2 链路层，逐跳加密，硬件线速、延迟极低，适合域控间与摄像头到域控的链路"
+      },
+      {
+        "key": "B",
+        "text": "IPSec 工作在 L3 网络层，端到端保护，典型用于 T-BOX 到云端"
+      },
+      {
+        "key": "C",
+        "text": "TLS 工作在 L4 传输层，端到端应用保护，典型用于 DoIP 安全通道"
+      },
+      {
+        "key": "D",
+        "text": "SecOC 工作在链路层，用于以太网大流量数据的线速加密"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "安全方案对比表：MACsec——L2 链路层，逐跳每段独立加密，延迟极低（硬件线速），用于域控间、摄像头到域控；IPSec——L3 网络层，端到端，延迟中等，用于 T-BOX 到云端；TLS——L4 传输层，端到端应用，延迟中等，用于 DoIP 安全通道；SecOC——应用层，PDU 级认证，延迟极低，用于 CAN/CAN FD 信号。D 把 SecOC 的层次和用途都说错了：SecOC 是应用层的 PDU 级认证，主战场是 CAN/CAN FD 信号，不是以太网大流量加密。章节的面试提示还给出了选型逻辑：ADAS 原始数据不用 TLS 是因为 TLS 走 TCP 开销太大，摄像头原始流动辄 Gbps 级不可能逐包做高层加密，而 MACsec 硬件线速加密延迟可忽略。",
+    "keyPoints": [
+      "MACsec=L2 逐跳、IPSec=L3 端到端、TLS=L4 端到端、SecOC=应用层 PDU 认证",
+      "ADAS 大流量选 MACsec 而非 TLS：硬件线速、延迟可忽略",
+      "MACsec 帧含 SecTAG（AN/PN 防重放/SCI）+ ICV（AES-GCM-128）"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "安全方案对比表（MACsec / IPSec / TLS / SecOC）"
+    },
+    "relatedTerms": [
+      "802.1AE",
+      "SecTAG",
+      "ICV"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-09-03",
+    "chapterNum": 5,
+    "sectionIndex": 8,
+    "sectionTitle": "九、测试实战关联",
+    "module": "A",
+    "type": "single",
+    "cat": "故障定位",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "故障排查",
+      "DoIP",
+      "SOME/IP"
+    ],
+    "stem": "台架上出现「SOME/IP 抓不到任何 OfferService 报文」的现象，根据常见故障排查表，最应优先排查的方向是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Server 未启动或 Service ID 配错，抓包看 SD 报文并核对 ARXML"
+      },
+      {
+        "key": "B",
+        "text": "以太网激活线没接、TCP 端口不是 13400"
+      },
+      {
+        "key": "C",
+        "text": "EventGroup 不匹配，对比 ARXML 的 Provide/Consume 配置"
+      },
+      {
+        "key": "D",
+        "text": "线束过长或受 EMC 干扰，缩短线缆并用网分测 S 参数"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "常见故障排查表四行分别对应四种现象：SOME/IP 无 Offer——原因是 Server 未启动或 Service ID 配错，排查方式是抓包看 SD 报文、查 ARXML；订阅失败——原因是 EventGroup 不匹配，对比 ARXML 的 Provide/Consume；DoIP 连不上——原因是以太网激活线没接或 TCP 端口错，查 13400 端口和激活线电压；丢包严重——原因是线束过长或 EMC 干扰，缩短线缆、用网分测 S 参数。题干现象是「完全没有 Offer」，对应第一行。B 是 DoIP 的排查方向，C 对应的是「能看到 Offer 但订阅不上」，D 对应的是「通但丢包」。排障要先按现象对号入座，再决定用哪层工具，避免一上来就拆线束。",
+    "keyPoints": [
+      "无 Offer → Server 未启动 / Service ID 配错（查 ARXML）",
+      "订阅失败 → EventGroup 不匹配（对比 Provide/Consume）",
+      "DoIP 连不上 → 激活线电压 + 13400 端口；丢包 → 线束/EMC"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "常见故障排查表（故障 / 原因 / 排查）"
+    },
+    "relatedTerms": [
+      "ARXML",
+      "EventGroup",
+      "抓包"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-10-01",
+    "chapterNum": 5,
+    "sectionIndex": 9,
+    "sectionTitle": "十、面试高频考点",
+    "module": "A",
+    "type": "single",
+    "cat": "协议流程",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "面试考点",
+      "SOME/IP-SD",
+      "顺序"
+    ],
+    "stem": "面试高频考点中「SOME/IP-SD 流程」的标准答法，正确的顺序是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "FindService → OfferService → SubscribeACK → Subscribe → Event 推送"
+      },
+      {
+        "key": "B",
+        "text": "OfferService → FindService → Subscribe → SubscribeACK → Event 推送"
+      },
+      {
+        "key": "C",
+        "text": "Subscribe → OfferService → FindService → Event 推送 → SubscribeACK"
+      },
+      {
+        "key": "D",
+        "text": "OfferService → Subscribe → FindService → Event 推送 → SubscribeACK"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "进阶加分项表给出的标准答法就是：OfferService → FindService → Subscribe → SubscribeACK → Event 推送。逻辑上也只能是这个顺序——先有服务提供方广播「我有什么」，Client 才谈得上找与订阅；订阅必须先请求（Subscribe）后确认（SubscribeACK）；确认之后才开始周期推送 Event。A 把 Subscribe 与 SubscribeACK 颠倒，C、D 顺序混乱。注意 FindService 是可选环节——Client 也可以什么都不发，静等 Server 的 Offer 主动到来。",
+    "keyPoints": [
+      "标准顺序：Offer → Find → Subscribe → SubscribeACK → Event",
+      "先请求后确认，确认后才推送",
+      "FindService 可选，Client 也可被动等 Offer"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "面试高频考点·进阶加分项表（SOME/IP-SD 流程行）"
+    },
+    "relatedTerms": [
+      "Service Discovery",
+      "订阅",
+      "Event"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-10-02",
+    "chapterNum": 5,
+    "sectionIndex": 9,
+    "sectionTitle": "十、面试高频考点",
+    "module": "A",
+    "type": "multi",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "面试考点",
+      "网关",
+      "VLAN"
+    ],
+    "stem": "根据面试高频考点表（必会基础 + 进阶加分项），下列答法与章节一致的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "SOME/IP 三个核心是 Event（推送）、Method（请求响应）、Field（可读写属性 + 通知）"
+      },
+      {
+        "key": "B",
+        "text": "CAN 和以太网网关的做法是 Signal → Service 转换，把 CAN DBC 的信号映射到 SOME/IP Event"
+      },
+      {
+        "key": "C",
+        "text": "VLAN 在车载以太网中用于隔离不同的域（ADAS VLAN 10、座舱 VLAN 20），兼顾安全与 QoS"
+      },
+      {
+        "key": "D",
+        "text": "DoIP 的安全完全依赖 TLS，物理层不需要额外保护措施"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 分别对应必会基础表的「SOME/IP 三个核心」和进阶加分项表的「CAN 和以太网网关怎么做」「VLAN 在车载以太网中干什么」。D 与章节答法不符——进阶加分项表对「DoIP 安全怎么保证」的回答是三重防护：TLS 加密通道 + 激活线物理保护 + MAC 地址白名单。物理层的激活线本身就是一道准入门槛（没接激活线根本进不来），实战严重问题表里「DoIP 路由激活失败」的根因之一正是激活线电压不足，另一是安全网关白名单未包含诊断仪 MAC。只答 TLS 会显得对整车安全设计理解不完整。",
+    "keyPoints": [
+      "SOME/IP 三核心：Event / Method / Field",
+      "网关做 Signal → Service 转换（DBC 信号 → SOME/IP Event）",
+      "DoIP 安全三重：TLS + 激活线物理保护 + MAC 白名单"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "面试高频考点表（必会基础 + 进阶加分项）"
+    },
+    "relatedTerms": [
+      "Signal2Service",
+      "MAC 白名单",
+      "QoS"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-11-01",
+    "chapterNum": 5,
+    "sectionIndex": 10,
+    "sectionTitle": "十一、一句话面试速答",
+    "module": "A",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "速答",
+      "刷写速度",
+      "测试关注点"
+    ],
+    "stem": "判断：章节给出的一句话速答中提到，DoIP 做远程诊断的刷写速度比 CAN 快约 200 倍，且测试主要关注服务发现、DoIP 路由激活、信号→服务的一致性映射。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "T"
+    ],
+    "explanation": "正确。一句话面试速答原文：车载以太网用 100BASE-T1 单对双绞线，100Mbps 全双工；上层跑 SOME/IP 做服务化通信——和 CAN 的信号广播不同，SOME/IP 是谁订阅谁收到；跑 DoIP 做远程诊断，刷写速度比 CAN 快 200 倍；TSN 保证确定性，做安全关键系统；目前 ADAS 域控和 T-BOX 已经标配以太网；我们测试主要关注服务发现、DoIP 路由激活、信号→服务的一致性映射。「快 200 倍」与带宽对比也吻合：100Mbps ÷ 500Kbps = 200。这段速答的价值在于结构完整——物理层、通信范式、诊断、确定性、落地现状、测试关注点，一句话覆盖六个层面。",
+    "keyPoints": [
+      "200 倍 = 100Mbps ÷ 500Kbps，与刷写 30 分钟→3 分钟相互印证",
+      "速答结构：物理层 → SOME/IP → DoIP → TSN → 落地现状 → 测试关注点",
+      "测试三关注：服务发现、路由激活、信号→服务一致性映射"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "十一、一句话面试速答——车载以太网了解吗？的完整答法"
+    },
+    "relatedTerms": [
+      "DoIP",
+      "SOME/IP",
+      "TSN"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-05-11-02",
+    "chapterNum": 5,
+    "sectionIndex": 10,
+    "sectionTitle": "十一、一句话面试速答",
+    "module": "A",
+    "type": "multi",
+    "cat": "故障定位",
+    "difficulty": "挑战",
+    "direction": "反向",
+    "tags": [
+      "严重问题",
+      "根因",
+      "易错"
+    ],
+    "stem": "根据「实战中常见严重问题」表，下列关于现象与根因的对应，正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "SOME/IP 服务发现失败 → ADAS 域控找不到摄像头服务 → 根因是 Service ID/Instance ID 配置不一致，ARXML 与 ECU 固件必须同步"
+      },
+      {
+        "key": "B",
+        "text": "DoIP 路由激活失败 → 诊断仪搜到车但被拒 → 根因是激活线电压不足或安全网关白名单未含诊断仪 MAC"
+      },
+      {
+        "key": "C",
+        "text": "TSN 时钟不同步 → gPTP 主时钟故障导致全网时间漂移、Qbv 门控错位 → 主备切换必须 < 100ms"
+      },
+      {
+        "key": "D",
+        "text": "SOME/IP 服务发现失败属于轻微问题，重启域控即可恢复，不影响功能安全评估"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 与严重问题表三行完全对应，包括各自的严重度：SOME/IP 服务发现失败为「严重」，DoIP 路由激活失败为「中等」，TSN 时钟不同步为「严重」。D 是本题的反向陷阱，与表中记载相反——SOME/IP 服务发现失败的现象是 ADAS 域控找不到摄像头服务、自动驾驶功能不可用，严重度标为「严重」。这类问题的根因是配置不一致（ARXML 与 ECU 固件不同步），重启并不能修复配置错误；而且自动驾驶功能不可用直接触及功能安全，绝不能按轻微问题处理。",
+    "keyPoints": [
+      "三大严重问题：SD 失败（严重）、DoIP 路由激活失败（中等）、TSN 时钟不同步（严重）",
+      "SD 失败根因是配置不一致，重启无效，必须同步 ARXML 与固件",
+      "TSN 主时钟冗余必须验证，主备切换 < 100ms"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "实战中常见严重问题表（问题 / 严重度 / 现象 / 根因+教训）"
+    },
+    "relatedTerms": [
+      "Instance ID",
+      "Grandmaster",
+      "功能安全"
+    ],
+    "refAnswer": ""
+  }
+]

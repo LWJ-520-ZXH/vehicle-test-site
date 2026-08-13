@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+(function () {
+  const saved = localStorage.getItem('avt-theme') || 'system'
+  let t = 'light'
+  if (saved === 'dark') t = 'dark'
+  else if (saved === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark'
+  document.documentElement.setAttribute('data-theme', t)
+  document.documentElement.style.background = t === 'dark' ? '#0a0f1e' : '#f4f7fb'
+})()
+</script>
+<title>章节详情 - 车载测试学堂</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232563eb'/><text x='16' y='22' text-anchor='middle' fill='white' font-size='18' font-family='sans-serif' font-weight='bold'>VT</text></svg>">
+<link rel="stylesheet" href="assets/css/main.css?v=20260813225913">
+<link rel="stylesheet" href="assets/css/chapter-detail.css?v=20260813225913">
+<script>
+(function(){
+  var V='20260813225913';
+  function check(){
+    fetch('assets/version.json?t='+Date.now(),{cache:'no-store'})
+      .then(function(r){return r.json();})
+      .then(function(j){ if(j&&j.version&&j.version!==V){location.reload(true);} })
+      .catch(function(){});
+  }
+  check();
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible'){ setTimeout(check,800); }
+  });
+})();
+</script>
+</head>
+<body>
+
+<!-- 流程图箭头标记（全局复用，主题自适应，fill 由 chapter-detail.css 控制） -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <marker id="arrowA" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z"/></marker>
+  <marker id="arrowYes" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z"/></marker>
+  <marker id="arrowNo" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z"/></marker>
+  <marker id="arrowMute" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z"/></marker>
+</defs></svg>
+
+<!-- ====== 顶部导航 ====== -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">
+          <path d="M5 12h3l2-5 4 10 2-5h3"/>
+          <circle cx="12" cy="12" r="1.5" fill="#fff"/>
+        </svg>
+      </div>
+      车载测试学堂
+    </a>
+    <nav class="nav">
+      <a href="index.html">首页</a>
+      <div class="nav-item-dropdown">
+        <a href="chapters.html">知识库</a>
+        <div class="nav-dropdown" id="kb-dropdown"><!-- JS填充 --></div>
+      </div>
+      <a href="glossary.html" title="专业术语速查与释义">术语表</a>
+      <a href="quiz.html" title="知识点自测题库">题库中心</a>
+    </nav>
+    <div class="header-right">
+      <div class="hdr-search">
+        <input id="hdr-search" type="search" placeholder="搜索章节 / 知识点…" aria-label="站内搜索">
+        <button type="button" id="hdr-search-btn" aria-label="搜索"><svg class="ui-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
+      </div>
+      <button class="theme-btn" id="theme-btn" aria-label="切换主题">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ====== 全宽 Banner 封面区 ====== -->
+<section class="chapter-banner" id="chapter-banner"><!-- JS渲染 --></section>
+
+<!-- ====== 知识点卡片区 ====== -->
+<section class="kp-section" id="kp-section">
+  <div class="kp-section-head">
+    <h2><svg class="ui-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-1.8-1.2-4-1.8-7-1.8C3 4.2 2 5.4 2 7v12c0 1.5 1 2.5 3 2.5 2.8 0 5-1 7-2.2 2 1.2 4.2 2.2 7 2.2 2 0 3-1 3-2.5V7c0-1.6-1-2.8-3-2.8-3 0-5.2.6-7 1.8z"/><path d="M12 6v13.5"/></svg> 知识点导航</h2>
+    <p id="kp-section-desc">由浅入深 循序渐进</p>
+  </div>
+  <div class="kp-layout">
+    <!-- 横向缩略卡片行：全宽（内容+目录整体最大宽度，居中展示，不再被左侧内容列挤压导致偏左） -->
+    <div class="kp-row" id="kp-row"><!-- JS渲染 --></div>
+    <div class="kp-main">
+      <!-- 内容区：单栏 -->
+      <div class="kp-body" id="kp-body">
+        <div class="kp-detail" id="kp-detail"><div class="kp-detail-inner"><!-- JS渲染 --></div></div>
+      </div>
+    </div>
+    <!-- 右侧目录（TOC）锚点 -->
+    <aside class="kp-toc" id="kp-toc"><!-- JS渲染 --></aside>
+  </div>
+  <!-- 章末总结 -->
+  <div class="kp-summary" id="kp-summary" style="display:none"><!-- JS渲染 --></div>
+</section>
+
+<!-- ====== 上下章导航 ====== -->
+<section class="chapter-nav" id="chapter-nav" style="display:none"><!-- JS渲染 --></section>
+
+<!-- ====== 浮动滚动按钮 ====== -->
+<div class="chapter-float-actions" id="chapter-float-actions" aria-label="页面滚动控制">
+  <button class="chapter-float-btn" id="back-to-top" aria-label="回到顶部" title="回到顶部">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
+  <button class="chapter-float-btn" id="back-to-bottom" aria-label="滚动到底部" title="滚动到底部">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+</div>
+
+<!-- ====== 页脚 ====== -->
+<footer class="site-footer">
+  <b>车载测试学堂</b> · 基于真实项目面试题库打造 · <span data-chapter-count>51</span> 章覆盖 CAN/LIN/FlexRay/以太网/UDS → CANoe/CAPL → 五大域测试
+</footer>
+
+<script src="assets/js/data-bundle.js?v=20260813225913" defer></script>
+<script src="assets/js/app.js?v=20260813225913" defer></script>
+</body>
+</html>

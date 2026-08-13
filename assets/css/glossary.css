@@ -1,0 +1,60 @@
+/* ===== 术语表页（站点一致风格 + 分类筛选 + 点击复制） ===== */
+.gl-wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 56px; scroll-margin-top: 84px; }
+
+/* 粘性筛选头：位于站点 sticky 头部(64px)之下 */
+.gl-header {
+  position: sticky; top: 64px; z-index: 50;
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid var(--border, #e4ebf3);
+  border-radius: 16px; padding: 16px 18px; margin-bottom: 22px;
+  box-shadow: var(--shadow);
+}
+.gl-title { font-size: var(--fs-h2, 23px); font-weight: var(--fw-bold, 800); letter-spacing: .3px; display: flex; align-items: center; gap: 10px; }
+.gl-title .gl-emoji { font-size: 22px; }
+.gl-sub { color: var(--text-2); font-size: 13.5px; margin: 6px 0 14px; line-height: 1.6; }
+.gl-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.gl-search { position: relative; flex: 1; min-width: 220px; }
+.gl-search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--text-3, #8a94a6); }
+.gl-search input {
+  width: 100%; padding: 11px 14px 11px 38px; border-radius: 12px;
+  border: 1px solid var(--border, #d8e0ea); background: var(--bg, #fff);
+  color: var(--text, #1b2330); font-size: 14px; outline: none; transition: border-color .2s;
+}
+.gl-search input:focus { border-color: var(--brand, #2563eb); }
+.gl-count { font-size: 12.5px; color: var(--text-3, #8a94a6); white-space: nowrap; }
+
+.gl-cats { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.gl-cat-chip {
+  font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 999px;
+  border: 1px solid var(--border, #e4ebf3); background: var(--chip, rgba(120,140,180,.1));
+  color: var(--text-2); cursor: pointer; transition: .18s; user-select: none;
+}
+.gl-cat-chip:hover { border-color: var(--brand, #2563eb); color: var(--brand, #2563eb); }
+.gl-cat-chip.active { background: var(--brand, #2563eb); color: #fff; border-color: var(--brand, #2563eb); }
+
+.gl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.gl-card {
+  position: relative; background: var(--surface); border: 1px solid var(--border, #e4ebf3);
+  border-radius: 14px; padding: 16px 16px 14px; cursor: pointer;
+  transition: transform .18s, box-shadow .18s, border-color .18s;
+}
+.gl-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: var(--brand, #2563eb); }
+.gl-card.copied { border-color: var(--brand, #2563eb); }
+.gl-term { font-size: 16px; font-weight: 700; color: var(--brand, #2563eb); display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; padding-right: 64px; }
+.gl-full { font-size: 12px; font-weight: 500; color: var(--text-3, #8a94a6); }
+.gl-def { margin-top: 8px; font-size: 14px; line-height: 1.7; color: var(--text, #1b2330); }
+.gl-cat-tag {
+  position: absolute; top: 14px; right: 14px; font-size: 11px; color: var(--text-3, #8a94a6);
+  background: var(--chip, rgba(120,140,180,.12)); padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+}
+.gl-copy-hint { font-size: 11px; color: var(--text-3, #8a94a6); margin-top: 10px; display: flex; align-items: center; gap: 4px; opacity: .8; }
+.gl-card.copied .gl-copy-hint { color: var(--brand, #2563eb); opacity: 1; }
+.gl-empty { text-align: center; color: var(--text-3, #8a94a6); padding: 36px 20px; font-size: 14px; }
+
+@media (max-width: 560px) {
+  .gl-wrap { padding: 18px 14px 56px; }
+  .gl-header { top: 56px; }
+  .gl-grid { grid-template-columns: 1fr; }
+}

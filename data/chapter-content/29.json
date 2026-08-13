@@ -1,0 +1,385 @@
+{
+  "num": 29,
+  "slug": "AUTOSAR基础",
+  "title": "AUTOSAR 基础",
+  "oneliner": "AUTOSAR（AUTomotive Open System ARchitecture）是车载软件的\"标准化底座\"——定义统一的分层架构和接口，让不同供应商的软件能像拼乐高一样集成到同一个ECU。测试人员懂分层、知道BSW配置错误会出什么故障，面试就够用了",
+  "sections": [
+    {
+      "title": "一、为什么需要 AUTOSAR？",
+      "icon": "🏗️",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "为什么车企要搞 AUTOSAR？一辆车上几十个 ECU 来自不同供应商，接口不统一、集成就是灾难。AUTOSAR 定义分层架构和标准化接口，让不同供应商软件像拼乐高装进同一 ECU。测试人员不必深究每层代码，懂分层（应用层/RTE/BSW）、知道 BSW 配错会出什么故障就够用。",
+          "_enh": "concept"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "没有AUTOSAR:                   有AUTOSAR:\n  ECU A 软件                    App层（业务逻辑，各厂自己写）\n  ├── 硬件驱动（自己写）         ├── 标准接口\n  └── 通信栈（自己写）           │\n                                RTE（运行时环境）\n  ECU B 软件                    │\n  ├── 硬件驱动（又写一遍）       BSW层（基础软件，标准化复用）\n  └── 通信栈（又写一遍）         ├── 通信栈/诊断栈/OS\n                                └── MCAL（硬件抽象）\n→ 每个ECU重复造轮子              → 只写应用层，底层全行业复用"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"AUTOSAR解决的是'重复造轮子'——以前每个ECU的驱动和通信栈都要重写，换供应商就推倒重来。标准化后应用层和底层解耦，测试用例也能跨项目复用。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": false,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "二、Classic Platform (CP) 分层架构",
+      "icon": "🔑",
+      "content_blocks": [
+        {
+          "type": "code",
+          "language": "",
+          "code": "┌─────────────────────────────────────────────────────┐\n│ 应用层 Application                                   │\n│   SWC ─── SWC ─── SWC   (软件组件：灯光控制/门锁逻辑) │\n├─────────────────────────────────────────────────────┤\n│ RTE (Runtime Environment)                            │\n│   SWC之间的\"总线\"：负责组件间通信，屏蔽底层细节        │\n├──────────────┬──────────────┬──────────────────────┤\n│ BSW 服务层    │ BSW ECU抽象层 │ BSW MCAL             │\n│ Services     │ ECU Abstr.   │ Microcontroller      │\n│ · Com通信栈   │ · 板级接口     │ Abstraction Layer   │\n│ · Dcm诊断栈   │ · IO抽象      │ · 直接操作MCU寄存器   │\n│ · Dem故障管理 │              │ · ADC/CAN/SPI驱动     │\n│ · OS/存储     │              │                      │\n├──────────────┴──────────────┴──────────────────────┤\n│ 硬件 MCU（英飞凌TriCore/NXP S32K/瑞萨RH850）          │\n└─────────────────────────────────────────────────────┘\n\n数据流示例（SWC发一个CAN信号）：\nSWC → RTE → Com(打包进PDU) → PduR(路由) → CanIf → CanDrv(MCAL) → CAN收发器"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "层",
+            "功能",
+            "测试影响"
+          ],
+          "rows": [
+            [
+              "**应用层 SWC**",
+              "业务逻辑（软件组件）",
+              "主要测试对象，接口以RTE为准"
+            ],
+            [
+              "**RTE**",
+              "SWC之间、SWC与BSW之间的通信桥梁",
+              "信号传递正确性、接口匹配"
+            ],
+            [
+              "**BSW 服务层**",
+              "Com/Dcm/Dem/OS/NvM等",
+              "配置错误→CAN不通/诊断失败"
+            ],
+            [
+              "**BSW ECU抽象层**",
+              "屏蔽具体电路板差异",
+              "换板子时验证点"
+            ],
+            [
+              "**BSW MCAL**",
+              "微控制器抽象，直接操作寄存器",
+              "驱动层测试，一般由供应商负责"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"CP四层记住一句话：SWC干活、RTE传话、BSW服务、MCAL碰硬件。注意MCAL是BSW的一部分，不是独立第四层——说'BSW含服务层/ECU抽象层/MCAL'更准确。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "三、Classic vs Adaptive：不是替代，是共存",
+      "icon": "⚡",
+      "content_blocks": [
+        {
+          "type": "code",
+          "language": "",
+          "code": "        同一辆车，两类芯片各跑各的\n┌────────────────────┐     ┌────────────────────┐\n│  MCU 类 ECU         │     │  SoC 类域控         │\n│  (英飞凌TC3xx/S32K) │     │  (高通8295/英伟达Orin)│\n│                    │     │                    │\n│  Classic Platform  │     │  Adaptive Platform │\n│  · 硬实时 OSEK OS   │     │  · POSIX OS(Linux) │\n│  · C语言            │     │  · C++             │\n│  · CAN/LIN/FlexRay │◄───►│  · ara::com(SOME/IP)│\n│  · 静态配置          │     │  · 服务发现/动态部署 │\n│                    │     │                    │\n│  EMS/ABS/BCM/VCU   │     │  智驾域控/座舱域控   │\n└────────────────────┘     └────────────────────┘\n   控制类、安全类功能           计算密集、可OTA升级"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Classic Platform (CP)",
+            "Adaptive Platform (AP)"
+          ],
+          "rows": [
+            [
+              "**定位**",
+              "实时控制（动力/底盘/车身）",
+              "高性能计算（智驾/座舱/中央计算）"
+            ],
+            [
+              "**跑在**",
+              "MCU（单片机）",
+              "SoC（高性能处理器）"
+            ],
+            [
+              "**OS**",
+              "硬实时OS（OSEK/AUTOSAR OS）",
+              "POSIX OS（Linux/QNX）"
+            ],
+            [
+              "**通信**",
+              "信号导向：CAN/LIN/FlexRay",
+              "服务导向：ara::com，底层SOME/IP"
+            ],
+            [
+              "**开发语言**",
+              "C",
+              "C++"
+            ],
+            [
+              "**典型ECU**",
+              "EMS/ABS/BCM",
+              "ADAS域控/智能座舱"
+            ],
+            [
+              "**测试难点**",
+              "实时性、时序、总线",
+              "服务发现、大并发、OTA"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"CP和AP不是谁取代谁——同一辆车上MCU跑CP管实时控制，SoC跑AP管大算力，两边通过网关/以太网协作。说'AP会取代CP'是外行话，刹车转向永远要硬实时。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "四、测试工程师要关注的点",
+      "icon": "🔬",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "关注点",
+            "为什么重要"
+          ],
+          "rows": [
+            [
+              "**RTE接口**",
+              "SWC通过RTE收发信号，测试时要验证RTE数据传递正确"
+            ],
+            [
+              "**BSW配置**",
+              "通信栈/诊断栈(Dcm)/故障管理(Dem)配置错误会导致CAN不通/诊断失败"
+            ],
+            [
+              "**SecOC**",
+              "BSW通信栈里的安全模块：给报文加MAC认证+新鲜度值，防篡改/防重放"
+            ],
+            [
+              "**VFB（虚拟功能总线）**",
+              "SWC在VFB上验证，独立于ECU硬件，支持早期SIL测试"
+            ],
+            [
+              "**ARXML文件**",
+              "AUTOSAR的配置描述文件（相当于DBC的升级版，描述SWC/接口/通信矩阵）"
+            ],
+            [
+              "**CDD（复杂驱动）**",
+              "非标准驱动，AUTOSAR管不到，需单独测试"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"测试不需要会配AUTOSAR，但要知道BSW配置错会出什么故障——CAN ID配错全都不通、Dcm配错诊断不响应、Dem配错DTC不上报。还有SecOC，做安全测试要知道MAC校验和新鲜度值是干什么的。\""
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "面试高频考点"
+        },
+        {
+          "type": "h3",
+          "text": "必会基础"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "你要能说出来的"
+          ],
+          "rows": [
+            [
+              "**AUTOSAR是什么**",
+              "车载软件标准架构，分层+标准接口，供应商软件可拼插集成"
+            ],
+            [
+              "**CP分层**",
+              "SWC(应用)→RTE(运行时)→BSW(服务层/ECU抽象层/MCAL)→MCU硬件"
+            ],
+            [
+              "**CP vs AP**",
+              "CP=MCU实时控制(CAN/C/OSEK)，AP=SoC高性能(以太网SOME/IP/C++/POSIX)，共存不替代"
+            ],
+            [
+              "**对测试影响**",
+              "标准化接口→用例可复用；BSW配置错误是常见Bug来源"
+            ],
+            [
+              "**AUTOSAR vs DBC**",
+              "DBC只定义CAN信号；AUTOSAR的ARXML描述整个软件架构+通信矩阵，更全更底层"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "进阶加分项"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "高分回答思路"
+          ],
+          "rows": [
+            [
+              "**RTE是干什么的**",
+              "SWC之间/SWC与BSW之间的通信中间层，让应用层不感知底层——测试时以RTE接口为界"
+            ],
+            [
+              "**SecOC原理**",
+              "BSW通信栈内的报文认证：发送方算MAC+新鲜度值随帧发，接收方校验，防篡改防重放；常见于网关和关键控制信号"
+            ],
+            [
+              "**为什么AP用SOME/IP**",
+              "服务导向通信适合大算力动态场景（服务发现、按需订阅），不像CAN信号导向是静态配置"
+            ],
+            [
+              "**VFB和SIL测试**",
+              "SWC先在虚拟总线上跑仿真，不等硬件就能测应用逻辑，左移测试"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "测试实战关联"
+        },
+        {
+          "type": "h3",
+          "text": "诊断测试"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "Dcm（诊断通信管理）配置决定UDS服务能不能响应——$27安全访问失败先查Dcm配置",
+            "详见 [[06-UDS诊断]]"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "总线测试"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "Com栈配置错误是\"信号不发/发错\"的高发根因：PDU路由、周期、初值都在ARXML里配",
+            "详见 [[02-CAN总线]]"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "安全测试"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "SecOC报文：篡改信号值看接收方是否拒收；重放旧帧看新鲜度值是否拦截",
+            "与功能安全的区别见 [[28-ISO26262功能安全]]"
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "⚠️ 实战中常见严重问题"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "严重度",
+            "现象",
+            "根因+教训"
+          ],
+          "rows": [
+            [
+              "**BSW通信栈配置错误→全网瘫痪**",
+              "严重",
+              "改了ComStack配置→CAN ID偏移1位→所有报文ID错→ECU全部失联",
+              "BSW配置变更必须全量回归，不能\"只测改了的部分\""
+            ],
+            [
+              "**RTE接口信号类型不匹配**",
+              "中等",
+              "SWC 发 sint16 负值→上层按 uint16 解释→0xFFFF×0.01 → 车速显示 655.35km/h",
+              "ARXML配置必须和SWC代码接口一致，用工具自动校验"
+            ],
+            [
+              "**SecOC新鲜度值同步失败**",
+              "中等",
+              "ECU重启后新鲜度值计数器对不上→接收方拒收合法报文→功能失灵",
+              "新鲜度值同步策略要测重启/断电恢复场景，不能只测正常运行"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "⬅ 返回 [[MOC_车载测试]] | 继续 → [[30-Bootloader刷写]]"
+        },
+        {
+          "type": "blockquote",
+          "style": "lab",
+          "text": "🧪 动手实验：定位一个 BSW 配置错误的影响链\n环境：CANoe 或任意 CAN 分析仪 + 一份 DBC。\n步骤：① 在 DBC 把某信号 Byte Order 从 Intel 改 Motorola；② 用 CAN 卡发该信号；③ 观察接收端解析的物理值偏差。\n预期结果：理解「BSW / 通信栈配置」与「应用层看到的值」之间的传导——一个勾选错，上层数值全盘错位。\n常见失败：只改 DBC 没同步发送端，看不出差异；务必收发两端用同一份 DBC 基线。",
+          "_enh": "lab"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 6
+    }
+  ],
+  "summary": "**面试说**：\"测试不需要会配AUTOSAR，但要知道BSW配置错会出什么故障——CAN ID配错全都不通、Dcm配错诊断不响应、Dem配错DTC不上报。还有SecOC，做安全测试要知道MAC校验和新鲜度值是干什么的。\"",
+  "prev_chapter": {
+    "num": 28,
+    "name": "ISO26262功能安全"
+  },
+  "next_chapter": {
+    "num": 30,
+    "name": "Bootloader刷写"
+  }
+}

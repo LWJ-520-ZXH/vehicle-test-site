@@ -1,0 +1,1270 @@
+[
+  {
+    "id": "Q-03-00-01",
+    "chapterNum": 3,
+    "sectionIndex": 0,
+    "sectionTitle": "一、核心参数",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "LIN",
+      "速率",
+      "核心参数"
+    ],
+    "stem": "LIN 总线的速率范围是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "1~19.2 Kbps（口语常说「20K」）"
+      },
+      {
+        "key": "B",
+        "text": "125 Kbps ~ 500 Kbps"
+      },
+      {
+        "key": "C",
+        "text": "1 Mbps ~ 8 Mbps"
+      },
+      {
+        "key": "D",
+        "text": "19.2 Kbps ~ 125 Kbps"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "核心参数表第一行给出：速率 1~19.2 Kbps（口语常说“20K”），说明是“低速，就够了”。这个速率是 LIN 全部设计取舍的起点——正因为只有 19.2K，信号边沿慢、反射可忽略，才**不需要终端电阻**；也正因为速率低，从机才能靠测量 Sync 段的位宽来校准时钟，**不需要晶振**。选项 B 是 CAN 的常见速率范围，C 是 CAN FD 的数据段速率，D 把下限和上限都记错了。面试口径记住章节那句话：“LIN 就记四个数：一根线、19.2K、一主十五从、几毛钱一个节点。”",
+    "keyPoints": [
+      "LIN 速率 1~19.2 Kbps，口语常说 20K",
+      "低速带来的连锁好处：不需终端电阻、不需晶振",
+      "记忆四要素：一根线、19.2K、一主十五从、几毛钱一个节点"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "LIN 核心参数表（速率/线数/拓扑/电压/帧长度/调度/同步/标准）"
+    },
+    "relatedTerms": [
+      "Sync",
+      "终端电阻",
+      "ISO 17987"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-00-02",
+    "chapterNum": 3,
+    "sectionIndex": 0,
+    "sectionTitle": "一、核心参数",
+    "module": "A",
+    "type": "multi",
+    "cat": "参数记忆",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "LIN",
+      "核心参数",
+      "标准"
+    ],
+    "stem": "关于 LIN 总线的核心参数，下列说法正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "拓扑为一主多从，1 个 Master + 最多 15 个 Slave，共 16 个节点"
+      },
+      {
+        "key": "B",
+        "text": "隐性约为 12V（电池电压），显性约为 0V，是「反逻辑」"
+      },
+      {
+        "key": "C",
+        "text": "从机不需要晶振，靠帧头的同步段校准时钟"
+      },
+      {
+        "key": "D",
+        "text": "LIN 遵循 ISO 11898 标准"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "逐项对照核心参数表：拓扑“一主多从（1 Master + ≤15 Slave），最多 16 个节点”→A 对；电压“隐性 ≈12V（电池电压）、显性 ≈0V”，并特别注明“反逻辑：0V 是显性”→B 对；同步“无需晶振，从帧头同步信息提取时钟”，帧格式表进一步说明 Sync 段固定值 0x55（01010101）让从机测量位宽来校准时钟→C 对。D 错——**LIN 的标准是 ISO 17987，ISO 11898 是 CAN 的标准**，这两个编号是高频混淆点，可以用“LIN 数字大、CAN 数字小”来区分，或者记住 vs CAN 对比表里那一行清清楚楚的对照。",
+    "keyPoints": [
+      "1 主 + ≤15 从 = 最多 16 节点",
+      "隐性≈12V、显性≈0V，与 CAN 的电平定义相反",
+      "无需晶振：从 Sync 段 0x55 测位宽校准时钟",
+      "标准：LIN = ISO 17987，CAN = ISO 11898"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "LIN 核心参数表（速率/线数/拓扑/电压/帧长度/调度/同步/标准）"
+    },
+    "relatedTerms": [
+      "ISO 17987",
+      "Sync",
+      "反逻辑"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-01-01",
+    "chapterNum": 3,
+    "sectionIndex": 1,
+    "sectionTitle": "二、物理层：一根线的智慧",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "LIN物理层",
+      "显性",
+      "电平"
+    ],
+    "stem": "LIN 总线处于「显性」状态时，总线电压约为多少？对应什么逻辑？",
+    "options": [
+      {
+        "key": "A",
+        "text": "≈12V，逻辑 1"
+      },
+      {
+        "key": "B",
+        "text": "≈0V，逻辑 0"
+      },
+      {
+        "key": "C",
+        "text": "≈2.5V，逻辑 0"
+      },
+      {
+        "key": "D",
+        "text": "≈3.5V，逻辑 1"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "LIN 物理层电平表给出：**隐性 ≈12V（电池电压，通过上拉电阻）对应逻辑 1；显性 ≈0V（收发器拉低）对应逻辑 0**。章节用 ⚠️ 特别提醒“跟 CAN 反着来”——CAN 隐性是 2.5V/2.5V、显性是差分 2V，而 LIN 隐性是高电平 12V、显性是低电平 0V。虽然电压定义相反，但两者有一个共同点：**显性覆盖隐性**。不过 LIN 因为是主从架构、不存在抢总线，这个特性主要用在 Break 唤醒上，而不用来仲裁。选项 C、D 是 CAN 的电平值，属于典型串台干扰项。补充一个实用点：隐性≈12V 还让部分从机可以直接从总线取电。",
+    "keyPoints": [
+      "LIN 显性 ≈0V（逻辑 0），隐性 ≈12V（逻辑 1）",
+      "与 CAN 电平定义相反，但同样是显性覆盖隐性",
+      "LIN 的显性覆盖主要用于 Break 唤醒，不用于仲裁"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "LIN 物理层电平表（状态/总线电压/对应逻辑）"
+    },
+    "relatedTerms": [
+      "上拉电阻",
+      "Break",
+      "反逻辑"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-01-02",
+    "chapterNum": 3,
+    "sectionIndex": 1,
+    "sectionTitle": "二、物理层：一根线的智慧",
+    "module": "A",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "LIN",
+      "终端电阻",
+      "成本设计"
+    ],
+    "stem": "判断：和 CAN 一样，LIN 总线也需要在总线两端各接一个 120Ω 终端电阻来消除信号反射。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "LIN **不需要**终端电阻。章节专门用一小节解释了原因：CAN 需要终端电阻是因为高速（500K+）差分信号会产生反射；而 **LIN 只有 19.2K，信号边沿慢，反射可以忽略**，所以省掉了终端电阻，“成本设计师嘴角上扬”。这属于 LIN 物理层“省钱三件套”之一（另外两件是单线、无晶振）。注意 LIN 侧确实有一个电阻——主节点内部的**上拉电阻（配合二极管）**，作用是把总线隐性电平拉到 VBAT，这跟阻抗匹配用的终端电阻是完全不同的东西，不要因为“都是电阻”就混为一谈。踩这个坑通常是把 CAN 的经验直接平移到 LIN 上，忘了两者的速率差了一千倍。",
+    "keyPoints": [
+      "LIN 不需要终端电阻：19.2K 低速、边沿慢、反射可忽略",
+      "省钱三件套：单线、无终端电阻、无晶振",
+      "主节点内部的上拉电阻是拉高隐性电平，不是阻抗匹配"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "二、物理层 - 为什么不需要终端电阻？"
+    },
+    "relatedTerms": [
+      "上拉电阻",
+      "信号反射",
+      "VBAT"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-01-03",
+    "chapterNum": 3,
+    "sectionIndex": 1,
+    "sectionTitle": "二、物理层：一根线的智慧",
+    "module": "A",
+    "type": "short",
+    "cat": "概念辨析",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "LIN物理层",
+      "省钱三件套",
+      "成本"
+    ],
+    "stem": "简答：LIN 物理层的「省钱三件套」是什么？请分别说明每一项省在哪里、为什么能省，并说明 LIN 主节点内部包含哪些关键部件。",
+    "options": [],
+    "answer": [],
+    "explanation": "这道题的价值在于把“省钱”讲成一条因果链而不是三个孤立结论：速率定在 19.2K → 边沿慢 → 不需要阻抗匹配（省终端电阻）+ 位宽足够宽以至于可以现场测量（省晶振）；单线传输 → 省一根线和差分收发器；隐性电平取 VBAT → 顺带让从机能从总线取电。答题时如果能补一句“哪些钱不能省”会更完整——LIN 省掉的都是“低速场景下用不上的可靠性冗余”，而它同时也失去了自动重发和错误状态机，所以绝不能用在刹车、转向这类安全攸关场景。",
+    "keyPoints": [
+      "单线：省一根线和差分收发器（CAN 需 CAN_H+CAN_L 两根）",
+      "无终端电阻：19.2K 低速边沿慢、反射可忽略，不需阻抗匹配",
+      "无晶振：从 Sync 段 0x55 测量位宽校准时钟",
+      "主节点含：LIN 控制器（MCU）+ LIN 收发器 + 上拉电阻和二极管"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "二、物理层 - 阶段性回顾（省钱三件套）"
+    },
+    "relatedTerms": [
+      "Sync",
+      "VBAT",
+      "收发器"
+    ],
+    "refAnswer": "**LIN 物理层「省钱三件套」**\n\n1. **单线（省一根线 + 省差分收发器）**\n   - 省在哪：CAN 需要 CAN_H 和 CAN_L 两根双绞线加差分收发器；LIN 只需 1 根信号线 + GND。\n   - 为什么能省：LIN 速率只有 19.2Kbps，通信距离和抗干扰要求都远低于 CAN，单端信号足以满足要求，不必用差分方式来抵消共模噪声。\n   - 连带收益：线束更细更轻，装配更简单，成本从 CAN 的 $1~2/节点降到 $0.3~0.5/节点。\n\n2. **无终端电阻（省两个匹配电阻和相应布板设计）**\n   - 省在哪：CAN 必须在总线物理两端各接一个 120Ω 终端电阻。\n   - 为什么能省：终端电阻的作用是阻抗匹配、消除高速信号反射。LIN 只有 19.2K，信号边沿变化很慢，线束长度相对于信号波长可以忽略，反射带来的影响微乎其微，因此不需要匹配电阻。\n\n3. **无晶振（省每个从机上的振荡器）**\n   - 省在哪：CAN 节点对时钟精度要求高，每个节点都要配晶振；LIN 从机不需要。\n   - 为什么能省：每帧帧头都带一个 Sync 段，固定值 0x55（二进制 01010101），从机通过测量这段方波的位宽实时校准自己的波特率。相当于每帧都重新\"对一次表\"，因此从机用便宜的片内 RC 振荡器就够了。\n\n**补充收益**：LIN 隐性电平≈12V（电池电压），部分简单从机可以直接从总线取电，进一步简化供电设计。\n\n**LIN 主节点（Master）内部关键部件**\n- **LIN 控制器**：由 MCU 实现，负责按调度表生成帧头、组织收发时序。\n- **LIN 收发器**：负责驱动总线电平（把逻辑电平转成 0V/12V 的总线电平）。\n- **上拉电阻 + 二极管**：把总线隐性电平上拉到 VBAT（电池电压），二极管用于反接保护/防止电流倒灌。这是主节点特有的，从机侧通常只有收发器。\n\n从机（Slave）则极简：有收发器、甚至无独立 MCU 也可以工作。\n\n**注意边界**：这些取舍省掉的都是低速场景用不上的冗余；LIN 同时也失去了自动重发和错误状态机，因此不能用于刹车、转向等安全攸关场景。"
+  },
+  {
+    "id": "Q-03-02-01",
+    "chapterNum": 3,
+    "sectionIndex": 2,
+    "sectionTitle": "三、帧格式：Break打头",
+    "module": "A",
+    "type": "single",
+    "cat": "协议流程",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "LIN帧格式",
+      "Sync",
+      "时钟校准"
+    ],
+    "stem": "LIN 帧的 Sync 段固定值是多少？它的作用是什么？",
+    "options": [
+      {
+        "key": "A",
+        "text": "0x55，让从机测量位宽来校准时钟，因此从机不需要晶振"
+      },
+      {
+        "key": "B",
+        "text": "0xAA，用于标记帧的开始位置"
+      },
+      {
+        "key": "C",
+        "text": "0x3C，用于指定诊断请求的目标节点"
+      },
+      {
+        "key": "D",
+        "text": "0xFF，用于把总线拉到隐性状态表示空闲"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "帧格式表明确写出：**Sync 段固定值 0x55（二进制 01010101），让从机测量位宽来校准时钟——“这就是为什么 Slave 不需要晶振”**。0x55 之所以被选中，是因为它是 0 和 1 严格交替的方波，能提供最多、最均匀的电平跳变边沿，从机据此可以最精确地测出一个位的宽度，进而校准自己的波特率。选项 C 的 0x3C 是**诊断帧的 ID**（主请求，0x3D 是从响应），不是 Sync 值，这是同一章内最容易串的两个十六进制数。标记帧开始的是 Break 段（≥13 个显性位），不是 Sync。记忆口诀用章节给的那句：“Break 敲门、Sync 对表、PID 点名、Data 干活、Checksum 验货。”",
+    "keyPoints": [
+      "Sync = 0x55（01010101），提供均匀跳变边沿",
+      "作用：从机测量位宽校准时钟 → 从机无需晶振",
+      "别混：0x3C/0x3D 是诊断帧 ID，不是 Sync 值"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "LIN 帧格式表（Break/Sync/PID/Data/Checksum）"
+    },
+    "relatedTerms": [
+      "Break",
+      "PID",
+      "波特率校准"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-02-02",
+    "chapterNum": 3,
+    "sectionIndex": 2,
+    "sectionTitle": "三、帧格式：Break打头",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Break",
+      "唤醒",
+      "帧头"
+    ],
+    "stem": "LIN 帧的 Break 段由多少个显性位构成？它的作用是什么？",
+    "options": [
+      {
+        "key": "A",
+        "text": "≥8 个显性位，用于校准从机时钟"
+      },
+      {
+        "key": "B",
+        "text": "≥13 个显性位，强制打破总线空闲、唤醒所有从机并标记帧开始"
+      },
+      {
+        "key": "C",
+        "text": "恰好 6 个显性位，与 CAN 的错误帧一致"
+      },
+      {
+        "key": "D",
+        "text": "≥13 个隐性位，表示总线进入空闲状态"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "帧格式表和面试考点表都给出同一答案：**Break = ≥13 个显性位，强制打破总线空闲，唤醒所有从机**，同时标记一帧的开始。为什么必须 ≥13 位？因为普通 UART 一个字节帧最多只能产生 9~10 个连续显性位，13 位以上的连续显性在正常数据传输中不可能出现，这样从机就能可靠地把它识别为“帧起始”而不会误判成数据。章节形象地称它为“LIN 的敲门砖，一锤子砸醒所有 Slave”。选项 A 混淆了 Break（敲门）和 Sync（对表）的分工；C 的 6 个显性位是 CAN 主动错误帧的定义；D 把显性写成了隐性——LIN 显性是 0V，总线空闲时反而是隐性 12V。",
+    "keyPoints": [
+      "Break = ≥13 个显性位",
+      "作用：打破总线空闲、唤醒所有从机、标记帧开始",
+      "≥13 位是为了与正常 UART 数据区分，不会误判",
+      "Break 由 Master 发出，也可用于 Master 主动召集唤醒"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "LIN 帧格式表（Break 段行）"
+    },
+    "relatedTerms": [
+      "Sync",
+      "唤醒",
+      "帧头"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-02-03",
+    "chapterNum": 3,
+    "sectionIndex": 2,
+    "sectionTitle": "三、帧格式：Break打头",
+    "module": "A",
+    "type": "multi",
+    "cat": "协议流程",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "LIN帧格式",
+      "帧头",
+      "主从分工"
+    ],
+    "stem": "LIN 帧分为「帧头」和「响应」两部分。下列由 Master 发出的帧头部分包含的段有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Break（≥13 个显性位）"
+      },
+      {
+        "key": "B",
+        "text": "Sync（固定 0x55）"
+      },
+      {
+        "key": "C",
+        "text": "PID（Protected ID，6bit ID + 2bit 奇偶校验）"
+      },
+      {
+        "key": "D",
+        "text": "Checksum（1 字节校验和）"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "LIN 帧结构图把一帧清晰地切成两半：**帧头（由 Master 发出）= Break + Sync + PID**；**响应（由被点名的 Slave 发出）= Data(1~8 Byte) + Checksum**。章节的面试口诀说得很直白：“前三段是帧头永远 Master 发，后两段是响应由被点名的 Slave 填——Slave 绝不主动开口。”所以 D 属于响应部分，由从机计算并填写。理解这个分工非常重要，它直接解释了两件事：①为什么 LIN 不需要仲裁——从机只有被点名才说话，不存在同时抢总线；②为什么 Master 是单点风险——Master 挂了就没有帧头，整条 LIN 子网全部瘫痪。另外补充 PID 的构成：6bit ID + 2bit 奇偶校验，其中 ID=0x3C/0x3D 保留给诊断使用。",
+    "keyPoints": [
+      "帧头（Master 发）= Break + Sync + PID",
+      "响应（Slave 发）= Data(1~8字节) + Checksum",
+      "PID = 6bit ID + 2bit 奇偶校验，0x3C/0x3D 留给诊断",
+      "Slave 绝不主动开口 → LIN 无需仲裁，但 Master 是单点"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "LIN 帧结构图（帧头由 Master 发出 / 响应由 Slave 发出）"
+    },
+    "relatedTerms": [
+      "PID",
+      "Checksum",
+      "主从架构"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-03-01",
+    "chapterNum": 3,
+    "sectionIndex": 3,
+    "sectionTitle": "四、调度表：主节点的剧本",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "诊断帧",
+      "0x3C",
+      "0x3D"
+    ],
+    "stem": "LIN 中用于诊断的保留帧 ID 是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "0x00（主请求）/ 0x01（从响应）"
+      },
+      {
+        "key": "B",
+        "text": "0x3C（主请求）/ 0x3D（从响应）"
+      },
+      {
+        "key": "C",
+        "text": "0x55（主请求）/ 0xAA（从响应）"
+      },
+      {
+        "key": "D",
+        "text": "0x7DF（主请求）/ 0x7E8（从响应）"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "调度表小节的帧类型表明确写出：**诊断帧 ID = 0x3C（主请求）/ 0x3D（从响应），用于配置和诊断**，帧格式表在 PID 行也重复强调“ID=0x3C/0x3D 留给诊断”。这两个 ID 是 LIN 协议保留的，不能用于普通应用信号。选项 C 的 0x55 是 Sync 段的固定值，不是帧 ID；D 的 0x7DF/0x7E8 是 **CAN 诊断（UDS on CAN）**的功能寻址请求和响应 ID，属于串台干扰项——LIN 的 ID 只有 6 bit（0x00~0x3F），根本表示不了 0x7DF 这么大的值，这也是排除 D 的一个硬性依据。实际应用中，第 7 节讲的休眠命令 Go-To-Sleep 帧也是走 PID=0x3C、Data[0]=0x00。",
+    "keyPoints": [
+      "0x3C = 主请求，0x3D = 从响应，协议保留",
+      "LIN ID 只有 6bit（0x00~0x3F），不可能出现 0x7DF",
+      "Go-To-Sleep 帧也走 PID=0x3C，Data[0]=0x00"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "调度表帧类型表（无条件帧/事件触发帧/偶发帧/诊断帧）"
+    },
+    "relatedTerms": [
+      "Go-To-Sleep",
+      "PID",
+      "SNPD"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-03-02",
+    "chapterNum": 3,
+    "sectionIndex": 3,
+    "sectionTitle": "四、调度表：主节点的剧本",
+    "module": "A",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "调度表",
+      "仲裁",
+      "主从"
+    ],
+    "stem": "判断：LIN 总线没有类似 CAN 的仲裁机制，因为所有通信都由 Master 按调度表点名发起，从机不会主动发送，因此不存在冲突。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "T"
+    ],
+    "explanation": "正确。章节的时序图给出关键点：“Slave 永远等 Master 点名，没有帧头就没有响应——所以 LIN 不需要仲裁。”面试口径是：“LIN 没有仲裁，因为不会冲突——全是 Master 一个人按调度表轮流点名，点到谁谁说话。这就是'主从'的精髓。”这与 CAN 形成鲜明对照：CAN 是多主架构，任何节点随时可发，必须靠逐位仲裁裁决；LIN 是单主架构，发言权由调度表静态排定。不过要注意一个例外情形——**事件触发帧**允许多个 Slave 共享一个 ID，谁有事件谁填，此时确实可能发生总线冲突，但 LIN 的处理方式不是仲裁，而是由 Master 检测到冲突后**回退到无条件帧逐个查询**。所以准确说法是“LIN 没有仲裁机制”，而不是“LIN 绝对不会有冲突”。",
+    "keyPoints": [
+      "Master 按调度表发帧头，Slave 被点名才应答",
+      "没有帧头就没有响应 → 常态下不会冲突 → 不需要仲裁",
+      "例外：事件触发帧可能冲突，靠回退到无条件帧解决，而非仲裁"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "主从一问一答时序图（关键点：Slave 永远等 Master 点名）"
+    },
+    "relatedTerms": [
+      "事件触发帧",
+      "无条件帧",
+      "多主"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-03-03",
+    "chapterNum": 3,
+    "sectionIndex": 3,
+    "sectionTitle": "四、调度表：主节点的剧本",
+    "module": "A",
+    "type": "single",
+    "cat": "协议流程",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "事件触发帧",
+      "冲突处理",
+      "帧类型"
+    ],
+    "stem": "LIN 的「事件触发帧」允许多个 Slave 共享同一个 ID，谁有事件谁填数据。当多个 Slave 同时应答造成碰撞时，协议的处理方式是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "按 Slave 的 NAD 大小逐位仲裁，NAD 小者胜出"
+      },
+      {
+        "key": "B",
+        "text": "回退到无条件帧，由 Master 逐个查询，解决后恢复"
+      },
+      {
+        "key": "C",
+        "text": "所有参与碰撞的 Slave 进入 Bus Off 状态，等待自动恢复"
+      },
+      {
+        "key": "D",
+        "text": "Master 丢弃该帧且不做任何处理，等下一轮调度自然错开"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "帧类型表对事件触发帧的描述是：“多个 Slave 共享一个 ID，谁有事件谁填。**碰撞时回退到无条件帧**。”进阶考点表进一步补充完整流程：“主检测到冲突 → 切换为无条件帧逐个查询 → 解决后恢复。”设计动机很实际：事件触发帧是为了省带宽——四个门的状态平时都不变，没必要每个门都单独轮询一遍，共用一个 ID 让“有变化的那个”来应答就够了；但一旦两个门同时变化就会撞车，此时退化成逐个点名，牺牲一点带宽换取确定性。选项 A 错在 LIN 根本没有仲裁机制；C 的 Bus Off 是 CAN 的错误状态机概念，LIN 没有；D 错在冲突不会自然错开，必须由 Master 主动介入。实战对应：故障表里的“方向盘按键串扰”根因就是“多个 Slave 共用事件触发帧”，排查要点是检查 PID 冲突。",
+    "keyPoints": [
+      "碰撞处理：Master 检测到冲突 → 切换无条件帧逐个查询 → 解决后恢复",
+      "事件触发帧的目的是省带宽，代价是可能碰撞",
+      "LIN 没有仲裁，也没有 Bus Off 状态机",
+      "实战：方向盘按键串扰的根因常是共用事件触发帧"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "调度表帧类型表（事件触发帧行）"
+    },
+    "relatedTerms": [
+      "无条件帧",
+      "偶发帧",
+      "PID冲突"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-04-01",
+    "chapterNum": 3,
+    "sectionIndex": 4,
+    "sectionTitle": "五、vs CAN：全方位的低成本替代",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "成本",
+      "选型",
+      "CAN对比"
+    ],
+    "stem": "按照 CAN 与 LIN 的对比表，两者单节点成本分别约为：",
+    "options": [
+      {
+        "key": "A",
+        "text": "CAN $0.3~0.5；LIN $1~2"
+      },
+      {
+        "key": "B",
+        "text": "CAN $1~2；LIN $0.3~0.5"
+      },
+      {
+        "key": "C",
+        "text": "CAN $5~10；LIN $1~2"
+      },
+      {
+        "key": "D",
+        "text": "两者成本基本相同，差别只在速率"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "vs CAN 对比表给出：成本/节点 CAN 是 $1~2，**LIN 是 $0.3~0.5**，大约差 3 倍。成本差异的来源正是前面讲的物理层取舍：LIN 省掉了一根线、差分收发器、终端电阻和晶振。章节给出的选型逻辑一句话概括：“速率要求 ≤20K、实时性不敏感、用量又大的场景，LIN 够用就用 LIN——每节点省下的钱乘以年产量就是利润。”这就是为什么车窗、座椅、天窗、方向盘按键、雨量传感器这类“不着急、不重要但数量多”的负载全都挂 LIN。选项 A 把两者完全颠倒，是典型的粗心失分点。补充记忆表里其他关键对照：速率 125K~1M（FD 达 8M）vs 1K~19.2K、线数 2 根 vs 1 根、拓扑多主 vs 一主多从、标准 ISO 11898 vs ISO 17987。",
+    "keyPoints": [
+      "CAN $1~2/节点，LIN $0.3~0.5/节点，约差 3 倍",
+      "成本差来自：单线、无差分收发器、无终端电阻、无晶振",
+      "选型逻辑：≤20K + 实时性不敏感 + 用量大 → 用 LIN"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "CAN vs LIN 全方位对比表（速率/线数/成本/晶振/拓扑/仲裁/错误处理/实时性/标准/场景）"
+    },
+    "relatedTerms": [
+      "选型",
+      "ISO 17987",
+      "ISO 11898"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-04-02",
+    "chapterNum": 3,
+    "sectionIndex": 4,
+    "sectionTitle": "五、vs CAN：全方位的低成本替代",
+    "module": "A",
+    "type": "multi",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "CAN对比",
+      "选型",
+      "典型场景"
+    ],
+    "stem": "根据 CAN 与 LIN 的对比表，下列说法正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "CAN 是多主拓扑、靠逐位仲裁；LIN 是一主多从、靠调度表轮询"
+      },
+      {
+        "key": "B",
+        "text": "CAN 有 5 种错误检测加错误状态机；LIN 只有简单校验"
+      },
+      {
+        "key": "C",
+        "text": "CAN 典型场景是发动机/ABS/仪表；LIN 典型场景是车窗/座椅/天窗/传感器"
+      },
+      {
+        "key": "D",
+        "text": "LIN 的实时性优于 CAN，因为调度表能保证每帧都在固定时刻发送"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 都直接对应对比表的行：拓扑（多主 vs 一主多从）、仲裁（逐位仲裁 vs 无，调度表轮询）、错误处理（5 种检测+状态机 vs 简单校验）、典型场景（发动机/ABS/仪表 vs 车窗/座椅/天窗/传感器）。D 是似是而非的陷阱：表里“实时性”一行写的是 **CAN“确定性强”，LIN“调度表保证周期，但延迟大”**。调度表确实带来了周期确定性，但这和“实时性好”不是一回事——LIN 的问题在于速率只有 19.2K，一帧传输本身就慢，而且从机必须等到自己在调度表里的时隙才能发言，紧急事件无法插队（CAN 则可以靠小 ID 立刻抢到总线）。再叠加“出错不自动重发、要等下一轮调度”，端到端延迟就更大了。所以正确表述是：LIN 周期确定但延迟大，不适合实时性敏感场景。",
+    "keyPoints": [
+      "拓扑/仲裁：CAN 多主逐位仲裁 vs LIN 一主多从调度轮询",
+      "错误处理：CAN 5 种检测+状态机 vs LIN 简单校验",
+      "实时性：CAN 确定性强；LIN 周期确定但延迟大（≠实时性好）",
+      "场景：CAN 发动机/ABS/仪表；LIN 车窗/座椅/天窗/传感器"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "CAN vs LIN 全方位对比表（速率/线数/成本/晶振/拓扑/仲裁/错误处理/实时性/标准/场景）"
+    },
+    "relatedTerms": [
+      "调度表",
+      "确定性",
+      "延迟"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-05-01",
+    "chapterNum": 3,
+    "sectionIndex": 5,
+    "sectionTitle": "六、LDF 文件：LIN的\"DBC\"",
+    "module": "A",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "LDF",
+      "DBC",
+      "调度表"
+    ],
+    "stem": "LDF 文件相比 CAN 的 DBC 文件，最关键的区别是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "LDF 用二进制格式存储，DBC 是文本格式"
+      },
+      {
+        "key": "B",
+        "text": "LDF 包含调度表（Schedule），DBC 不包含"
+      },
+      {
+        "key": "C",
+        "text": "LDF 不定义信号的起始位和长度，只定义节点"
+      },
+      {
+        "key": "D",
+        "text": "LDF 只能描述一个从机，DBC 可以描述整个网络"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "LDF vs DBC 对比表给出四行对照，其中“调度信息”一行是关键：**LDF 包含调度表，DBC 不包含**。章节的面试口径把原因讲透了：“LDF 和 DBC 最大的区别就一条：LDF 带调度表。CAN 靠仲裁不用排班，LIN 必须告诉 Master 第几毫秒点谁的名——所以测 LIN 第一步永远是加载 LDF 看 Schedule。”这是两种协议架构差异在文件层面的直接映射：CAN 是多主抢占，发送时机由各 ECU 自己决定，数据库只需描述“信号长什么样”；LIN 是单主轮询，发送时机由调度表统一安排，数据库必须把“什么时候发什么”也写进去。C 明显错误——LDF 的 Signals 段就定义了信号名、长度（bit）、初始值、发布者和接收者；Frames 段定义帧名、ID、发布节点、帧长和携带的信号及起始位。",
+    "keyPoints": [
+      "核心区别：LDF 带调度表，DBC 不带",
+      "根因：CAN 靠仲裁自主发送，LIN 靠 Master 按表点名",
+      "LDF 关键元素：Nodes / Signals / Frames / Schedule",
+      "测 LIN 第一步：加载 LDF 看 Schedule"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "LDF vs DBC 对比表（对应协议/文件后缀/关键元素/调度信息）"
+    },
+    "relatedTerms": [
+      "Schedule Table",
+      "Nodes",
+      "Frames"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-05-02",
+    "chapterNum": 3,
+    "sectionIndex": 5,
+    "sectionTitle": "六、LDF 文件：LIN的\"DBC\"",
+    "module": "A",
+    "type": "short",
+    "cat": "工具操作",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "LDF",
+      "语法",
+      "测试流程"
+    ],
+    "stem": "简答：请说明 LDF 文件包含哪些主要段落及各自定义什么内容，并解释为什么「测 LIN 第一步永远是加载 LDF 看 Schedule」。",
+    "options": [],
+    "answer": [],
+    "explanation": "这题要答出“文件结构”和“为什么先看 Schedule”两层。第二层是重点：LIN 的一切行为都由调度表驱动，不看调度表就无法判断“这一帧本来应该在什么时候出现”，也就无从判断丢帧、超时、周期偏差。这与测 CAN 的思路很不一样——CAN 报文的周期写在 DBC 的属性里（GenMsgCycleTime），但真正决定发送时机的是各 ECU 自己的代码；而 LIN 的发送时机就明明白白写在 LDF 的 Schedule 里，是可以直接拿来当预期结果的基准。",
+    "keyPoints": [
+      "LDF 主要段落：头部/协议版本/速率、Nodes、Signals、Frames、Schedule",
+      "Nodes 定义 Master（含时基）与 Slaves 列表",
+      "Signals 定义信号长度/初值/发布者/接收者；Frames 定义帧 ID、发布节点、帧长、信号起始位",
+      "先看 Schedule：调度表是 LIN 通信时序的唯一基准，用于判断丢帧/超时/周期偏差"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "LDF 文件语法示例（LIN_protocol_version / Nodes / Signals / Frames）"
+    },
+    "relatedTerms": [
+      "Schedule Table",
+      "LIN_speed",
+      "无条件帧"
+    ],
+    "refAnswer": "**一、LDF 文件的主要段落**\n\n1. **文件头与全局属性**\n   - `LIN_description_file;`：声明这是一个 LDF 文件。\n   - `LIN_protocol_version = \"2.1\";`：协议版本。这一项非常关键，它决定了 Checksum 用经典（V1.x，只校数据段）还是增强（V2.x，校 PID+数据）。\n   - `LIN_speed = 19.2 kbps;`：总线波特率。\n\n2. **Nodes（节点定义）**\n   - `Master: BCM, 5 ms, 0.1 ms;`：指定主节点以及它的时基（time_base）和抖动（jitter）。\n   - `Slaves: Window_L, Window_R;`：从节点列表。\n\n3. **Signals（信号定义）**\n   - 格式：信号名, 长度(bit), 初始值, 发布者, 接收者。\n   - 例：`WindowCmd: 2, 0, BCM, Window_L;` 表示 2 bit 的车窗命令，初值 0，由 BCM 发布、左车窗接收；`WindowPos: 8, 0, Window_L, BCM;` 是 8 bit 的位置反馈，方向相反。\n\n4. **Frames（帧定义）**\n   - 格式：帧名: ID, 发布节点, 帧长(字节) { 携带的信号, 起始位; }。\n   - 例：`WindowCtrl: 1, BCM, 1 { WindowCmd, 0; }` 表示 ID=1、由 BCM 发布、长度 1 字节的帧，携带 WindowCmd 信号，起始位为 0。\n\n5. **Schedule（调度表）**\n   - 定义 Master 按什么顺序、什么周期依次发送哪些帧头。这是 LDF 相比 DBC 多出来的关键内容。\n\n**二、为什么测 LIN 第一步永远是加载 LDF 看 Schedule**\n\n1. **调度表是 LIN 通信时序的唯一基准**：LIN 是一主多从、无仲裁架构，所有通信都由 Master 严格按调度表发帧头触发。不知道调度表，就不知道某一帧\"本来应该什么时候出现\"，也就无法判断当前 Trace 是正常还是异常。\n2. **它是判断丢帧/超时/周期偏差的参照**：例如某帧调度周期是 100ms，Trace 里出现 200ms 的间隔，说明丢了一轮；Master 报 No Response 时，也要先确认调度表里确实排了这一帧。\n3. **它解释了故障的时间特征**：LIN 出错后**不会自动重发**，只能等调度表的下一轮。所以\"偶发失灵持续约 100ms\"这类现象，只有对照调度周期才能解释清楚。\n4. **与 CAN 的思路差异**：CAN 报文的周期虽然写在 DBC 属性（GenMsgCycleTime）里，但实际发送时机由各 ECU 自己的代码决定；而 LIN 的发送时机就明确写在 LDF 的 Schedule 中，可以直接作为测试预期结果的基准。\n5. **版本一致性检查**：加载 LDF 时还要顺带确认 `LIN_protocol_version` 与 ECU 固件实现是否一致，否则会出现经典/增强校验混用导致的 Checksum Error——这是实战问题表里明确列出的中等严重度问题。"
+  },
+  {
+    "id": "Q-03-06-01",
+    "chapterNum": 3,
+    "sectionIndex": 6,
+    "sectionTitle": "七、网关场景：CAN ↔ LIN",
+    "module": "A",
+    "type": "single",
+    "cat": "协议流程",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "SNPD",
+      "自动寻址",
+      "NAD"
+    ],
+    "stem": "量产车四个门模块是同一零件号，它们靠 SNPD（Slave Node Position Detection）识别自己的安装位置。SNPD 的硬件基础是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "每个门模块出厂时烧录不同的唯一序列号"
+      },
+      {
+        "key": "B",
+        "text": "每个门模块的 POSITION 引脚接不同的分压电阻，通过 ADC 读出的电压得到位置编码"
+      },
+      {
+        "key": "C",
+        "text": "根据各模块在 LIN 总线上响应帧头的先后顺序自动排序"
+      },
+      {
+        "key": "D",
+        "text": "由 Master 根据各从机上报的 MAC 地址进行分配"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "SNPD 的硬件基础是**分压电阻 + ADC**：左前门 R=0Ω → ADC 读出 0V → 位置编码 0；右前门 R=1kΩ → 1.2V → 编码 1；左后门 R=2kΩ → 2.4V → 编码 2；右后门 R=3kΩ → 3.6V → 编码 3。这样四个硬件完全一样的模块，插到不同位置的线束上就能读出不同的电压，从而知道“我是谁”。接着走三步流程：Step 1 Assign NAD（Master 广播“位置编码=0 的节点，你的 Logical NAD=0x10”，对应从机从 Initial NAD 0x7F 改为 Logical NAD）→ Step 2 Conditional Change NAD（对其他三个位置重复，各得唯一 NAD）→ Step 3 Save Configuration（所有从机把新 NAD 存入 EEPROM，以后用新地址通信）。选项 A 错在如果烧唯一序列号，四个模块就不再是同一零件号了，失去了通用件的成本优势；C 错在 LIN 是点名制，响应顺序由调度表决定，不能用来推断物理位置；D 的 MAC 地址是以太网概念。这是 LIN 2.x 标准化的配置服务（0xB0~0xB7），实车必用。",
+    "keyPoints": [
+      "硬件基础：POSITION 引脚接不同分压电阻，ADC 读电压得位置编码",
+      "三步流程：Assign NAD → Conditional Change NAD → Save Configuration",
+      "Initial NAD=0x7F，配置后得到唯一 Logical NAD 并存入 EEPROM",
+      "属于 LIN 2.x 标准配置服务（0xB0~0xB7）"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "SNPD 自动寻址（硬件基础与三步流程）"
+    },
+    "relatedTerms": [
+      "NAD",
+      "Logical NAD",
+      "EEPROM"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-06-02",
+    "chapterNum": 3,
+    "sectionIndex": 6,
+    "sectionTitle": "七、网关场景：CAN ↔ LIN",
+    "module": "A",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "休眠",
+      "静态电流",
+      "测试方法"
+    ],
+    "stem": "LIN 节点全部进入 Sleep 后，整车静态电流的目标指标是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "< 10 μA"
+      },
+      {
+        "key": "B",
+        "text": "< 100 μA"
+      },
+      {
+        "key": "C",
+        "text": "< 10 mA"
+      },
+      {
+        "key": "D",
+        "text": "< 100 mA"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "休眠唤醒小节给出：Master 发 Go-To-Sleep 帧（PID=0x3C, Data[0]=0x00）→ 从机确认 → 等待 4~10 秒无总线活动 → 所有节点进入 Sleep，**静态电流 < 100μA**。面试考点表里“怎么测 LIN 休眠唤醒”的回答也是“测静态电流 < 100μA”。测试方法章节写得很具体：“锁车 → 等网络静默 → 串入电流表 → 看 10 分钟稳定值 <100μA。超过 → 逐个拔 LIN 节点定位漏电源。”这里要注意两个容易做错的操作细节：①必须**等网络完全静默**再读数，刚锁车时各 ECU 还在做休眠前处理，电流是高的，读早了会误判；②电流表要**串入**回路而不是并联。静态电流之所以重要，是因为它直接决定车辆停放多久会亏电——这是整车级的关键指标，也是 LIN 网络管理测试的核心验证项。",
+    "keyPoints": [
+      "静态电流目标 < 100μA",
+      "休眠流程：Go-To-Sleep(PID=0x3C, Data[0]=0x00) → 从机确认 → 4~10s 无活动 → Sleep",
+      "测法：锁车 → 等网络静默 → 串入电流表 → 看 10 分钟稳定值",
+      "超标时逐个拔 LIN 节点定位漏电源"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "休眠唤醒：四种总线状态与休眠/唤醒过程"
+    },
+    "relatedTerms": [
+      "Go-To-Sleep",
+      "Wakeup Pulse",
+      "网络管理"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-06-03",
+    "chapterNum": 3,
+    "sectionIndex": 6,
+    "sectionTitle": "七、网关场景：CAN ↔ LIN",
+    "module": "A",
+    "type": "short",
+    "cat": "协议流程",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "休眠唤醒",
+      "网关",
+      "CAN-LIN转发"
+    ],
+    "stem": "简答：请描述 LIN 的休眠与唤醒完整流程（含三种唤醒类型），并说明 CAN↔LIN 网关场景下有哪些关键测试点。",
+    "options": [],
+    "answer": [],
+    "explanation": "这题把“协议流程”和“测试落地”结合起来考。休眠唤醒部分容易漏掉两个时间参数：休眠前要等 4~10 秒无总线活动、唤醒后 Master 必须在 200ms 内发出 Frame Header，这两个数字是测试用例的直接判据。网关部分的关键认知是 BCM“身兼两职”——它对上是车身 CAN 上的一个普通节点，对下是 LIN 子网的 Master，所以速率匹配（CAN 10ms vs LIN 50ms）必须靠缓存或最新值策略来处理，这也是最容易出问题的地方。",
+    "keyPoints": [
+      "四种状态：Active → Sleep → Wakeup → Active",
+      "休眠：Go-To-Sleep(PID=0x3C, Data[0]=0x00) → 从机确认 → 等 4~10s 无活动 → Sleep（<100μA）",
+      "三种唤醒：总线远程（显性脉冲250μs~5ms）/ 本地IO（门把手、按键）/ Break 唤醒（Master召集）；唤醒后 Master 须在 200ms 内发 Frame Header",
+      "网关测试点：CAN→LIN 转发、LIN→CAN 上报、速率匹配（10ms vs 50ms）、休眠唤醒联动"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "休眠唤醒：四种总线状态与休眠/唤醒过程 + 唤醒类型表"
+    },
+    "relatedTerms": [
+      "Wakeup Pulse",
+      "BCM",
+      "速率匹配"
+    ],
+    "refAnswer": "**一、休眠与唤醒完整流程**\n\n总线四种状态：Active（正常通信）→ Sleep（低功耗）→ Wakeup（唤醒中）→ Active（恢复通信）。\n\n**休眠过程：**\n1. Master 发送 Go-To-Sleep 帧：PID=0x3C（诊断主请求），Data[0]=0x00。\n2. 从机确认（ACK）。\n3. 等待 4~10 秒无总线活动。\n4. 所有节点进入 Sleep，整车静态电流应 < 100μA。\n\n**唤醒过程：**\n1. 触发（三种类型）：\n   - **总线远程唤醒**：总线电平由隐性变显性，产生 250μs~5ms 的脉冲。适用于任一节点有数据要发。\n   - **本地 IO 唤醒**：门把手拉动、按键按下、传感器触发等，通过 IO 中断唤醒从机内部。适用于用户操作（如开门）。\n   - **Break 唤醒**：Master 发出 ≥13 bit 显性的 Break，主动召集所有从机。\n2. 从机内部唤醒后，拉低总线发送 Wakeup Pulse。\n3. Master 检测到 Wakeup Pulse，发 Break + Sync 恢复通信。\n4. **Master 必须在 200ms 内发出 Frame Header**，否则从机可能重新进入休眠或判定唤醒失败。\n\n**二、CAN↔LIN 网关场景的关键测试点**\n\n整车中的位置：车身 CAN（125Kbps）→ 网关/BCM（身兼两职：既是 CAN 节点，又是 LIN 主节点）→ LIN 子网（19.2Kbps），下挂左前/右前门控（车窗+后视镜+门锁）、方向盘按键、雨量传感器等。\n\n关键测试点：\n1. **CAN→LIN 转发**：用 IG 在 CAN 侧发送信号 → 网关转换到 LIN → 捕获 LIN 帧，验证数据一致（信号值、映射关系正确）。\n2. **LIN→CAN 上报**：操作 LIN 设备（如按方向盘按键）→ 网关转发到 CAN → 在 CAN Trace 中验证上报的信号值和时机。\n3. **速率匹配**：CAN 侧可能是 10ms 周期，LIN 侧是 50ms 周期，要验证网关的缓存策略/最新值策略是否正确——快的一侧多余的更新是丢弃取最新值还是排队，会不会造成命令丢失或延迟累积。\n4. **休眠唤醒联动**：CAN 侧下发休眠命令 → BCM 转发 Go-To-Sleep 到 LIN → LIN 节点全部进入休眠 → 再用 LIN Break 唤醒，验证整链路能否正确恢复；同时测静态电流 <100μA。\n5. **静态电流定位**：若电流超标，锁车等网络静默后串入电流表，看 10 分钟稳定值；超标则逐个拔 LIN 节点定位漏电源。\n\n**三、风险提示**\nLIN 是一主多从架构，Master（BCM）是单点：实战问题表里\"LIN 主节点挂掉 → BCM 死机 → 整条 LIN 子网瘫痪 → 4 门车窗无法升降/天窗关不上\"就是这个风险的体现，因此主节点必须高可靠并配看门狗。"
+  },
+  {
+    "id": "Q-03-07-01",
+    "chapterNum": 3,
+    "sectionIndex": 7,
+    "sectionTitle": "八、测试实战关联",
+    "module": "A",
+    "type": "single",
+    "cat": "故障定位",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "LIN故障",
+      "排查",
+      "万用表"
+    ],
+    "stem": "车窗控制无响应，怀疑 LIN 断路或对地短路。按章节给出的排查方法，第一步应该做什么？",
+    "options": [
+      {
+        "key": "A",
+        "text": "用万用表测 LIN 线电压，隐性状态下应≈12V"
+      },
+      {
+        "key": "B",
+        "text": "断电测 LIN 线对地电阻，应≈60Ω"
+      },
+      {
+        "key": "C",
+        "text": "直接更换车窗从机模块验证"
+      },
+      {
+        "key": "D",
+        "text": "先重新烧录 BCM 固件排除软件问题"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "常见故障表“窗控无响应”一行给出的排查动作就是：“万用表测 LIN 线电压（隐性应≈12V）”。这是最快判断物理层死活的手段：如果量到 ≈12V，说明上拉正常、线路通畅，物理层是活着的，可以往上层查；如果量到 ≈0V 且一直不变，很可能是对地短路（实战问题表里就有“门板装配挤压线束 → LIN 对地短路 → 隐性 12V 被拉低 → 通信失败”的真实案例）；如果量到悬空/异常值，则可能是断路。B 是把 CAN 的 60Ω 经验错误地搬到 LIN 上——**LIN 根本没有终端电阻**，量不出 60Ω。C、D 违背了“从简到繁、从底到顶”的排查原则：换件和刷固件成本高、耗时长，应该放在物理层排除之后。章节给的整体思路是：“先量 LIN 线电压（隐性≈12V 说明物理层活着），再看 Master 有没有按调度表发帧头，最后查 Slave 应答。”",
+    "keyPoints": [
+      "第一步：万用表测 LIN 线电压，隐性应≈12V",
+      "≈0V 恒定 → 怀疑对地短路；异常/悬空 → 怀疑断路",
+      "LIN 没有终端电阻，不存在测 60Ω 这一说",
+      "排查顺序：物理层电压 → Master 帧头 → Slave 应答"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "LIN 常见故障表（故障/原因/排查）"
+    },
+    "relatedTerms": [
+      "对地短路",
+      "调度表",
+      "No Response"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-07-02",
+    "chapterNum": 3,
+    "sectionIndex": 7,
+    "sectionTitle": "八、测试实战关联",
+    "module": "A",
+    "type": "single",
+    "cat": "故障定位",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "Checksum Error",
+      "版本一致性",
+      "LDF"
+    ],
+    "stem": "LIN 通信中频繁出现 Checksum Error，按常见故障表，最可能的原因和排查方向是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "LIN 线对地短路；用万用表测线电压"
+      },
+      {
+        "key": "B",
+        "text": "经典校验与增强校验混用；确认 LDF 版本和 ECU 实现是否一致"
+      },
+      {
+        "key": "C",
+        "text": "多个 Slave 共用事件触发帧；检查 PID 冲突"
+      },
+      {
+        "key": "D",
+        "text": "Slave 掉线；单独给 Slave 供电测通信"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "常见故障表“Checksum Error”一行的原因就是“经典/增强校验混用”，排查方向是“确认 LDF 版本和 ECU 实现一致”。机制上很好理解：**经典校验（V1.x）只对数据段求和，增强校验（V2.x）对 PID + 数据段一起求和**。如果主机按 V1.x 算、从机按 V2.x 校验（或反过来），双方算出来的值必然不同，每一帧都会报 Checksum 错误。实战问题表里有对应案例：“主机 V1.x 校验 + 从机 V2.x 校验 → Checksum Error → 窗控偶发失灵”，教训是“LDF 文件版本必须与 ECU 固件版本严格对应”。其余选项各自对应表里的其他故障行：A 对应“窗控无响应”，C 对应“方向盘按键串扰”，D 对应“主节点报 NoResponse”。排查 Checksum Error 的完整路径还包括：确认数据段长度是否与 LDF 定义一致。",
+    "keyPoints": [
+      "根因：经典(V1.x)只校数据段 vs 增强(V2.x)校 PID+数据，混用必错",
+      "排查：确认 LDF 的 LIN_protocol_version 与 ECU 固件实现一致",
+      "补充检查：数据段长度是否与 LDF 定义一致",
+      "教训：LDF 版本必须与 ECU 固件版本严格对应"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "LIN 常见故障表（Checksum Error 行）"
+    },
+    "relatedTerms": [
+      "经典校验",
+      "增强校验",
+      "LIN_protocol_version"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-08-01",
+    "chapterNum": 3,
+    "sectionIndex": 8,
+    "sectionTitle": "九、错误检测机制",
+    "module": "A",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Checksum",
+      "经典",
+      "增强"
+    ],
+    "stem": "LIN 的经典校验（Classic Checksum）与增强校验（Enhanced Checksum）的区别是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "经典校验用 CRC，增强校验用累加和"
+      },
+      {
+        "key": "B",
+        "text": "经典校验（V1.x）只校验数据段；增强校验（V2.x）校验 PID + 数据段"
+      },
+      {
+        "key": "C",
+        "text": "经典校验只在诊断帧中使用，增强校验用于所有应用帧"
+      },
+      {
+        "key": "D",
+        "text": "经典校验由 Master 计算，增强校验由 Slave 计算"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "错误类型表和帧格式表都给出同一结论：**经典（V1.x）只校数据段；增强（V2.x）校 PID + 数据**。把 PID 纳入校验范围的意义在于：万一 PID 在传输中被干扰篡改，接收方能发现“这帧根本不是发给我这个 ID 的”，从而提升可靠性；经典校验做不到这一点，PID 出错时数据段校验依然可能通过。选项 A 错在两者都是基于带进位的累加和（不是 CRC，LIN 也没有硬件 CRC——这正是它和 CAN 的重要差距）；C 错在校验类型是由协议版本决定的全局配置，不是按帧类型区分（不过实践中诊断帧 0x3C/0x3D 按规范使用经典校验）；D 错在 Checksum 由发送响应的一方计算、接收方重新计算比对，与主从身份无关。这是面试进阶加分项里的高频问题，必须能一句话说清。",
+    "keyPoints": [
+      "经典(V1.x)：只校验数据段",
+      "增强(V2.x)：校验 PID + 数据段，能发现 PID 被篡改",
+      "两者都是累加和，LIN 没有硬件 CRC",
+      "混用会导致每帧都报 Checksum Error"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "LIN 三种错误类型表（Checksum 错误行）"
+    },
+    "relatedTerms": [
+      "PID",
+      "累加和",
+      "LIN_protocol_version"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-08-02",
+    "chapterNum": 3,
+    "sectionIndex": 8,
+    "sectionTitle": "九、错误检测机制",
+    "module": "A",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "反向",
+    "tags": [
+      "LIN错误",
+      "重发",
+      "可靠性"
+    ],
+    "stem": "判断：LIN 帧出现 Checksum 错误后，协议会像 CAN 一样自动重发该帧，因此数据不会丢失。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "章节用 ⚠️ 明确标注了这个关键差异：**LIN 没有 CAN 的“重发机制”——这一帧 Checksum 错了就丢了，下一帧要等调度表的下一轮（比如 100ms 后）**。CAN vs LIN 错误检测对比表也逐项列出：恢复机制上 CAN 是“自动重发 + 错误主动/被动状态机”，LIN 是“**无自动恢复**——等待下一个调度周期”；出错帧处理上 CAN 是“自动重发”，LIN 是“**丢弃**，等下一轮调度”；硬件支持上 CAN 是“收发器+控制器硬件级检测”，LIN 是“仅 Checksum 在软件层”。这条差异带来的工程结论非常重要，也是面试的标准答案：“LIN 本质上不保证可靠传输——Checksum 只检错不纠错，丢帧了等下一轮调度周期。这就是刹车/转向用 CAN 不用 LIN 的根本原因。”",
+    "keyPoints": [
+      "LIN 无自动重发，出错帧直接丢弃",
+      "只能等调度表的下一轮（可能 100ms 后）",
+      "Checksum 只检错不纠错，仅在软件层实现",
+      "这是 LIN 不适合安全关键场景的根本原因"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "⚠️ 关键差异：LIN 没有 CAN 的重发机制"
+    },
+    "relatedTerms": [
+      "调度周期",
+      "错误状态机",
+      "安全关键"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-08-03",
+    "chapterNum": 3,
+    "sectionIndex": 8,
+    "sectionTitle": "九、错误检测机制",
+    "module": "A",
+    "type": "multi",
+    "cat": "故障定位",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "LIN错误类型",
+      "三种错误",
+      "对比CAN"
+    ],
+    "stem": "LIN 只有三种基础的错误检测机制。下列属于这三种的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Checksum 错误：接收方重新计算 Checksum 与发送方对比"
+      },
+      {
+        "key": "B",
+        "text": "Slave No Response：Master 发出帧头后超时未收到响应"
+      },
+      {
+        "key": "C",
+        "text": "总线冲突：Master 检测到总线电平异常，常见于事件触发帧多个 Slave 同时应答"
+      },
+      {
+        "key": "D",
+        "text": "填充错误：连续 5 个相同位后未插入反位"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "LIN 三种错误类型表列出的就是 A、B、C：Checksum 错误（经典只校数据、增强校 PID+数据）、Slave No Response（Slave 掉线、PID 不匹配、Slave 忙）、总线冲突（事件触发帧多个 Slave 同时应答）。D 的**填充错误（Bit Stuffing Error）是 CAN 五种错误之一，LIN 没有位填充机制**，因此不存在这种错误——这是最典型的 CAN/LIN 串台干扰项。对比记忆：CAN 有 5 种（位错误 / 填充错误 / CRC / 格式 / ACK），LIN 只有 3 种；而且 CAN 是收发器+控制器硬件级检测，LIN 仅 Checksum 在软件层。三种错误对应的排查路径章节也给全了：Checksum Error → 查 LDF 版本 vs ECU 固件、查经典/增强是否混用、查数据段长度；No Response → 查 Slave 供电/接地、示波器看帧头是否完整、单独给 Slave 供电排除总线负载问题；总线冲突 → 检查是否有多个 Slave 共享了同一个 PID。",
+    "keyPoints": [
+      "LIN 三种错误：Checksum 错误、Slave No Response、总线冲突",
+      "CAN 五种错误：位/填充/CRC/格式/ACK——填充错误是 CAN 独有",
+      "LIN 仅 Checksum 在软件层，无硬件级检测",
+      "三条排查路径分别对应版本一致性、供电与帧头完整性、PID 共享"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "LIN 三种错误类型表（错误类型/检测方式/说明）"
+    },
+    "relatedTerms": [
+      "No Response",
+      "事件触发帧",
+      "填充错误"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-09-01",
+    "chapterNum": 3,
+    "sectionIndex": 9,
+    "sectionTitle": "十、面试高频考点",
+    "module": "A",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "选型",
+      "LIN定位",
+      "安全关键"
+    ],
+    "stem": "判断：只要把 LIN 的波特率提上去，它就可以替代 CAN 用于刹车、转向等安全关键场景，从而进一步降低整车成本。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "进阶加分项表对“LIN 能替代 CAN 吗”给出的标准回答是：**“不能。速度快了成本就上去，就不是 LIN 了。定位互补，不是替代。”**这句话点破了本质——LIN 的低成本不是凭空来的，而是用一系列取舍换来的：单线（省线和差分收发器）、无终端电阻、无晶振，这些都建立在“速率只有 19.2K”的前提上。一旦要提速，就必须加差分线、加终端匹配、加晶振，成本立刻向 CAN 靠拢，那还不如直接用 CAN。更关键的是可靠性层面的硬伤：LIN 只有 3 种错误检测且仅在软件层，**没有自动重发、没有错误状态机**，一帧错了就丢，要等下一轮调度（可能 100ms 后）。刹车、转向对时延和可靠性的要求根本无法容忍这种行为。章节的结论很干脆：“这就是刹车/转向用 CAN 不用 LIN 的根本原因。”",
+    "keyPoints": [
+      "LIN 的低成本源于低速带来的取舍，提速则成本回升，失去存在意义",
+      "LIN 无自动重发、无错误状态机，出错等下一轮调度",
+      "CAN 与 LIN 是定位互补关系，不是替代关系",
+      "安全关键场景（刹车/转向）必须用 CAN"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "进阶加分项表（LIN 能替代 CAN 吗）"
+    },
+    "relatedTerms": [
+      "选型",
+      "自动重发",
+      "定位互补"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-03-09-02",
+    "chapterNum": 3,
+    "sectionIndex": 9,
+    "sectionTitle": "十、面试高频考点",
+    "module": "A",
+    "type": "short",
+    "cat": "故障定位",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "实战问题",
+      "单点风险",
+      "根因分析"
+    ],
+    "stem": "简答：请结合「实战中常见严重问题」表，说明 LIN 网络的单点风险体现在哪里，并列举至少三类 LIN 实战问题的现象、根因与测试启示。",
+    "options": [],
+    "answer": [],
+    "explanation": "这题要求把架构特性（一主多从）和具体故障案例连起来讲。单点风险是 LIN 架构层面最重要的结论——它不是某个 ECU 的 bug，而是“选择了主从架构”必然付出的代价，因此对策也必须在设计层面解决（主节点高可靠 + 看门狗），而不是靠测试去规避。列举案例时按“现象 → 根因 → 测试启示”的三段式组织，比单纯罗列问题更能体现分析能力。特别注意 LIN 线对地短路这条：因为 LIN 是单线无冗余，一旦短路整条子网就废了，不像 CAN 双线还有一定的降级运行可能。",
+    "keyPoints": [
+      "单点风险：一主多从，Master（BCM）挂掉 → 整条 LIN 子网瘫痪",
+      "对策：主节点必须高可靠 + 看门狗",
+      "四类实战问题：主节点挂掉、调度表冲突、LIN 线对地短路、经典/增强校验混用",
+      "LIN 单线无冗余，线束保护和老化测试必做"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "⚠️ 实战中常见严重问题表（问题/严重度/现象/根因+教训）"
+    },
+    "relatedTerms": [
+      "单点风险",
+      "看门狗",
+      "事件触发帧"
+    ],
+    "refAnswer": "**一、LIN 网络的单点风险**\n\nLIN 采用一主多从架构，所有通信都必须由 Master 发出帧头来触发，Slave 绝不主动开口。这意味着 **Master 是整条子网的唯一发起者，也是唯一的单点**：Master 一挂，没有帧头，所有 Slave 全部静默，整条 LIN 子网彻底瘫痪。\n\n对应实战案例：**LIN 主节点挂掉**（严重）——BCM 死机 → 整条 LIN 子网全部瘫痪 → 4 门车窗无法升降、天窗关不上。\n根因与教训：这是 LIN 一主多从架构的固有风险，主节点必须做到高可靠并配置看门狗（Watchdog）；测试上要专门覆盖 Master 异常复位、死机、掉电等场景，验证恢复时间与恢复后各 Slave 能否重新正常通信。\n注意与 CAN 对比：CAN 是多主广播架构，单个节点失效不影响其他节点通信（\"人坏无碍\"），LIN 没有这个特性。\n\n**二、其他三类实战问题（现象 / 根因 / 测试启示）**\n\n1. **调度表冲突**（中等）\n   - 现象：车窗升降过程中按后视镜折叠 → LIN 帧冲突 → 两个操作都不响应。\n   - 根因：偶发帧和事件触发帧的冲突处理逻辑没有完整实现或覆盖。\n   - 测试启示：必须设计并发操作用例（多个 LIN 功能同时触发），验证 Master 检测到冲突后能否正确回退到无条件帧逐个查询、解决后能否恢复；同时对照 LDF 的 Schedule 检查是否存在 PID 共享设计缺陷。\n\n2. **LIN 线对地短路**（中等）\n   - 现象：门板装配挤压线束 → LIN 对地短路 → 隐性 12V 被拉低 → 通信失败。\n   - 根因：LIN 是单线且无冗余，任何一处对地短路都会让整条总线失去隐性电平。\n   - 测试启示：线束保护（走线、护套、固定点）+ 老化/振动/耐久测试必做；排查时第一步用万用表测 LIN 线电压，隐性应≈12V，量到接近 0V 且恒定即怀疑对地短路。\n\n3. **经典/增强校验混用**（中等）\n   - 现象：主机用 V1.x 经典校验 + 从机用 V2.x 增强校验 → 每帧 Checksum Error → 窗控偶发失灵。\n   - 根因：经典校验只校数据段，增强校验校 PID+数据段，两端算法不一致必然对不上。\n   - 测试启示：LDF 文件版本（LIN_protocol_version）必须与 ECU 固件版本严格对应，入库前做版本一致性检查；由于 LIN 出错不自动重发，Checksum 错误会直接表现为功能偶发失灵，用户感知明显。\n\n**三、总体测试思路**\n排查 LIN 问题遵循\"先物理层、再 Master、最后 Slave\"：先量 LIN 线电压确认物理层活着（隐性≈12V），再看 Master 有没有按调度表发帧头，最后查 Slave 应答。因为主节点是单点，怀疑顺序上应优先考虑 Master。"
+  }
+]

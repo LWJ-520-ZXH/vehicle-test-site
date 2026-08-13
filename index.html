@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+(function () {
+  const saved = localStorage.getItem('avt-theme') || 'system'
+  let t = 'light'
+  if (saved === 'dark') t = 'dark'
+  else if (saved === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark'
+  document.documentElement.setAttribute('data-theme', t)
+  document.documentElement.style.background = t === 'dark' ? '#0a0f1e' : '#f4f7fb'
+})()
+</script>
+<title>车载测试学堂</title>
+<meta name="description" content="51章系统化车载测试学习平台。CAN/LIN/FlexRay/车载以太网/UDS/OBD-II → CANoe/CAPL/Python+CAN → 仪表/中控/ADAS/OTA/BMS五大域测试实战，面试题库全覆盖。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232563eb'/><text x='16' y='22' text-anchor='middle' fill='white' font-size='18' font-family='sans-serif' font-weight='bold'>VT</text></svg>">
+<link rel="stylesheet" href="assets/css/main.css?v=20260813225913">
+<script>
+(function(){
+  var V='20260813225913';
+  function check(){
+    fetch('assets/version.json?t='+Date.now(),{cache:'no-store'})
+      .then(function(r){return r.json();})
+      .then(function(j){ if(j&&j.version&&j.version!==V){location.reload(true);} })
+      .catch(function(){});
+  }
+  check();
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible'){ setTimeout(check,800); }
+  });
+})();
+</script>
+</head>
+<body>
+
+<!-- ====== 顶部导航 ====== -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">
+          <path d="M5 12h3l2-5 4 10 2-5h3"/>
+          <circle cx="12" cy="12" r="1.5" fill="#fff"/>
+        </svg>
+      </div>
+      车载测试学堂
+    </a>
+    <nav class="nav">
+      <a href="index.html" class="active">首页</a>
+      <div class="nav-item-dropdown">
+        <a href="chapters.html">知识库</a>
+        <div class="nav-dropdown" id="kb-dropdown"><!-- JS填充 --></div>
+      </div>
+      <a href="glossary.html" title="专业术语速查与释义">术语表</a>
+      <a href="quiz.html" title="知识点自测题库">题库中心</a>
+    </nav>
+    <div class="header-right">
+      <div class="hdr-search">
+        <input id="hdr-search" type="search" placeholder="搜索章节 / 知识点…" aria-label="站内搜索">
+        <button type="button" id="hdr-search-btn" aria-label="搜索"><svg class="ui-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
+      </div>
+      <button class="theme-btn" id="theme-btn" aria-label="切换主题">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ====== Hero Banner ====== -->
+<section class="hero" id="hero">
+  <div class="hero-grid-bg"></div>
+  <div id="hero-car">
+    <div class="hero-car-bg">
+      <img src="assets/images/car-hero.png?v=20260805f" alt="实车展示" class="car-real-img">
+      <div class="car-overlay-left"></div>
+      <div class="car-overlay-right"></div>
+    </div>
+  </div>
+  <canvas id="hero-particles"></canvas>
+  <canvas id="hero-wave"></canvas>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span class="dot"></span> <span data-chapter-count>51</span> 章系统化 · 面试导向
+    </div>
+    <h1 class="hero-title">
+      从 <span class="grad">CAN 帧</span> 到 五大域<br>车载测试工程师成长站
+    </h1>
+    <p class="hero-sub">
+      总线协议 → 工具链 → 域测试实战 → 行业标准。每一章都按教学卡设计，面试题库源自真实项目。
+    </p>
+    <div class="hero-cta">
+      <a href="#chapters" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h13M12 5l7 7-7 7"/></svg>
+        开始学习
+      </a>
+      <a href="chapters.html" class="btn btn-ghost">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        浏览知识库
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><b data-chapter-count>51</b> <span>系统章节</span></div>
+      <div class="stat"><b>6</b> <span>知识模块</span></div>
+      <div class="stat"><b data-glossary-count>91</b> <span>专业术语</span></div>
+      <div class="stat"><b>200+</b> <span>动态交互演示</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 五阶段学习路径（带图标 inline fallback） ====== -->
+<div class="roadmap-strip">
+  <div class="roadmap-card">
+    <div class="roadmap-head">
+      <h3><small>LEARNING PATH</small>学习路线</h3>
+      <a href="chapter.html?id=16"><svg class="ui-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 5-4 2 2-5z"/></svg> 查看完整学习路径，规划你的进阶路线 →</a>
+    </div>
+    <div class="stages" id="stages-grid">
+      <div class="stage" style="--c:#2563eb">
+        <div class="stage-icon" style="color:var(--c)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V8l8-5 8 5v12"/><path d="M12 3v8"/><circle cx="12" cy="14" r="3"/></svg></div>
+        <div class="s-no">阶段 1</div><div class="s-name">入门看懂</div><div class="s-goal">不抓瞎</div>
+      </div>
+      <div class="stage" style="--c:#06b6d4">
+        <div class="stage-icon" style="color:var(--c)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M3 12h18M7 5l5 7 5-7"/><path d="M12 3v18"/></svg></div>
+        <div class="s-no">阶段 2</div><div class="s-name">总线吃透</div><div class="s-goal">能说清每帧含义</div>
+      </div>
+      <div class="stage" style="--c:#8b5cf6">
+        <div class="stage-icon" style="color:var(--c)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="6" width="16" height="14" rx="2"/><path d="M9 22h6"/><path d="M12 20v2"/></svg></div>
+        <div class="s-no">阶段 3</div><div class="s-name">工具能干活</div><div class="s-goal">独立搭台架跑自动化</div>
+      </div>
+      <div class="stage" style="--c:#f59e0b">
+        <div class="stage-icon" style="color:var(--c)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polygon points="12 2 22 7 22 17 12 22 2 17 2 7"/><line x1="12" y1="22" x2="12" y2="12"/><line x1="2" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="22" y2="7"/></svg></div>
+        <div class="s-no">阶段 4</div><div class="s-name">域测试方向</div><div class="s-goal">独立负责一个域</div>
+      </div>
+      <div class="stage" style="--c:#10b981">
+        <div class="stage-icon" style="color:var(--c)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 12l2 2 4-4"/><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/></svg></div>
+        <div class="s-no">阶段 5</div><div class="s-name">标准拉开差距</div><div class="s-goal">能和开发聊架构</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 章节卡片区（首页仅展示前6张核心卡） ====== -->
+<section class="section" id="chapters">
+  <div class="section-head">
+    <div>
+      <h2 class="section-title"><small>CHAPTERS</small>知识卡片</h2>
+      <p class="section-desc">核心 6 章 · 快速入门车载测试</p>
+    </div>
+    <a href="chapters.html" class="chip more-link">
+      <span class="c-dot"></span>查看全部
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+  <div class="card-grid" id="card-grid"><!-- JS渲染 --></div>
+</section>
+
+<!-- ====== 车企分享卡片区（带 inline fallback） ====== -->
+<section class="section" id="oem-section">
+  <div class="section-head">
+    <div>
+      <h2 class="section-title"><small>AUTOMOTIVE OEMs</small>车企分享</h2>
+    </div>
+    <a href="#" class="chip" style="pointer-events:none;opacity:.7;"><span class="c-dot" style="background:#888"></span>国内 · 合资 · 新势力</a>
+  </div>
+  <div class="oem-grid" id="oem-grid"><!-- JS渲染，fallback在JS中处理 --></div>
+</section>
+
+<!-- ====== 页脚 ====== -->
+<footer class="site-footer">
+  <b>车载测试学堂</b> · 基于真实项目面试题库打造 · <span data-chapter-count>51</span> 章覆盖 CAN/LIN/FlexRay/以太网/UDS → CANoe/CAPL → 五大域测试<br>
+  纯原生 JS + SVG · 科技写实风 · 亮/暗双主题
+</footer>
+
+<script src="assets/js/banner.js" defer></script>
+<script src="assets/js/data-bundle.js?v=20260813225913" defer></script>
+<script src="assets/js/app.js?v=20260813225913" defer></script>
+</body>
+</html>

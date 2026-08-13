@@ -1,0 +1,60 @@
+# ============================================================
+# 车载测试学堂 · 部署排除清单
+# ------------------------------------------------------------
+# 以下为非访客资源（开发脚本 / 内部方案 / 原型预览页）。
+# 整目录部署会随站公开，故排除出纳管（非破坏、可随时回退）。
+#
+# 站点公开面（部署时仅上传这些）：
+#   index.html  chapters.html  chapter.html  glossary.html
+#   assets/                # css/js/images + 构建产物 assets/js/data-bundle.js
+#   data/                  # 仅作 fetch 兜底，可省；data-bundle.js 已内联数据
+# ============================================================
+
+# Python 构建缓存（绝不入库）
+__pycache__/
+
+# 一次性修复 / 回滚 / 同步脚本（非站点运行所需）
+__fix.py
+revert_ee_evolution.py
+sync_covers.py
+
+# 原型 / 预览页（非正式站点，避免暴露）
+components-preview.html
+ee-evolution-preview.html
+
+# 内部方案 / 审计文档（不对外）
+overview.md
+内容展示设计方案.md
+网站内容评估与产品优化方案.md
+
+# 开发期回归工具（非站点运行所需）
+tools/
+
+# ── 补充排除（Git / Cloudflare Pages 部署前补齐）──
+# 第三方依赖（绝不入库）
+node_modules/
+
+# 调试 / 临时产物
+_tmp/
+__pycache__/
+*.pyc
+
+# 本地调试脚本（非站点运行所需）
+_tmp_check_quiz.py
+probe_ch8.js
+probe_html.js
+restore_k_version.py
+serve.py
+
+# 独立海报封面系统（线上主站用矢量生成封面，不依赖此目录）
+covers/
+
+# WorkBuddy 本地记忆（含 memory，不公开）
+.workbuddy/
+
+# 文档碎片（0 字节写入残留）
+原则：*
+基于全站*
+审计日期*
+数据依据*
+目标：根据*

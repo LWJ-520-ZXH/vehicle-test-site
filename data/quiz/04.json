@@ -1,0 +1,1266 @@
+[
+  {
+    "id": "Q-04-01-01",
+    "chapterNum": 4,
+    "sectionIndex": 0,
+    "sectionTitle": "一、为什么需要 FlexRay？",
+    "module": "A",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "FlexRay",
+      "时间触发",
+      "TDMA"
+    ],
+    "stem": "章节用「自由讨论 vs 点名发言」类比 CAN 与 FlexRay。FlexRay 能保证刹车信号「绝不打架」，最根本的原因是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "波特率更高，抢占总线的速度比 CAN 快，所以总能抢赢"
+      },
+      {
+        "key": "B",
+        "text": "采用时间触发（TDMA），给每个信号分配固定时间槽，到点就发"
+      },
+      {
+        "key": "C",
+        "text": "一帧能装 254 字节，一次把所有信号打包发完就不会冲突"
+      },
+      {
+        "key": "D",
+        "text": "采用双通道冗余，一条通道被占用就自动切到另一条发送"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "章节开头讲得很清楚：CAN 的短板是事件触发——大家都在抢总线，低优先级报文可能被长期堵死，而刹车信号不能「等一下再发」。FlexRay 的解法是时间触发 TDMA：给每个信号分配固定的时间槽，到点就发，绝不打架。类比就是 CAN 像自由讨论（谁抢到麦克风谁说话），FlexRay 像点名发言（每人固定时间，到你就说）。A 是典型误解——速率高只是顺带的，确定性不来自速度；C、D 分别是帧格式和物理层冗余带来的好处，不是「不打架」的机制来源。",
+    "keyPoints": [
+      "CAN = 事件触发，能发就发、撞了再让",
+      "FlexRay = 时间触发 TDMA，排班表发言、绝不撞车",
+      "确定性来自时间槽预分配，不是来自高速率"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "一、为什么需要 FlexRay？——CAN 的短板 / FlexRay 的解法"
+    },
+    "relatedTerms": [
+      "事件触发",
+      "TDMA",
+      "确定性"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-01-02",
+    "chapterNum": 4,
+    "sectionIndex": 0,
+    "sectionTitle": "一、为什么需要 FlexRay？",
+    "module": "A",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "FlexRay",
+      "事件触发",
+      "优先级"
+    ],
+    "stem": "判断：CAN 是事件触发、低优先级报文可能被堵死，FlexRay 解决这一问题的办法是给关键信号设置更高的仲裁优先级。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误。FlexRay 的核心解法不是「把优先级调高」，而是彻底换赛道——用时间触发 TDMA 把总线时间切成固定时间槽，每个信号到点就发，从机制上消除了竞争。优先级仲裁只存在于 FlexRay 的动态段（FTDMA，Frame ID 越小优先级越高），那部分承载的是诊断、标定等非紧急数据；真正保证刹车信号确定性的是静态段的固定 Slot。把 FlexRay 理解成「优先级更强的 CAN」是面试常见失分点。",
+    "keyPoints": [
+      "FlexRay 用时间槽消除竞争，而不是加强优先级仲裁",
+      "优先级竞争只出现在动态段（FTDMA / Mini-slotting）",
+      "硬实时信号靠静态段固定 Slot 保障"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "一、为什么需要 FlexRay？——FlexRay 的解法：时间触发（TDMA）"
+    },
+    "relatedTerms": [
+      "静态段",
+      "动态段",
+      "FTDMA"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-02-01",
+    "chapterNum": 4,
+    "sectionIndex": 1,
+    "sectionTitle": "二、关键参数",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "FlexRay",
+      "帧长度",
+      "关键参数"
+    ],
+    "stem": "根据关键参数表，FlexRay 单帧的有效载荷（Payload）最大是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "8 字节"
+      },
+      {
+        "key": "B",
+        "text": "64 字节"
+      },
+      {
+        "key": "C",
+        "text": "254 字节"
+      },
+      {
+        "key": "D",
+        "text": "1500 字节"
+      }
+    ],
+    "answer": [
+      "C"
+    ],
+    "explanation": "关键参数表明确写着「帧长度：有效载荷 0~254 字节，远大于 CAN 的 8 字节」。干扰项都是同族总线的典型值：8 字节是 CAN 2.0，64 字节是 CAN FD，1500 字节是车载以太网单帧。章节里也用「FlexRay 一帧 254 字节，顶 CAN 三十多帧」来帮助记忆。",
+    "keyPoints": [
+      "FlexRay Payload：0~254 字节",
+      "对照记忆：CAN 2.0 = 8B，CAN FD = 64B，以太网 = 1500B",
+      "254 字节 ≈ 30 倍 CAN 的帧容量"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "关键参数表（参数 / 值 / 备注）"
+    },
+    "relatedTerms": [
+      "Payload",
+      "CAN FD"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-02-02",
+    "chapterNum": 4,
+    "sectionIndex": 1,
+    "sectionTitle": "二、关键参数",
+    "module": "A",
+    "type": "multi",
+    "cat": "参数记忆",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "FlexRay",
+      "关键参数",
+      "同步精度"
+    ],
+    "stem": "根据章节的关键参数表，下列关于 FlexRay 的描述正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "速率为单通道 10 Mbps，双通道叠加可达 20 Mbps"
+      },
+      {
+        "key": "B",
+        "text": "最大节点数 64 个（星型，靠主动星型耦合器扩展）"
+      },
+      {
+        "key": "C",
+        "text": "全网络时钟偏差 < 1μs"
+      },
+      {
+        "key": "D",
+        "text": "只支持时间触发，不支持事件触发"
+      },
+      {
+        "key": "E",
+        "text": "有效载荷 0~254 字节"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C",
+      "E"
+    ],
+    "explanation": "A、B、C、E 全部来自关键参数表原文：速率 10 Mbps（单通道）/ 20 Mbps（双通道）；最大节点 64 个（星型，主动星型耦合器扩展）；同步精度全网络时钟偏差 < 1μs；帧长度有效载荷 0~254 字节。D 错在把 FlexRay 说死了——参数表的「触发方式」一栏写的是「时间触发(静态段) + 事件触发(动态段)」，并注明这是 FlexRay 独有的双模式：静态段保确定性、动态段保灵活性，一套总线两种脾气。",
+    "keyPoints": [
+      "10M 单通道 / 20M 双通道、254B、64 节点、<1μs 同步",
+      "FlexRay 独有双模式：静态段时间触发 + 动态段事件触发",
+      "节点扩展靠主动星型耦合器"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "关键参数表（参数 / 值 / 备注）"
+    },
+    "relatedTerms": [
+      "星型耦合器",
+      "动态段",
+      "时钟同步"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-02-03",
+    "chapterNum": 4,
+    "sectionIndex": 1,
+    "sectionTitle": "二、关键参数",
+    "module": "A",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "FlexRay",
+      "拓扑",
+      "MOST"
+    ],
+    "stem": "判断：FlexRay 的典型拓扑是环形网络，节点首尾相连形成闭环。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误。参数表写明 FlexRay 拓扑是「总线型 / 星型 / 混合型」，实际项目多用星型 + 冗余。章节的面试提示特意点名了这个坑：注意拓扑是总线/星型组合，不是环形——车载环形网络的代表是 MOST 多媒体环网，别张冠李戴。面试高频考点表里也把「拓扑是什么」单列为必会基础。",
+    "keyPoints": [
+      "FlexRay 拓扑：总线型 / 星型 / 混合型，实际多用星型+冗余",
+      "车载环形网络的代表是 MOST（多媒体环网）",
+      "这是典型的张冠李戴陷阱题"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "关键参数节「面试说」——拓扑是总线/星型组合，不是环形"
+    },
+    "relatedTerms": [
+      "MOST",
+      "星型拓扑",
+      "混合拓扑"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-03-01",
+    "chapterNum": 4,
+    "sectionIndex": 2,
+    "sectionTitle": "三、通信周期：64个Cycle循环",
+    "module": "A",
+    "type": "single",
+    "cat": "协议流程",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "通信周期",
+      "NIT",
+      "时钟同步"
+    ],
+    "stem": "FlexRay 一个通信周期分为四段，「所有节点把本地时钟同步到同一相位」发生在哪一段？",
+    "options": [
+      {
+        "key": "A",
+        "text": "静态段（Static Segment）"
+      },
+      {
+        "key": "B",
+        "text": "动态段（Dynamic Segment）"
+      },
+      {
+        "key": "C",
+        "text": "符号窗（Symbol Window）"
+      },
+      {
+        "key": "D",
+        "text": "NIT（Network Idle Time，网络空闲时间）"
+      }
+    ],
+    "answer": [
+      "D"
+    ],
+    "explanation": "通信周期结构表的四行分工是：静态段——TDMA 时间触发，承载刹车、转向等硬实时数据；动态段——FTDMA 灵活时间触发、优先级仲裁，承载诊断标定；符号窗——发送特殊符号，用于网络管理和唤醒；NIT——网络空闲时间，所有节点同步时钟到同一相位。时钟同步的 Offset / Rate 校正就是在每个 NIT 段执行的。把符号窗当成同步段是常见混淆——符号窗管的是网络管理和唤醒，不是对表。",
+    "keyPoints": [
+      "四段：静态段 / 动态段 / 符号窗 / NIT",
+      "NIT = 网络空闲时间，全网时钟对齐相位",
+      "符号窗负责网络管理与唤醒，不负责同步"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "通信周期四段表（段 / 机制 / 用途）"
+    },
+    "relatedTerms": [
+      "NIT",
+      "符号窗",
+      "Offset Correction"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-03-02",
+    "chapterNum": 4,
+    "sectionIndex": 2,
+    "sectionTitle": "三、通信周期：64个Cycle循环",
+    "module": "A",
+    "type": "multi",
+    "cat": "协议流程",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "静态段",
+      "动态段",
+      "Cycle"
+    ],
+    "stem": "关于 FlexRay 通信周期，下列说法正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "静态段采用 TDMA，每个 Slot 固定长度，承载刹车信号、转向指令等硬实时数据"
+      },
+      {
+        "key": "B",
+        "text": "动态段采用 FTDMA 灵活时间触发、优先级仲裁，承载诊断、标定等非紧急数据"
+      },
+      {
+        "key": "C",
+        "text": "符号窗用于发送特殊符号，做网络管理和唤醒"
+      },
+      {
+        "key": "D",
+        "text": "Cycle 从 0 计到 63 后循环，但每个信号在哪个 Cycle 的哪个 Slot 由节点上电后动态协商决定"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 与四段表逐行对应。D 错在最后半句：ASCII 图下方明确标注「每个信号在哪个 Cycle 的哪个 Slot 发送，全部预配置」——这些配置写在 FIBEX 文件里，属于离线设计的产物，节点上电后不做协商。这正是 FlexRay 确定性的来源：调度表是设计期就冻结的，运行期不可变。若允许运行时协商，TDMA 的时间保证就不成立了。",
+    "keyPoints": [
+      "静态段 TDMA 保确定性，动态段 FTDMA 保灵活性",
+      "Cycle 0~63 循环，调度全部离线预配置（FIBEX）",
+      "运行期不协商 Slot，这是确定性的前提"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "Communication Cycle 结构图（静态段/动态段/符号窗/NIT + Cycle 0→63 循环）"
+    },
+    "relatedTerms": [
+      "FTDMA",
+      "FIBEX",
+      "Slot"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-03-03",
+    "chapterNum": 4,
+    "sectionIndex": 2,
+    "sectionTitle": "三、通信周期：64个Cycle循环",
+    "module": "A",
+    "type": "short",
+    "cat": "协议流程",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "通信周期",
+      "TDMA",
+      "FTDMA"
+    ],
+    "stem": "请完整描述 FlexRay 一个通信周期（Communication Cycle）的组成，说明每一段的机制与典型用途，并解释「64 个 Cycle 循环」的含义。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题考察对 FlexRay 时间轴组织方式的整体把握，是理解 Bus Guardian、冷启动、FIBEX 配置的前置基础。回答时要按「四段 + Cycle 循环」两个层次展开，并点出静态段与动态段的分工差异。",
+    "keyPoints": [
+      "四段结构：静态段 / 动态段 / 符号窗 / NIT",
+      "静态段 TDMA 确定性 100%，动态段 FTDMA 类似 CAN 的按优先级竞争",
+      "64 个 Cycle（0~63）循环往复，调度全部预配置"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "Communication Cycle 结构图 + 通信周期四段表"
+    },
+    "relatedTerms": [
+      "Cycle Multiplexing",
+      "NIT",
+      "Mini-slotting"
+    ],
+    "refAnswer": "FlexRay 的一个通信周期由四段按固定顺序组成：\n\n1）静态段（Static Segment）：时间触发 TDMA，被切分成若干等长 Slot，每个 Slot 归属固定节点、长度固定。承载刹车信号、转向指令等硬实时数据，确定性 100%——到点就发，谁也抢不走。\n\n2）动态段（Dynamic Segment）：事件触发 FTDMA（灵活时间触发），按优先级仲裁，行为类似 CAN。承载诊断、标定等非紧急、非周期数据，在有数据时才占用时间，没有数据就快速滑过。\n\n3）符号窗（Symbol Window）：发送特殊符号，用于网络管理和唤醒（例如冷启动阶段的 CAS 冲突避免符号）。\n\n4）NIT（Network Idle Time，网络空闲时间）：不传输数据，所有节点在这里执行时钟同步计算，把本地时钟对齐到同一相位，这是全网偏差 < 1μs 的实现窗口。\n\n「64 个 Cycle 循环」的含义：通信周期带一个 6bit 的 Cycle Counter，从 Cycle 0 依次计到 Cycle 63，然后回到 Cycle 0 周而复始。它带来两个工程价值：一是可以做 Cycle Multiplexing（周期复用）——同一个 Slot 在不同 Cycle 承载不同的帧，例如 Slot 5 在 Cycle 0 发 Frame A、在 Cycle 1 发 Frame B，从而在有限 Slot 内容纳更多低频信号；二是可以配置 Cycle Repetition——安全关键帧配成每个 Cycle 都发，诊断帧配成每 N 个 Cycle 发一次。\n\n关键点：每个信号在哪个 Cycle 的哪个 Slot 的哪个 Channel 上发送，全部在 FIBEX 文件里离线预配置，运行期不协商、不可变——这正是 FlexRay 确定性的根本来源。"
+  },
+  {
+    "id": "Q-04-04-01",
+    "chapterNum": 4,
+    "sectionIndex": 3,
+    "sectionTitle": "四、帧格式",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "帧格式",
+      "帧头",
+      "Payload Length"
+    ],
+    "stem": "关于 FlexRay 的帧头长度和 Payload Length 字段的计数单位，正确的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "帧头 40bit，Payload Len 按字节计数，最大 254 字节"
+      },
+      {
+        "key": "B",
+        "text": "帧头 40bit，Payload Len 按 16bit 字计数，最大 127 字 = 254 字节"
+      },
+      {
+        "key": "C",
+        "text": "帧头 24bit，Payload Len 按 16bit 字计数，最大 127 字"
+      },
+      {
+        "key": "D",
+        "text": "帧头 64bit，Payload Len 按 32bit 双字计数，最大 64 双字"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "帧结构图写明：帧头 40bit → Payload 0~254B → Trailer CRC 24bit；帧头 40bit 细分为 Rsv 1b + 指示位 4b + FrameID 11b + Len 7b + H-CRC 11b + Cycle 6b（合计正好 40bit）。图下一行特别注明：Payload Len 按 16bit 字计数 → 最大 127 字 = 254 字节。这也解释了为什么最大值是 254 而不是 255——7bit 能表示 0~127 个字，127×2 = 254 字节。A 的错误在于计数单位（若按字节计数，7bit 最多只能表示 127 字节）；24bit 是 Trailer CRC 的长度，被 C 拿来冒充帧头。",
+    "keyPoints": [
+      "帧头 40bit = Rsv 1 + 指示位 4 + FrameID 11 + Len 7 + H-CRC 11 + Cycle 6",
+      "Payload Len 按 16bit 字计数，7bit → 最大 127 字",
+      "127 字 × 2 = 254 字节，这是 254 这个数的由来"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "FlexRay 帧结构图（帧头 40bit 细分 + Payload + Trailer CRC 24bit）"
+    },
+    "relatedTerms": [
+      "Header CRC",
+      "Frame ID",
+      "Cycle Count"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-04-02",
+    "chapterNum": 4,
+    "sectionIndex": 3,
+    "sectionTitle": "四、帧格式",
+    "module": "A",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "帧格式",
+      "CRC",
+      "易错点"
+    ],
+    "stem": "判断：FlexRay 采用帧头 CRC、数据段 CRC、帧尾 CRC 三层 CRC 保护，因此比 CAN 可靠得多。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误——是两层不是三层。章节的标准提示原文：两层 CRC 保护，Header CRC（11bit）只保帧头，Trailer CRC（24bit）保整帧，比 CAN 单次 CRC 可靠得多；并且明确警告「FlexRay 没有独立的数据段 CRC，别在面试里说三层 CRC」。结论前半句（比 CAN 可靠）成立，但机制描述错了，整句判错。",
+    "keyPoints": [
+      "两层 CRC：Header CRC 11bit（只保帧头）+ Trailer CRC 24bit（保整帧）",
+      "没有独立的数据段 CRC",
+      "对照：CAN 只有单层 CRC15"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "帧格式节标准提示——两层 CRC 保护，别说三层 CRC"
+    },
+    "relatedTerms": [
+      "Trailer CRC",
+      "CRC15"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-04-03",
+    "chapterNum": 4,
+    "sectionIndex": 3,
+    "sectionTitle": "四、帧格式",
+    "module": "A",
+    "type": "multi",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "帧头",
+      "指示位",
+      "Startup"
+    ],
+    "stem": "FlexRay 帧头中的 4 个指示位（Indicator Bits）包括下列哪些（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "PP（Payload Preamble，负载前导）"
+      },
+      {
+        "key": "B",
+        "text": "NF（Null Frame，空帧）"
+      },
+      {
+        "key": "C",
+        "text": "Sync（同步帧）"
+      },
+      {
+        "key": "D",
+        "text": "Startup（启动帧）"
+      },
+      {
+        "key": "E",
+        "text": "ACK（应答位，接收方置位确认）"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "explanation": "帧结构图注明：指示位×4 = PP(负载前导) / NF(空帧) / Sync(同步帧) / Startup(启动帧)。E 是干扰项——FlexRay 作为时间触发协议不做逐帧应答，没有 ACK 位；ACK 槽是 CAN 的机制，这是跨协议张冠李戴的典型陷阱。其中 Sync 和 Startup 两个位是冷启动流程的关键道具：看到这两个位置 1 的帧，就知道是同步节点在建立时间基准。",
+    "keyPoints": [
+      "4 个指示位：PP / NF / Sync / Startup",
+      "Sync + Startup 是冷启动的关键标志位",
+      "FlexRay 没有 ACK 位，逐帧应答是 CAN 的机制"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "FlexRay 帧结构图——指示位×4 = PP / NF / Sync / Startup"
+    },
+    "relatedTerms": [
+      "冷启动",
+      "Sync Frame",
+      "Null Frame"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-05-01",
+    "chapterNum": 4,
+    "sectionIndex": 4,
+    "sectionTitle": "五、双通道冗余：物理层可靠性",
+    "module": "A",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "双通道",
+      "叠加模式",
+      "带宽"
+    ],
+    "stem": "某项目让 Channel A 传输安全关键数据、Channel B 传输普通数据，合计带宽达到 20 Mbps。这属于双通道的哪种用法？",
+    "options": [
+      {
+        "key": "A",
+        "text": "冗余模式（双通道发相同数据）"
+      },
+      {
+        "key": "B",
+        "text": "叠加模式（双通道发不同数据）"
+      },
+      {
+        "key": "C",
+        "text": "单通道 + 故障切换"
+      },
+      {
+        "key": "D",
+        "text": "星型耦合器扩展模式"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "冗余方式表列了三种用法：双通道相同数据（A 和 B 发相同内容，接收方对比校验，属冗余模式）；双通道不同数据（A 发安全关键数据 + B 发普通数据，加起来 20 Mbps，属叠加模式）；单通道 + 故障切换（正常跑 A，A 断了切 B，不间断）。题干描述的「不同数据 + 合计 20M」正是叠加模式。记忆口诀：冗余模式求可靠（A 断 B 顶上），叠加模式求带宽（A+B=20M）。注意叠加模式牺牲了冗余能力——此时断一路就会真丢数据。",
+    "keyPoints": [
+      "冗余模式：A=B 发相同数据，求可靠",
+      "叠加模式：A≠B 发不同数据，求带宽（20Mbps）",
+      "叠加模式下不再具备物理冗余能力"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "冗余方式表（双通道相同数据 / 不同数据 / 单通道+故障切换）"
+    },
+    "relatedTerms": [
+      "Channel A",
+      "Channel B",
+      "故障切换"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-05-02",
+    "chapterNum": 4,
+    "sectionIndex": 4,
+    "sectionTitle": "五、双通道冗余：物理层可靠性",
+    "module": "A",
+    "type": "short",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "双通道",
+      "冗余测试",
+      "HIL"
+    ],
+    "stem": "请说明 FlexRay 双通道的三种用法，并给出在 HIL 台架上验证双通道冗余能力的具体测试方法与判据。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题把物理层冗余原理与台架实操打通。回答要分两块：先讲清三种用法及各自取舍，再给出「断 A 验 B」的操作步骤和量化判据（信号不丢、延迟不增、切换时间 < 1 个 Cycle）。",
+    "keyPoints": [
+      "三种用法：相同数据冗余 / 不同数据叠加 / 单通道+故障切换",
+      "测试方法：断开 Channel A 线束，验证 Channel B 无缝接管",
+      "判据：信号不丢、延迟不增，切换时间 < 1 个 Cycle"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "冗余方式表 + 双通道冗余节「测试关键」提示"
+    },
+    "relatedTerms": [
+      "断线测试",
+      "底盘域",
+      "Trace 对比"
+    ],
+    "refAnswer": "一、双通道的三种用法\n\n1）双通道相同数据（冗余模式）：A、B 两条物理独立通道发送相同内容，接收方对比校验。任一通道断线仍可通信，可靠性最高，代价是带宽仍只有 10 Mbps。\n\n2）双通道不同数据（叠加模式）：A 发安全关键数据、B 发普通数据，合计 20 Mbps。带宽翻倍，但此时不再具备冗余能力。\n\n3）单通道 + 故障切换：正常只跑 A，检测到 A 故障后切到 B，保证通信不间断。是可靠性与带宽的折中方案。\n\n二、HIL 台架冗余验证方法\n\n步骤：\n1. 在正常双通道状态下用 CANoe FlexRay 模块建立基线 Trace，记录关键帧（如制动请求帧）的周期、抖动、端到端延迟。\n2. 在运行中物理断开 Channel A 的线束（拔接头或用断线盒切断），模拟单通道故障。\n3. 持续采集 Channel B 上的报文，观察接收侧的信号连续性。\n4. 恢复 Channel A，验证能否自动回到双通道状态。\n\n判据：\n- 信号不丢：断 A 瞬间关键信号不得出现丢帧、超时或替代值（默认值/失效值）。\n- 延迟不增：Channel B 接管后端到端延迟与基线相当，不得出现阶跃。\n- 切换时间 < 1 个 Cycle：这是章节在「实战中常见严重问题」里给出的硬指标，超出会导致刹车信号延迟、制动距离增加。\n- 无关联 DTC 误报，或按设计只报预期的通道故障 DTC。\n\n三、补充测试项\n- 通道间数据一致性：冗余模式下双通道发相同数据，用 Trace 对比两路内容并校验 CRC 一致。\n- 反向验证：改断 Channel B，确认 A 侧同样不受影响，避免只做单向测试留下盲区。\n\n这项「断 A 验 B」是底盘域 HIL 的保留节目，因为线控制动/转向的安全论证直接依赖它。"
+  },
+  {
+    "id": "Q-04-06-01",
+    "chapterNum": 4,
+    "sectionIndex": 5,
+    "sectionTitle": "六、Bus Guardian：安全门卫",
+    "module": "A",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Bus Guardian",
+      "安全",
+      "线控制动"
+    ],
+    "stem": "FlexRay 的 Bus Guardian 的作用是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "一个软件看门狗，任务超时后复位本节点的 MCU"
+      },
+      {
+        "key": "B",
+        "text": "硬件门卫，只在分配给该节点的 Slot 时段接通总线，其他时段物理断开"
+      },
+      {
+        "key": "C",
+        "text": "对每一帧做 CRC 校验，校验失败则丢弃报文"
+      },
+      {
+        "key": "D",
+        "text": "网关中的路由过滤器，决定哪些帧允许跨网段转发"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "章节原文：每个节点都有一个 Bus Guardian 硬件，只在分配给该节点的 Slot 时段接通总线，其它时段物理断开。目的是防止「发疯的节点」在别人的时间槽乱发，破坏整个 TDMA 调度——没有 BG 时，节点 A 在节点 B 的时间槽发帧会破坏 B 的信号，可能导致刹车失效；有 BG 时节点 A 被硬件阻断，B 的信号正常发出。关键词是「硬件层面」——软件 bug 也破坏不了，这就是 FlexRay 敢做线控制动的底气。A 描述的是看门狗定时器，C 是 CRC 校验，D 是网关路由，都不是 BG。",
+    "keyPoints": [
+      "BG 是硬件门卫，按 Slot 时段物理接通/断开总线",
+      "防止节点在他人时间槽乱发，保护 TDMA 调度",
+      "硬件级保障，软件 bug 也绕不过——线控制动的底气"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "Bus Guardian 机制说明块（有/无 BG 的对比）"
+    },
+    "relatedTerms": [
+      "Slot",
+      "TDMA",
+      "线控制动"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-06-02",
+    "chapterNum": 4,
+    "sectionIndex": 5,
+    "sectionTitle": "六、Bus Guardian：安全门卫",
+    "module": "A",
+    "type": "multi",
+    "cat": "协议流程",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "冷启动",
+      "CAS",
+      "Startup Frame"
+    ],
+    "stem": "关于 FlexRay 的冷启动（Cold Start）流程，下列说法正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Lead Cold Start Node 上电后先监听总线，若发现已有节点在发 Startup Frame，则转入 Integration（集成启动）"
+      },
+      {
+        "key": "B",
+        "text": "多个 Lead 节点可能同时发起启动，通过 CAS（Collision Avoidance Symbol）保证只有一个成为真正的 Lead"
+      },
+      {
+        "key": "C",
+        "text": "Lead 节点发送带 SYNC 位的 Startup Frame，建立 Cycle 0 的时间基准"
+      },
+      {
+        "key": "D",
+        "text": "网络中只需配置 1 个冷启动节点即可完成冷启动"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "冷启动四阶段依次是：Phase 1 监听（Listen）——Lead Cold Start Node 上电后监听总线，检测是否已有节点在发 Startup Frame，有则进入 Integration；Phase 2 CAS 冲突避免——多个 Lead 节点同时发 Collision Avoidance Symbol，CAS 就像敲门的暗号，只让一个节点成为真正的 Lead；Phase 3 发送 Startup Frame——Lead 节点发 SYNC Frame（带 SYNC 位=1 的 Startup Frame），建立 Cycle 0 时间基准；Phase 4 建立同步——Following 节点收到后对齐本地时钟并发自己的 SYNC Frame，至少 2 个节点同步成功后网络进入 Normal Active。D 错在节点数量：冷启动条件是至少 2 个（推荐 3 个）节点配置为 Cold Start Node，单节点无法完成同步确认。此外启动超时通常 < 100ms。",
+    "keyPoints": [
+      "四阶段：监听 → CAS 冲突避免 → 发 Startup/Sync 帧 → 建立同步",
+      "至少 2 个（推荐 3 个）冷启动节点，启动超时通常 < 100ms",
+      "至少 2 个节点同步成功才进入 Normal Active"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "冷启动四阶段代码块（Listen / CAS / Startup Frame / 建立同步）"
+    },
+    "relatedTerms": [
+      "Integration",
+      "Normal Active",
+      "SYNC Frame"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-06-03",
+    "chapterNum": 4,
+    "sectionIndex": 5,
+    "sectionTitle": "六、Bus Guardian：安全门卫",
+    "module": "A",
+    "type": "short",
+    "cat": "协议流程",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "FTSP",
+      "时钟同步",
+      "Macrotick"
+    ],
+    "stem": "FlexRay 如何做到全网时钟偏差 < 1μs？请说明硬件时钟链、FTSP 的两类校正机制，以及 Sync Node 与 Non-Sync Node 的区别。",
+    "options": [],
+    "answer": [],
+    "explanation": "时钟同步是 FlexRay 确定性的物理基础——没有统一时基，TDMA 的 Slot 边界就无从谈起。回答需覆盖硬件时钟链（晶振→Microtick→Macrotick→Cycle）、Offset 与 Rate 两类校正、FTA 容错平均算法，以及 Sync Node 最多 15 个的限制。",
+    "keyPoints": [
+      "时钟链：晶振(40MHz) → Microtick(25ns) → Macrotick(1μs) → Cycle",
+      "FTSP 两类校正：Offset（偏移，剔除最偏值取容错平均）+ Rate（速率，补偿晶振漂移）",
+      "校正在每个 NIT 段执行；Sync Node 最多 15 个"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "时钟同步代码块（FTSP、Offset Correction、Rate Correction、Sync Node）"
+    },
+    "relatedTerms": [
+      "FTA",
+      "ppm",
+      "NIT"
+    ],
+    "refAnswer": "一、硬件时钟链\n\nFlexRay 把物理晶振逐级换算成协议时间单位：\n晶振（如 40MHz）→ Microtick（μT，约 25ns，节点本地最小计时单位）→ Macrotick（MT，1μs，全网统一的同步单位）→ Cycle（通信周期）。\nMicrotick 是本地的、各节点可能有偏差；Macrotick 是全网对齐的目标，所以同步精度的量级天然落在微秒级。\n\n二、FTSP 的两类校正（每个 NIT 段执行）\n\nFTSP = Fault-Tolerant Synchronization Protocol（容错同步协议），它同时修「相位」和「频率」两件事：\n\n1）Offset Correction（偏移校正 / 修相位）：\n- 收集本 Cycle 内所有 Sync Frame 的实际到达时间与期望时间的偏差；\n- 用 FTA（Fault-Tolerant Average，容错平均）算法剔除最偏的 2 个极端值，避免某个故障节点把全网带偏；\n- 用剩余值计算本节点的时钟偏差，并校正本地时钟相位。\n\n2）Rate Correction（速率校正 / 修频率）：\n- 比较相邻两个双 Cycle 之间同一 Sync Frame 的时间差；\n- 推算本地晶振相对全网的频率漂移；\n- 校正计时速率，例如补偿 ±50ppm 的晶振误差。\n只修相位不修频率会导致每个周期都重新跑偏，两者必须配合，这是能长期稳定在 1μs 以内的关键。\n\n三、Sync Node vs Non-Sync Node\n\n- Sync Node（同步节点，全网最多 15 个）：发送 SYNC Frame，参与 FTSP 计算，是时间基准的贡献者。数量受限是因为 FTA 算法需要在有限样本上做容错平均，节点过多既无必要也增加计算负担。\n- Non-Sync Node（非同步节点）：只接收 SYNC Frame，被动对齐本地时钟，不参与基准计算。\n\n四、测试关联\n\n台架上验证时钟同步的典型做法是故障注入：断开冷启动/同步节点，观察网络降级后能否维持同步、剩余 Sync Node 是否顶上、以及同步丢失后是否按预期进入降级状态并报出对应故障。"
+  },
+  {
+    "id": "Q-04-06-04",
+    "chapterNum": 4,
+    "sectionIndex": 5,
+    "sectionTitle": "六、Bus Guardian：安全门卫",
+    "module": "A",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "Frame ID",
+      "Slot",
+      "Cycle Multiplexing"
+    ],
+    "stem": "关于 FlexRay 中 Frame ID 与 Slot 的映射规则，正确的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "静态段中 Frame ID = Slot Number 严格一一对应；动态段中 Frame ID 越小优先级越高，通过 Mini-slotting 竞争"
+      },
+      {
+        "key": "B",
+        "text": "静态段中 Frame ID 越小优先级越高；动态段中 Frame ID 与 Slot 一一对应"
+      },
+      {
+        "key": "C",
+        "text": "静态段和动态段都是 Frame ID 与 Slot 严格一一对应"
+      },
+      {
+        "key": "D",
+        "text": "静态段和动态段都靠 Frame ID 优先级竞争，与 Slot 编号无关"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "Frame ID → Slot 映射表列了三行：静态段——Frame ID = Slot Number（严格一一对应），例如 Slot 1 对应 Frame ID 1，长度固定；动态段——Frame ID 越小优先级越高，通过 Mini-slotting 竞争，例如 Frame ID 20 优先于 Frame ID 30；Cycle Multiplexing——同一 Slot 在不同 Cycle 发不同 Frame，例如 Slot 5 在 Cycle 0 发 Frame A、Cycle 1 发 Frame B。B、C、D 都把两段的规则弄混了。理解的关键仍是那句话：静态段保确定性所以固定映射，动态段保灵活性所以按优先级竞争。",
+    "keyPoints": [
+      "静态段：Frame ID = Slot Number，一一对应，长度固定",
+      "动态段：Frame ID 越小优先级越高，Mini-slotting 竞争",
+      "Cycle Multiplexing：同一 Slot 在不同 Cycle 承载不同帧"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "Frame ID → Slot 映射表（段类型 / 映射规则 / 示例）"
+    },
+    "relatedTerms": [
+      "Mini-slotting",
+      "Slot Number",
+      "周期复用"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-07-01",
+    "chapterNum": 4,
+    "sectionIndex": 6,
+    "sectionTitle": "七、FIBEX 配置：FlexRay 的\"DBC\"",
+    "module": "A",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "FIBEX",
+      "DBC",
+      "LDF"
+    ],
+    "stem": "FIBEX 与 DBC、LDF 相比，最本质的区别是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "FIBEX 是二进制格式，DBC/LDF 是文本格式"
+      },
+      {
+        "key": "B",
+        "text": "FIBEX 定义的是 Cycle × Slot × Channel 三维映射，DBC 定义谁发什么信号，LDF 定义谁在什么时间点名"
+      },
+      {
+        "key": "C",
+        "text": "FIBEX 只描述物理层参数，不描述信号与报文"
+      },
+      {
+        "key": "D",
+        "text": "FIBEX 由 OEM 自定义，没有行业标准约束"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "章节的面试提示原文：DBC 定义的是「谁发什么信号」，LDF 定义的是「谁在什么时间点名」，FIBEX 定义的是「谁在哪个 Cycle 的哪个 Slot 的哪个 Channel 上发什么帧」——三维映射（Cycle × Slot × Channel），复杂度高了一个数量级。A 错在格式：对比表写明 FIBEX 底层是 XML（ASAM 标准），不是二进制；C 错在内容：FIBEX 的核心内容恰恰是 Slot/Cycle/Channel 三维矩阵映射，同时还包含 Macrotick/Microtick/gdCycle 等时钟配置；D 错在标准归属：FIBEX 是 ASAM 标准，后缀 .fibex/.xml。",
+    "keyPoints": [
+      "FIBEX = XML（ASAM 标准），后缀 .fibex / .xml",
+      "三维映射：Cycle × Slot × Channel",
+      "DBC 一维信号映射、LDF 帧+调度表，FIBEX 复杂度高一个数量级"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "FIBEX vs DBC vs LDF 对比表（后缀/底层格式/核心内容/调度定义/冗余描述/时钟配置）"
+    },
+    "relatedTerms": [
+      "ASAM",
+      "gdCycle",
+      "Macrotick"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-07-02",
+    "chapterNum": 4,
+    "sectionIndex": 6,
+    "sectionTitle": "七、FIBEX 配置：FlexRay 的\"DBC\"",
+    "module": "A",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "FIBEX",
+      "配置验证",
+      "Slot冲突"
+    ],
+    "stem": "根据章节「配置时必须检查的三件事」，FIBEX 配置验证的必查项包括（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Slot 不冲突——两个节点不能占用同一 Slot，否则数据覆盖导致故障"
+      },
+      {
+        "key": "B",
+        "text": "Cycle Repetition 正确——安全帧应在每个 Cycle 发，诊断帧只能隔 N 个 Cycle 发"
+      },
+      {
+        "key": "C",
+        "text": "Channel 映射一致——发射机配 Channel A 发，接收机必须配为收 Channel A"
+      },
+      {
+        "key": "D",
+        "text": "波特率与同车的 CAN 网段保持一致，避免网关转发丢帧"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "「配置时必须检查的三件事」表给出的正是 A、B、C 三项及其实车教训：同一 Slot 两个节点同时发包会数据覆盖导致故障；Cycle Repetition 配错会让帧出现在错误的 Cycle，安全帧漏发或诊断帧挤占带宽；Channel 映射不一致会导致 A 发 B 收模式下收不到数据。D 是臆造项——FlexRay 与 CAN 是两个独立网段，速率各自独立（FlexRay 10M、CAN 500K 是常态），网关做的是协议与信号的转换，不要求波特率一致。",
+    "keyPoints": [
+      "三大必查：Slot 不冲突 / Cycle Repetition 正确 / Channel 映射一致",
+      "Slot 冲突 → 数据覆盖 → 实车故障",
+      "FlexRay 与 CAN 网段速率相互独立，由网关做转换"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "配置时必须检查的三件事表（检查项 / 为什么重要 / 实车教训）"
+    },
+    "relatedTerms": [
+      "Cycle Repetition",
+      "Channel 映射",
+      "网关"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-08-01",
+    "chapterNum": 4,
+    "sectionIndex": 7,
+    "sectionTitle": "八、综合对比",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "综合对比",
+      "数据量",
+      "选型"
+    ],
+    "stem": "根据综合对比表，CAN 2.0 / CAN FD / FlexRay / 车载以太网(TSN) 每帧数据量的正确对应是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "8B / 64B / 254B / 1500B"
+      },
+      {
+        "key": "B",
+        "text": "8B / 64B / 64B / 1024B"
+      },
+      {
+        "key": "C",
+        "text": "8B / 128B / 254B / 1500B"
+      },
+      {
+        "key": "D",
+        "text": "64B / 254B / 1500B / 9000B"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "综合对比表的「数据量/帧」一行是 8B（CAN 2.0）、64B（CAN FD）、254B（FlexRay）、1500B（车载以太网 TSN）。配套记忆速率一行：1M / 8M / 10~20M / 100M~1G+。这四组数字是总线选型题的答题底座——被问「为什么 OTA 不走 CAN」时，用 8B vs 1500B、500K vs 100M 这两组对比最有说服力。",
+    "keyPoints": [
+      "数据量/帧：8B / 64B / 254B / 1500B",
+      "速率：1M / 8M / 10~20M / 100M~1G+",
+      "确定性：FlexRay 极高，以太网靠 TSN 达到高"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "综合对比表（CAN 2.0 / CAN FD / FlexRay / 车载以太网 TSN）"
+    },
+    "relatedTerms": [
+      "CAN FD",
+      "TSN",
+      "选型"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-08-02",
+    "chapterNum": 4,
+    "sectionIndex": 7,
+    "sectionTitle": "八、综合对比",
+    "module": "A",
+    "type": "multi",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "FlexRay",
+      "趋势",
+      "TSN"
+    ],
+    "stem": "章节分析「为什么 FlexRay 被替代」，下列属于其中原因的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "成本太高：收发器贵、星型耦合器更贵、FIBEX 配置复杂、工具链昂贵"
+      },
+      {
+        "key": "B",
+        "text": "生态萎缩：芯片停产、人才稀少、新项目不再选型"
+      },
+      {
+        "key": "C",
+        "text": "以太网赶上来了：TSN 提供确定性，带宽碾压；CAN FD 的 8M + 64 字节也够用了"
+      },
+      {
+        "key": "D",
+        "text": "FlexRay 的确定性本来就不如 CAN FD，技术上先天不足"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "「趋势：为什么 FlexRay 被替代」表列了五条：成本太高、生态萎缩、以太网赶上来了（TSN 提供确定性、带宽碾压）、CAN FD 够用了（8M + 64 字节能覆盖大部分底盘需求）、国内趋势（国产车企几乎不用 FlexRay，用 CAN FD + 以太网组合）。D 与事实相反——综合对比表里 FlexRay 的确定性是「极高」，CAN FD 是「低」。章节的面试提示也强调：被问 FlexRay 前景别吹也别黑，技术上确定性仍是一流，但生态在萎缩、TSN 以太网在接棒。FlexRay 输在商业与生态，不是输在技术确定性。",
+    "keyPoints": [
+      "被替代原因：成本高、生态萎缩、TSN 以太网接棒、CAN FD 够用、国内几乎不用",
+      "FlexRay 确定性仍是一流（对比表标为极高），输的是生态而非技术",
+      "存量车型（宝马 X5 空气悬挂、奥迪线控转向）仍需会测"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "趋势：为什么 FlexRay 被替代表（原因 / 说明）"
+    },
+    "relatedTerms": [
+      "CAN FD",
+      "TSN",
+      "星型耦合器"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-09-01",
+    "chapterNum": 4,
+    "sectionIndex": 8,
+    "sectionTitle": "九、测试实战关联",
+    "module": "A",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "帧周期检查",
+      "抖动",
+      "CANoe"
+    ],
+    "stem": "根据测试实战关联表，FlexRay「帧周期检查」的方法是确认每帧在分配的静态槽内准时发送，其抖动判据是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "抖动 < 1ms"
+      },
+      {
+        "key": "B",
+        "text": "抖动 < 1μs"
+      },
+      {
+        "key": "C",
+        "text": "抖动 < 10ms"
+      },
+      {
+        "key": "D",
+        "text": "抖动 < 100ms"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "测试项表第一行：帧周期检查——确认每帧在分配的静态槽内准时发送，抖动 < 1μs，工具是 CANoe FlexRay 模块。这个 1μs 与关键参数表的「全网络时钟偏差 < 1μs」是同一量级——正因为全网时钟能对齐到微秒级，才有资格要求帧发送抖动也在微秒级。章节的面试提示总结得很到位：FlexRay 测试的核心是「时间」——帧必须在自己的 Slot 里准时出现。若判据放宽到毫秒级，TDMA 的意义就荡然无存了。",
+    "keyPoints": [
+      "帧周期检查判据：静态槽内准时发送，抖动 < 1μs",
+      "工具：CANoe FlexRay 模块",
+      "微秒级判据源自 <1μs 的全网时钟同步能力"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "测试实战关联表（测试项 / 方法 / 工具）"
+    },
+    "relatedTerms": [
+      "静态槽",
+      "抖动",
+      "Trace"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-09-02",
+    "chapterNum": 4,
+    "sectionIndex": 8,
+    "sectionTitle": "九、测试实战关联",
+    "module": "A",
+    "type": "short",
+    "cat": "故障定位",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "Bus Guardian",
+      "故障注入",
+      "HIL"
+    ],
+    "stem": "请设计一个验证 Bus Guardian 是否生效的台架测试：说明测试方法、预期结果、以及如果 BG 未能阻断会造成什么后果。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题把 BG 原理转换为可执行的故障注入用例，考察「造错误 → 看阻断 → 评后果」的测试思维。答案要点须来自测试实战表（用错误的时间槽发帧，硬件应阻断，测试脚本强制错位发送）和常见严重问题表（BG 配置错 → 破坏他人 Slot → ESP 数据被覆盖）。",
+    "keyPoints": [
+      "方法：用测试脚本强制节点在非本节点 Slot 错位发送",
+      "预期：BG 硬件阻断，总线上不出现越权帧，他人 Slot 数据完好",
+      "BG 失效后果：破坏他人 Slot，如 ESP 数据被覆盖；必须硬件验证，不能只靠软件仿真"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "测试实战关联表「Bus Guardian 测试」行 + 常见严重问题表「Bus Guardian 配置错」行"
+    },
+    "relatedTerms": [
+      "故障注入",
+      "ESP",
+      "越权发送"
+    ],
+    "refAnswer": "一、测试目标\n验证节点在非授权时间槽发送时，Bus Guardian 能在硬件层面阻断，保证其他节点的 Slot 数据不被破坏。\n\n二、测试方法\n1. 准备：按 FIBEX 配置搭好 FlexRay 网络，明确被测节点 A 的授权 Slot 与相邻节点 B 的授权 Slot（如 A 占 Slot 3、B 占 Slot 4）。用 CANoe FlexRay 模块建立正常状态基线 Trace。\n2. 注入：用测试脚本/特制固件强制节点 A 在 Slot 4（属于 B）的时段发送一帧，即错位发送。为覆盖充分，可分别注入「提前发送」「延后发送」「持续占用多个 Slot」三种错位形态。\n3. 观测：在总线侧抓取 Trace，同时在 B 的接收端观察其帧是否完整、CRC 是否通过。\n\n三、预期结果（判据）\n- 总线上不出现节点 A 在 Slot 4 的越权帧——BG 在物理层已把收发器与总线断开。\n- 节点 B 在 Slot 4 的帧照常发出、内容完整、CRC 校验通过，接收方无丢帧。\n- 网络状态不降级，其余 Slot 的时序与基线一致，抖动仍 < 1μs。\n- 如果设计要求，节点 A 侧应记录相应的通信/BG 错误状态或 DTC。\n\n四、BG 未阻断的后果\n章节在「实战中常见严重问题」里给出了真实教训：节点在错误 Slot 发包而 Guardian 未阻断，会破坏他人 Slot 的数据，例如 ESP 的数据被覆盖。TDMA 的时间保证一旦被打破，所有安全关键信号（制动、转向）都可能失真或丢失，严重度为「严重」。\n\n五、注意事项\nBG 配置必须在硬件层面验证，不能只靠软件仿真——仿真环境中的软件协议栈可能自行规避越权发送，导致测试假通过，真车上却因硬件配置错误而失守。"
+  },
+  {
+    "id": "Q-04-10-01",
+    "chapterNum": 4,
+    "sectionIndex": 9,
+    "sectionTitle": "十、面试高频考点",
+    "module": "A",
+    "type": "judge",
+    "cat": "标准合规",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "冗余切换",
+      "指标",
+      "HIL"
+    ],
+    "stem": "判断：章节要求 FlexRay 双通道的切换时间必须小于 1 个 Cycle，否则可能出现刹车信号延迟、制动距离增加，因此 HIL 必测「断 A 切 B」。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "T"
+    ],
+    "explanation": "正确。「实战中常见严重问题」表第一行给出的根因与教训原文就是：双通道切换时间必须 < 1 个 Cycle，HIL 必测断 A 切 B；对应现象是 Channel A 断了而 Channel B 没有切换，导致刹车信号延迟、制动距离增加，严重度为「严重」。这个指标的逻辑很直白——FlexRay 的调度以 Cycle 为节拍，若切换耗时超过一个 Cycle，就必然至少丢掉一轮关键帧，安全论证无法通过。",
+    "keyPoints": [
+      "双通道切换时间硬指标：< 1 个 Cycle",
+      "切换失败现象：刹车信号延迟、制动距离增加",
+      "断 A 切 B 是底盘 HIL 的必测项"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "实战中常见严重问题表「单通道故障导致冗余失效」行"
+    },
+    "relatedTerms": [
+      "Cycle",
+      "冗余失效",
+      "制动距离"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-04-10-02",
+    "chapterNum": 4,
+    "sectionIndex": 9,
+    "sectionTitle": "十、面试高频考点",
+    "module": "A",
+    "type": "multi",
+    "cat": "故障定位",
+    "difficulty": "挑战",
+    "direction": "反向",
+    "tags": [
+      "面试考点",
+      "严重问题",
+      "易错"
+    ],
+    "stem": "面试官问及 FlexRay 的实战风险，下列哪些说法与章节「面试高频考点」及「常见严重问题」一致（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Channel A 断而 B 未切换会导致刹车信号延迟、制动距离增加，切换时间要求 < 1 个 Cycle"
+      },
+      {
+        "key": "B",
+        "text": "Bus Guardian 配置错会让节点在错误 Slot 发包不被阻断，破坏他人 Slot，例如 ESP 数据被覆盖"
+      },
+      {
+        "key": "C",
+        "text": "Bus Guardian 的配置只要在软件仿真环境验证通过即可，无需硬件层面复测"
+      },
+      {
+        "key": "D",
+        "text": "选 FlexRay 而不选 CAN 的典型场景是线控制动/转向等安全关键系统，需要时间确定 + 硬件冗余"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "D"
+    ],
+    "explanation": "A、B 出自「实战中常见严重问题」表的两行现象与根因；D 出自「进阶加分项」表的「什么时候选 FlexRay 不选 CAN」——线控制动/转向等安全关键系统，必须时间确定 + 硬件冗余。C 与章节教训完全相反：原文明确写着「BG 配置必须硬件层面验证，不能只靠软件仿真」。这是本题的反向陷阱——仿真环境的软件协议栈往往会自行规避越权发送，测试看似通过，实车却因硬件配置错误而失守。",
+    "keyPoints": [
+      "冗余失效与 BG 配置错是两大严重级问题",
+      "BG 必须硬件验证，软件仿真会造成假通过",
+      "FlexRay 选型场景：线控制动/转向，要时间确定 + 硬件冗余"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "实战中常见严重问题表 + 进阶加分项表（什么时候选 FlexRay 不选 CAN）"
+    },
+    "relatedTerms": [
+      "线控制动",
+      "硬件在环",
+      "冗余"
+    ],
+    "refAnswer": ""
+  }
+]

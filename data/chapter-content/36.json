@@ -1,0 +1,659 @@
+{
+  "num": 36,
+  "slug": "CarPlay-Carlife",
+  "title": "CarPlay / Carlife 测试",
+  "oneliner": "CarPlay/Carlife 将手机生态投射到车机屏幕——导航、音乐、电话、消息全在车屏操作，反向触控操控手机。测试核心：**连接稳、投屏流畅、音频无冲突、认证合规**",
+  "sections": [
+    {
+      "title": "一、连接建立流程",
+      "icon": "📋",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "CarPlay / Carlife 把手机生态投到车机：导航 / 音乐 / 电话 / 消息都在车屏操作，还能反向触控手机。背后是手机与车机认证握手 + 音视频流。测试核心：连接稳、投屏流畅、音频焦点不冲突（导航播报别被音乐盖掉）、认证合规（Apple / 百度认证过才能上车）。",
+          "_enh": "concept"
+        },
+        {
+          "type": "h3",
+          "text": "有线 CarPlay 连接流程"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "  iPhone USB 插入车机\n          │\n          ▼\n  ┌────────────┐     iAP2握手 + MFi认证     ┌──────────────┐\n  │  车机      │ ←────────────────────────→ │   iPhone    │\n  │  USB Host  │   ①USB枚举(设备识别)        │   USB       │\n  │            │   ②iAP2协议握手(认证芯片验证) │   Device    │\n  │            │   ③NCM网络通道(USB虚拟网卡)   │            │\n  │            │   ④CarPlay Service启动       │            │\n  └─────┬──────┘                             └──────┬─────┘\n        │                                           │\n        ▼                                           ▼\n  ┌──────────────┐                          ┌──────────────┐\n  │ 车机屏幕      │     ←── H.264视频流 ──    │ iPhone独立    │\n  │ 渲染CarPlay   │                          │ 渲染CarPlay   │\n  │ UI界面        │     ── 反向触控(HID) ──→  │ Dashboard    │\n  └──────────────┘                          └──────────────┘"
+        },
+        {
+          "type": "h3",
+          "text": "无线 CarPlay 连接流程"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "               阶段1：蓝牙握手(设备发现+认证)\n  车机                             手机\n    │    BLE广播/设备发现              │\n    │ ←═══════════════════════════→  │\n    │    交换WiFi凭据(SSID+密码)      │\n    │    配对确认(PIN/数字比对)       │\n    │                                │\n               阶段2：WiFi直连建立\n    │    WiFi 5GHz 直连（车机作 SoftAP，手机 STA 接入）         │\n    │ ←═══════════════════════════→  │\n    │    iAP2 over WiFi               │\n    │    H.264视频流 + 音频 + 触控    │\n    │                                │\n              后续回连：\n  点火→WiFi自动直连(蓝牙辅助握手→如果WiFi凭据有效则跳过蓝牙配对)"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "连接方式",
+            "底层协议",
+            "认证机制",
+            "带宽",
+            "首次连接标准"
+          ],
+          "rows": [
+            [
+              "有线 CarPlay",
+              "USB + iAP2",
+              "MFi 认证芯片",
+              "USB 2.0 480Mbps",
+              "<5s 进入界面"
+            ],
+            [
+              "无线 CarPlay",
+              "BLE(握手) + WiFi 5GHz 直连",
+              "MFi + WiFi 直连",
+              ">100Mbps",
+              "<30s"
+            ],
+            [
+              "Carlife 有线",
+              "USB + ADB",
+              "百度认证",
+              "USB 2.0",
+              "<5s"
+            ],
+            [
+              "Carlife 无线",
+              "WiFi 直连",
+              "百度认证",
+              "WiFi",
+              "<20s"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：无线CarPlay的蓝牙只做\"引荐人\"——交换WiFi SSID和密码、完成设备发现和配对确认，之后所有数据走WiFi。为什么必须WiFi？蓝牙EDR理论3Mbps实际更低，H.264视频流需稳定10Mbps以上，只有WiFi能承载。"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "二、认证测试",
+      "icon": "🔑",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "苹果 MFi 认证测试要点"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "测试项",
+            "说明",
+            "关键验证点"
+          ],
+          "rows": [
+            [
+              "iAP2协议兼容",
+              "车机USB模块实现iAP2协议栈",
+              "iAP2握手/指令/数据通道全部正常"
+            ],
+            [
+              "MFi认证芯片",
+              "车机内置MFi认证芯片(或MFi License)",
+              "认证握手通过，不受iOS版本升级影响"
+            ],
+            [
+              "CarPlay UI规范",
+              "苹果CarPlay HMI设计指南",
+              "按钮尺寸/间距/颜色/字体，Siri界面布局"
+            ],
+            [
+              "Siri集成",
+              "方向盘语音键长按唤Siri",
+              "长按=唤Siri，短按=车机语音，两者不冲突"
+            ],
+            [
+              "通话切换",
+              "CarPlay通话 vs 车机蓝牙HFP",
+              "两者不同时使用HFP；CarPlay通话时释放车机HFP"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "百度 Carlife 认证测试要点"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "测试项",
+            "说明",
+            "关键验证点"
+          ],
+          "rows": [
+            [
+              "ADB协议兼容",
+              "USB ADB调试协议栈兼容",
+              "各Android品牌/版本ADB兼容"
+            ],
+            [
+              "投屏方案",
+              "镜像模式 + 独立渲染模式",
+              "两种模式均正常，画面无撕裂"
+            ],
+            [
+              "小度语音",
+              "百度语音引擎集成",
+              "语音识别/导航/音乐控制正常工作"
+            ],
+            [
+              "第三方APP",
+              "不限制第三方地图/音乐",
+              "高德/百度地图/QQ音乐均正常（存疑：部分版本可能存在兼容性差异）"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "三、音频焦点仲裁与冲突处理",
+      "icon": "⚡",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "音源仲裁优先级"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "                    音频焦点管理器(Audio Focus Manager)\n                                │\n         ┌──────────────────────┼──────────────────────┐\n         ▼                      ▼                      ▼\n   PRIORITY HIGH          PRIORITY MEDIUM        PRIORITY LOW\n   ├ 倒车雷达告警           ├ HFP蓝牙通话            ├ FM/AM收音机\n   ├ eCall紧急呼叫          ├ CarPlay导航播报        ├ 蓝牙音乐(A2DP)\n   ├ 系统警示音             ├ CarPlay音乐播放         ├ 本地USB音乐\n   │                       │                         │\n                    冲突仲裁规则：\n                    高优先级抢占→低优先级暂停或衰减(ducking)\n                    同优先级→后启动者获取焦点\n                    焦点释放→自动恢复上一个持有者"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "冲突场景",
+            "预期行为",
+            "验证方法"
+          ],
+          "rows": [
+            [
+              "CarPlay音乐 vs FM收音机",
+              "CarPlay推音乐时自动停止收音机",
+              "切音源→收音机无声→CarPlay音乐正常"
+            ],
+            [
+              "CarPlay导航播报 vs CarPlay音乐",
+              "导航播报时音乐自动衰减(ducking)",
+              "导航播报→音乐音量降至约25%→导航结束恢复"
+            ],
+            [
+              "倒车雷达告警 vs CarPlay音乐",
+              "雷达告警→CarPlay音乐完全静音(mute)",
+              "挂R档雷达响→音乐静音→退出R档音乐恢复"
+            ],
+            [
+              "蓝牙HFP来电 vs CarPlay音乐",
+              "来电→CarPlay音乐暂停+切到HFP通话",
+              "通话结束→CarPlay音乐自动恢复"
+            ],
+            [
+              "Siri vs 车机语音助手",
+              "长按语音键=Siri优先",
+              "车机语音被抢占，Siri结束后恢复"
+            ],
+            [
+              "CarPlay退出 vs 收音机恢复",
+              "CarPlay导航结束拔线→切回收音机",
+              "收音机自动恢复播放，非无声"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：音源冲突是CarPlay测试最大坑点，高频Bug集中在：退出CarPlay后收音机无声(Audio Focus未归还)、导航播报后音乐不恢复(ducking退出失败)、倒车后黑屏(渲染资源抢占崩溃)。测试必须建Audio Focus状态矩阵遍历所有音源组合。"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "四、测试维度与场景",
+      "icon": "🔬",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "连接稳定性"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "测试维度",
+            "场景",
+            "通过标准"
+          ],
+          "rows": [
+            [
+              "有线首次连接",
+              "USB插线→CarPlay启动",
+              "<5s进入CarPlay界面"
+            ],
+            [
+              "无线首次配对",
+              "蓝牙配对→WiFi握手→CarPlay启动",
+              "<30s"
+            ],
+            [
+              "无线自动回连",
+              "熄火→重新点火",
+              "<15s自动回连"
+            ],
+            [
+              "USB热插拔",
+              "插→拔→插 循环20次",
+              "0次崩溃，0次连接失败"
+            ],
+            [
+              "多手机切换",
+              "手机A已连→拔线→手机B插线",
+              "<5s切换完成，A设备干净断开"
+            ],
+            [
+              "iOS版本兼容",
+              "最新iOS + 前2个大版本",
+              "基本功能全部兼容"
+            ],
+            [
+              "无线干扰环境",
+              "商场地库WiFi密集区",
+              "不频繁断连，断连<5s恢复"
+            ],
+            [
+              "充电中启动",
+              "手机低电量充电中→启动CarPlay",
+              "充电+CarPlay同时工作，不冲突不重启"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "投屏功能"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "测试维度",
+            "方法",
+            "验证点"
+          ],
+          "rows": [
+            [
+              "地图投屏",
+              "手机导航→车屏显示",
+              "路线/箭头/TBT路口放大同步，延迟<200ms"
+            ],
+            [
+              "反向触控",
+              "车屏双指缩放地图→手机地图缩放",
+              "反向触控延迟<200ms"
+            ],
+            [
+              "来电不中断导航",
+              "CarPlay导航中→来电话→接听",
+              "接听后导航持续，不退出不中断"
+            ],
+            [
+              "消息通知",
+              "微信/iMessage→CarPlay弹窗→Siri朗读",
+              "朗读+语音回复链路正常"
+            ],
+            [
+              "第三方地图",
+              "高德/百度地图投屏",
+              "功能完整，无画面错位偏移"
+            ],
+            [
+              "Dashboard分屏",
+              "CarPlay分屏(地图+音乐+快捷)",
+              "布局正确，切换流畅"
+            ],
+            [
+              "深色/浅色模式",
+              "车灯开关联动CarPlay主题切换",
+              "开大灯→CarPlay切深色模式"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "异常场景"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "测试场景",
+            "操作",
+            "预期行为"
+          ],
+          "rows": [
+            [
+              "倒车抢占",
+              "CarPlay导航中→挂R档",
+              "倒车影像全屏→退出R档→CarPlay恢复→不黑屏不崩溃"
+            ],
+            [
+              "来电→恢复",
+              "CarPlay播放→蓝牙来电→挂断→恢复",
+              "CarPlay界面不崩溃，音乐恢复"
+            ],
+            [
+              "WiFi断连→恢复",
+              "无线CarPlay→WiFi断连→自动重连",
+              "弹短暂的\"正在重连\"提示→5s内恢复"
+            ],
+            [
+              "充电线颠簸断开",
+              "颠簸路面→USB瞬间断开→CarPlay退出→瞬间恢复",
+              "不崩溃，恢复后导航/音乐继续"
+            ],
+            [
+              "长时间运行",
+              "CarPlay+导航+音乐 连续4h",
+              "无闪退无卡死，内存增长<200MB"
+            ],
+            [
+              "iOS大版本升级",
+              "手机升级iOS→首次连接车机",
+              "兼容，功能正常，必要重配对"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "五、Carlife / HiCar 差异对比",
+      "icon": "📱",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "维度",
+            "CarPlay",
+            "Carlife",
+            "HiCar"
+          ],
+          "rows": [
+            [
+              "出品方",
+              "Apple",
+              "百度",
+              "华为"
+            ],
+            [
+              "认证体系",
+              "MFi强制认证",
+              "百度认证",
+              "华为认证"
+            ],
+            [
+              "有线协议",
+              "USB + iAP2",
+              "USB + ADB",
+              "USB + 分布式协议"
+            ],
+            [
+              "无线协议",
+              "BLE握手 + WiFi 5GHz",
+              "WiFi直连",
+              "蓝牙 + WiFi"
+            ],
+            [
+              "语音助手",
+              "Siri",
+              "小度",
+              "小艺"
+            ],
+            [
+              "第三方APP",
+              "苹果审核制",
+              "百度生态+第三方",
+              "鸿蒙生态"
+            ],
+            [
+              "特色能力",
+              "iOS深度整合",
+              "百度地图+百度生态",
+              "分布式流转(手机应用流转到车机)"
+            ],
+            [
+              "测试侧重点",
+              "MFi认证+iAP2兼容",
+              "ADB+多品牌Android适配",
+              "NFC一碰传+流转"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "六、面试高频考点",
+      "icon": "🎯",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "必会基础"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "你要能说出来的"
+          ],
+          "rows": [
+            [
+              "**有线 vs 无线CarPlay协议栈**",
+              "有线=USB iAP2 + NCM(虚拟网卡) + H.264；无线=BLE握手交换凭证 + WiFi 5GHz直连 + iAP2 over WiFi"
+            ],
+            [
+              "**为什么无线用WiFi不用蓝牙**",
+              "蓝牙EDR理论3Mbps实际更低，H.264视频流需稳定10Mbps+，只有WiFi(AirPlay同原理)能承载"
+            ],
+            [
+              "**音源冲突仲裁**",
+              "Audio Focus Manager按优先级：警报>电话>CarPlay导航>CarPlay音乐>收音机。高优抢占低优，ducking(衰减)和mute(静音)两种策略"
+            ],
+            [
+              "**MFi认证测试**",
+              "iAP2协议兼容+MFi认证芯片握手+CarPlay UI规范+Siri集成+与车机蓝牙HFP互斥"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "进阶加分项"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "高分回答思路"
+          ],
+          "rows": [
+            [
+              "**CarPlay断连排查链路**",
+              "有线：查USB供电(5V/1A以上)→iAP2握手日志→NCM网络状态。无线：查WiFi信道干扰(5GHz DFS雷达避让)→BLE配对状态→凭据有效期"
+            ],
+            [
+              "**无线回连失败原因**",
+              "①WiFi凭据过期/被清→需重新配对 ②手机CarPlay设置中禁用了该车机 ③iOS更新MFi验证策略变化→需重新授权"
+            ],
+            [
+              "**ducking(混音衰减)失效**",
+              "Audio Focus Manager未配置ducking参数→Audio HAL未响应→DSP混音矩阵缺失该路径。用`adb shell dumpsys audio`看焦点栈"
+            ],
+            [
+              "**CarPlay认证流程**",
+              "车机厂商→加入MFi Program→购买认证芯片→集成iAP2协议栈→通过苹果自测工具(CarPlay Self-Certification)→提交苹果审核→获取Logo授权"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "七、测试实战关联",
+      "icon": "🛠️",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "与蓝牙电话联测"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "CarPlay通话 vs 车机蓝牙HFP：二者互斥，不同时占用HFP",
+            "来电时CarPlay导航界面不退出"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "与倒车影像联测"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "CarPlay导航中挂R档→倒车影像全屏→退出R档CarPlay恢复→确认GPU资源无冲突"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "与系统性能联测"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "CarPlay+导航+音乐+方向盘按键 长时间运行4h+→无ANR/Crash→内存增长<200MB"
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "⚠️ 实战中常见严重问题"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "严重度",
+            "现象",
+            "根因+教训"
+          ],
+          "rows": [
+            [
+              "**无线CarPlay始终连不上**",
+              "严重",
+              "蓝牙配对成功→WiFi跳转→一直转圈不进入CarPlay",
+              "WiFi 5GHz信道被DFS雷达避让机制占用→等待60s才能用。解决方案：固定使用非 DFS 信道（UNII-1 36~48 或 149~165）"
+            ],
+            [
+              "**退出CarPlay后收音机无声**",
+              "严重",
+              "拔线退出CarPlay→切回收音机→完全没有声音",
+              "Audio Focus归还失败或DSP音频通道未释放→必须遍历所有音源退出CarPlay后的恢复"
+            ],
+            [
+              "**倒车后CarPlay界面黑屏死机**",
+              "严重",
+              "CarPlay导航中挂R档→退出R档→CarPlay全黑",
+              "倒车影像模块+CarPlay渲染争抢GPU缓冲区→内存踩踏。需隔离Surface Buffer"
+            ],
+            [
+              "**颠簸路面USB断连**",
+              "中等",
+              "过减速带→USB瞬间断电→CarPlay退出导航中断",
+              "USB接口插拔力/抗震设计不足。振动测试+插拔寿命测试应该前置"
+            ],
+            [
+              "**iOS大版本升级后兼容异常**",
+              "中等",
+              "iOS更新→连车机→CarPlay不启动或部分App灰屏",
+              "iAP2协议新增字段未做向后兼容→需在iOS新版本发布前提早做CarPlay回归"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "⬅ 返回 [[MOC_车载测试]] | 继续 → [[37-系统性能测试]]"
+        },
+        {
+          "type": "blockquote",
+          "style": "lab",
+          "text": "🧪 动手实验：构造一次音频焦点冲突\n环境：iPhone + 车机（CarPlay）+ 手机导航 App。\n步骤：① CarPlay 播放音乐；② 触发手机导航播报；③ 观察音乐是否压低 / 暂停、播报后是否恢复；④ 来电插入，验证三方音频优先级。\n预期结果：导航 > 来电 > 音乐 的焦点仲裁正确，无混音、无卡死。\n常见失败：只测「音乐↔导航」，漏了「来电打断导航」的三方仲裁，优先级反转是认证高频失败项。",
+          "_enh": "lab"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 4
+    }
+  ],
+  "summary": "CarPlay/Carlife 将手机生态投射到车机屏幕——导航、音乐、电话、消息全在车屏操作，反向触控操控手机。测试核心：**连接稳、投屏流畅、音频无冲突、认证合规**",
+  "prev_chapter": {
+    "num": 35,
+    "name": "车辆设置测试"
+  },
+  "next_chapter": {
+    "num": 37,
+    "name": "系统性能测试"
+  }
+}

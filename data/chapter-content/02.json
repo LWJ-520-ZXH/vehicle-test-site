@@ -1,0 +1,1819 @@
+{
+  "num": 2,
+  "slug": "CAN总线",
+  "title": "CAN 总线 ⭐核心",
+  "oneliner": "CAN（Controller Area Network）是汽车上最核心的通信协议。所有 ECU 挂在一对差分线上（CAN_H/CAN_L），广播式通信——谁都能发、谁都能听，ID 越小优先级越高",
+  "sections": [
+    {
+      "title": "一、物理层：两根线的世界",
+      "icon": "🔌",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "差分信号原理"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "      隐性(逻辑1)              显性(逻辑0)              CAN_H\n   ━━━━━━━━━━━━━━          ━━━━            ━━━━      ━━━━━━━━ 3.5V\n                             ┃               ┃\n   2.5V ──────────           ┃               ┃        ──────── 2.5V\n                             ┃               ┃\n   ━━━━━━━━━━━━━━          ━━━━            ━━━━      ━━━━━━━━ 1.5V\n                                                                  CAN_L\n    CAN_H = CAN_L = 2.5V   CAN_H=3.5V, CAN_L=1.5V, 差值≈2V"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "状态",
+            "CAN_H",
+            "CAN_L",
+            "差分电压",
+            "逻辑"
+          ],
+          "rows": [
+            [
+              "**隐性**",
+              "≈2.5V",
+              "≈2.5V",
+              "≈0V",
+              "1"
+            ],
+            [
+              "**显性**",
+              "≈3.5V",
+              "≈1.5V",
+              "≈2V",
+              "0"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "warning",
+          "text": "⚠️ **显性覆盖隐性**——多个ECU同时发0和1，总线表现为0。这就是仲裁的基础。"
+        },
+        {
+          "type": "h3",
+          "text": "终端电阻"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "CAN_H ──┬────[ECU1]────[ECU2]────...────[ECUN]────┬──\n        │                                         │\n       120Ω                                      120Ω\n        │                                         │\nCAN_L ──┴─────────────────────────────────────────┴──\n         ↑                                         ↑\n      近端电阻                                   远端电阻"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "答案"
+          ],
+          "rows": [
+            [
+              "**阻值**",
+              "120Ω（匹配线束特性阻抗）"
+            ],
+            [
+              "**位置**",
+              "总线物理两端各一个"
+            ],
+            [
+              "**作用**",
+              "消除信号反射，防止振铃"
+            ],
+            [
+              "**少了会怎样**",
+              "信号反射→波形畸变→通信错误帧激增"
+            ],
+            [
+              "**实测值**",
+              "断电测CAN_H和CAN_L之间 ≈ 60Ω（两个120Ω并联）"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "**万用表快速诊断**：断电后测CAN_H ↔ CAN_L 电阻 = 60Ω → OK；=120Ω → 缺一个终端电阻；=∞ → 两个都掉了。"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"CAN为什么用差分？抗干扰——共模噪声同时打在CAN_H和CAN_L上，接收端只看差值，干扰被抵消。记住三句话：隐性2.5对2.5、显性3.5对1.5、显性覆盖隐性——最后这句是仲裁和错误帧的物理基础。\""
+        },
+        {
+          "type": "h4",
+          "text": "阶段性回顾"
+        },
+        {
+          "type": "review",
+          "current": "**你到现在掌握的是**：CAN物理层的工作原理——两根线（CAN_H/CAN_L）靠差分电压传 0 和 1；终端电阻 120Ω 防反射；显性可以\"吃掉\"隐性。",
+          "next": "**接下来要解决的**：有了一根能可靠传 0/1 的总线之后，怎么把上百个 ECU 的数据打包成一个标准格式，让所有人都能\"读懂\"？这就是帧格式。"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "sim",
+          "sim": "bittiming",
+          "title": "CAN 位时序与采样点计算器",
+          "caption": "拖动 BRP / TSEG1 / TSEG2 观察采样点位置与位时间构成；系统时钟固定 8 MHz，目标 500 kbps。",
+          "defaults": {
+            "fclk": 8,
+            "brp": 1,
+            "tseg1": 13,
+            "tseg2": 2,
+            "sjw": 1,
+            "target": 500
+          }
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": true,
+      "point_count": 0
+    },
+    {
+      "title": "二、CAN帧格式：数据帧七段",
+      "icon": "📦",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "**承上**：物理层解决了\"怎么传 bit\"。帧格式解决的是\"怎么把 bit 组织成有意义的数据包\"——谁发的、发给谁、发了多少个字节、对不对。帧是 CAN 总线一切交互的最小单位。"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "┌─────┬──────────┬────────┬──────────┬────────┬─────┬─────┬──────┐\n│ SOF │ Arbitration│Control│  Data   │  CRC  │ ACK │ EOF │ IFS  │\n│ 1bit│ 11/29 bit │ 6 bit │ 0~8 Byte│ 16 bit│2 bit│7 bit│3 bit │\n└─────┴──────────┴────────┴──────────┴────────┴─────┴─────┴──────┘"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "段",
+            "长度",
+            "作用",
+            "CANoe 中怎么看"
+          ],
+          "rows": [
+            [
+              "**SOF**",
+              "1 bit",
+              "起始位，一个显性位",
+              "Trace窗口首列"
+            ],
+            [
+              "**仲裁段(ID)**",
+              "11bit(标准) / 29bit(扩展)",
+              "ID越小优先级越高，同时决定谁发",
+              "Trace第一列，双击可看详情"
+            ],
+            [
+              "**控制段**",
+              "6 bit",
+              "IDE(1bit)+r0(1bit)+DLC(4bit)",
+              "DLC=0~8表示数据字节数"
+            ],
+            [
+              "**数据段**",
+              "0~8 Byte",
+              "实际数据，按DBC信号定义解析",
+              "Trace中按DBC解析后的物理值"
+            ],
+            [
+              "**CRC段**",
+              "16 bit",
+              "循环冗余校验，检测传输错误",
+              "硬件自动处理，错则发错误帧"
+            ],
+            [
+              "**ACK段**",
+              "2 bit",
+              "发送方发隐性位，接收方回显性位确认",
+              "ACK缺失→无节点在线"
+            ],
+            [
+              "**EOF**",
+              "7 bit",
+              "帧结束标志，7个隐性位"
+            ],
+            [
+              "**IFS**",
+              "3 bit",
+              "帧间隔"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "**标准帧 vs 扩展帧**：标准帧11位ID（0x000~0x7FF），扩展帧29位ID（0x00000000~0x1FFFFFFF）。测试时注意：DBC中同一个信号在标准和扩展帧里写法不同。"
+        },
+        {
+          "type": "h3",
+          "text": "四种帧类型"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "帧类型",
+            "用途",
+            "实际场景"
+          ],
+          "rows": [
+            [
+              "**数据帧**",
+              "发送数据，最常见",
+              "99%的CAN通信"
+            ],
+            [
+              "**远程帧**",
+              "请求对方发送数据",
+              "极少用，CAN FD已取消"
+            ],
+            [
+              "**错误帧**",
+              "检测到错误时发出，6个连续显性位",
+              "主动错误节点发出"
+            ],
+            [
+              "**过载帧**",
+              "通知总线过载，需要延迟",
+              "极罕见"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "标准帧 vs 扩展帧：逐位对比"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "标准帧 (Standard Frame, 11-bit ID):\n┌─────┬────────────┬─────┬─────┬──────────┬────────┬─────┬─────┬──────┐\n│ SOF │ 11bit ID  │ RTR │ IDE │  r0  DLC │  Data  │ CRC │ ACK │ EOF  │\n│ 1bit│ 0x000~0x7FF│1bit │1bit │1+4=5bit │0~8 Byte│16bit│2bit │7bit  │\n└─────┴────────────┴─────┴─┬───┴──────────┴────────┴─────┴─────┴──────┘\n                           │\n                       IDE=0 表示标准帧\n\n扩展帧 (Extended Frame, 29-bit ID):\n┌─────┬──────────┬─────┬─────┬───────────┬─────┬──────────┬───...──┐\n│ SOF │11bit ID │ SRR │ IDE │18bit ID   │ RTR │  r1 DLC  │ Data...│\n│ 1bit│ Base ID │1bit │1bit │Extended ID│1bit │1+4=5bit  │0~8 Byte│\n└─────┴──────────┴─────┴─┬───┴───────────┴─────┴──────────┴───...──┘\n                         │\n                     IDE=1 表示扩展帧"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "对比维度",
+            "标准帧",
+            "扩展帧"
+          ],
+          "rows": [
+            [
+              "**ID长度**",
+              "11 bit",
+              "29 bit"
+            ],
+            [
+              "**ID范围**",
+              "0x000 ~ 0x7FF (2048个)",
+              "0x00000000 ~ 0x1FFFFFFF (≈5.37亿个)"
+            ],
+            [
+              "**仲裁段长度**",
+              "12 bit (ID + RTR)",
+              "32 bit (ID(11) + SRR + IDE + ID(18) + RTR)"
+            ],
+            [
+              "**IDE位**",
+              "0 → \"我是标准帧\"",
+              "1 → \"我是扩展帧\""
+            ],
+            [
+              "**SRR位**",
+              "不存在",
+              "替代了标准帧的RTR位置，固定为隐性(1)"
+            ],
+            [
+              "**帧总长度**",
+              "较短(47+8×DLC bit)",
+              "较长(67+8×DLC bit)"
+            ],
+            [
+              "**CANoe Trace标识**",
+              "ID列直接显示",
+              "ID列尾标 'x' 如 `0x100x`"
+            ],
+            [
+              "**DBC写法**",
+              "`BO_ 256 ...`",
+              "`BO_ 2147483904 ...` (bit31=1)"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "IDE位：仲裁的关键转折点"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "标准帧 vs 扩展帧 同时抢总线：\n\n标准帧(IDE=0):  ── 11bit ID ── RTR ── IDE=0(显性) ──\n扩展帧(IDE=1):  ── 11bit ID ── SRR=1(隐性)── IDE=1(隐性) ──\n                                          ↑\n                                    到了 IDE 这一位：\n                                    标准帧发0(显性)→ 覆盖扩展帧的1(隐性)\n                                    → 标准帧仲裁胜出！"
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "🔑 **核心规则**：如果标准帧和扩展帧的前11位Base ID完全相同，**标准帧一定赢**。因为12位的IDE位，标准帧=0(显性)，扩展帧=1(隐性)，显性覆盖隐性。这就是为什么标准帧天生优先级高于扩展帧。"
+        },
+        {
+          "type": "h3",
+          "text": "实际应用场景分配"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "使用场景",
+            "帧类型",
+            "原因"
+          ],
+          "rows": [
+            [
+              "**动力/底盘安全信号**",
+              "标准帧",
+              "ID短→仲裁快；小ID=高优先级→实时性"
+            ],
+            [
+              "**车身域通用信号**",
+              "标准帧",
+              "2048个ID足够"
+            ],
+            [
+              "**诊断/标定/刷写**",
+              "标准帧+扩展帧混用",
+              "功能寻址0x7DF是标准帧；物理寻址可能是扩展帧"
+            ],
+            [
+              "**ADAS传感器数据**",
+              "扩展帧",
+              ">2048个报文→必须扩展帧；大数据用CAN FD"
+            ],
+            [
+              "**OEM自定义私有报文**",
+              "扩展帧",
+              "每个ECU预留ID块，标准帧不够用"
+            ],
+            [
+              "**J1939(商用车)**",
+              "扩展帧",
+              "29位ID含P/R/DP/PF/PS/SA完整层级"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"标准帧11位2048个ID，现在新车ECU动辄50+个、每个ECU几十条报文——不够用。所以扩展帧是趋势。但动力域安全信号仍用标准帧——ID短、仲裁快。\""
+        },
+        {
+          "type": "h3",
+          "text": "混合网络行为规则"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "场景",
+            "行为"
+          ],
+          "rows": [
+            [
+              "标准帧+标准帧仲裁",
+              "正常逐位仲裁，ID小的赢"
+            ],
+            [
+              "扩展帧+扩展帧仲裁",
+              "先比前11位Base ID→相同再比IDE位(都是1)→再比后18位"
+            ],
+            [
+              "**标准帧+扩展帧仲裁（前11位相同）**",
+              "**标准帧赢**（IDE=0覆盖IDE=1）"
+            ],
+            [
+              "**标准帧+扩展帧仲裁（前11位不同）**",
+              "ID小的赢，标准帧/扩展帧无关"
+            ],
+            [
+              "CAN 2.0控制器收扩展帧",
+              "旧2.0控制器不认识IDE=1→可能发错误帧"
+            ],
+            [
+              "CAN FD+扩展帧",
+              "FD也支持扩展帧，FDF位在控制段"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "warning",
+          "text": "⚠️ **测试注意**：CANoe加载DBC时，标准帧和扩展帧的CAN ID在Trace中显示不同。如果DBC定义是标准帧但总线跑扩展帧→解析不到。必须确认ID范围和IDE匹配。"
+        },
+        {
+          "type": "h3",
+          "text": "填充位(Bit Stuffing)"
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "标准帧和扩展帧都遵循相同的填充规则——这是理解错误检测和帧长度的前提。"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "规则：发送方连续5个相同位后，自动插入一个反位（填充位）\n      接收方自动去除填充位\n\n示例（标准帧，ID=0x000，DLC=0）：\nSOF  ID[0..10]    RTR IDE  r0  DLC    CRC           ACK  EOF   IFS\n0    000 0000 0000 0   0    0   0000   (CRC 15bit)   1 1  1111111 111\n      ^^^^^ ← 5个0后插入1个1(填充位)   ← 可能插入更多填充位\n\n影响：\n- 帧的实际长度不是固定的——取决于数据内容有多少连续相同位\n- 最坏情况：每5bit插1bit → 帧长最多增加20%\n- 为什么CAN总线负载率算不准？因为有填充位，实际比特数 > 理论比特数"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "参数",
+            "Bit Timing 说明",
+            "典型值(500Kbps)"
+          ],
+          "rows": [
+            [
+              "**波特率**",
+              "每秒传输的bit数",
+              "500 Kbps = 2μs/bit"
+            ],
+            [
+              "**Tq (Time Quanta)**",
+              "最小时间单位",
+              "1 Tq = 125ns（8MHz时钟）"
+            ],
+            [
+              "**同步段(SYNC_SEG)**",
+              "固定1 Tq，用于硬同步",
+              "1 Tq"
+            ],
+            [
+              "**传播段(PROP_SEG)**",
+              "物理延迟补偿",
+              "3~4 Tq"
+            ],
+            [
+              "**相位缓冲段1/2**",
+              "用于重同步调整",
+              "各 4 Tq"
+            ],
+            [
+              "**采样点(SP)**",
+              "在相位缓冲段1结束时采样",
+              "**75%~87.5%**"
+            ],
+            [
+              "**SJW**",
+              "同步跳转宽度",
+              "1~4 Tq"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"采样点设在哪？75%~87.5%。太早→波形未稳定→误判；太晚→留给Phase_Seg2时间不够→下一bit同步可能出错。算法：采样点=(1+TSEG1)÷(1+TSEG1+TSEG2)。比如配置1+12+3=16Tq，采样点=(1+12)÷16≈81%，正好落在推荐区间。\""
+        },
+        {
+          "type": "h4",
+          "text": "阶段性回顾"
+        },
+        {
+          "type": "review",
+          "current": "**你到现在掌握的是**：①物理层靠差分信号传 0/1，显性覆盖隐性 ②帧格式把 bit 组织成数据包（7段分段各司其职）③填充位让帧长不固定，影响负载率计算 ④采样点 75%~87.5% 决定读到的是正确数据还是噪声 ⑤标准帧 11bit vs 扩展帧 29bit，IDE 位决定仲裁胜负。",
+          "next": "**接下来要解决的**：帧格式规定了数据包的容器。但 30+ 个 ECU 挂在同一条总线上，同时发数据怎么办？谁先发？发完会不会数据损坏？这就是仲裁要回答的——它是 CAN 从\"能通信\"到\"高可靠通信\"的质变点。"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "sim",
+          "sim": "framedemo",
+          "title": "CAN 数据帧结构可视化构建器",
+          "caption": "切换标准/扩展帧、调节 ID 与 DLC，实时观察七段结构与总位数、单帧耗时变化。"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": true,
+      "point_count": 0
+    },
+    {
+      "title": "三、仲裁机制：谁赢谁发",
+      "icon": "⚡",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "**承上**：你已经知道显性(0)覆盖隐性(1)、帧开头是 ID 段。仲裁就是在这 11/29 个 ID bit 上展开的逐位 PK——不是\"先来后到\"，而是\"谁 ID 小谁优先\"。物理层的\"线与\"特性在这一章开花结果。"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "ECU A (ID=0x100): 0 0 1 0 0 0 0 0 0 0 0 ...\nECU B (ID=0x101): 0 0 1 0 0 0 0 0 0 0 1 ...\n                    ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ▲\n                    同时发，逐位比较      │\n                                      这一位A发0(显性)、B发1(隐性)\n                                      B看到总线是0→自己输了→立即退出发送\n                                      A继续发送→仲裁胜出"
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "**关键规则**：①逐位仲裁，显性(0)覆盖隐性(1) ②ID小的赢 ③没有节点被破坏——输了的自动退出发送，下次重试 ④这就是\"非破坏性仲裁\"，正式名称CSMA/BA（载波监听多路访问/逐位仲裁），物理基础是总线的\"线与\"特性。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "面试问",
+            "回答"
+          ],
+          "rows": [
+            [
+              "两个ECU同时发，总线听谁的？",
+              "ID小的赢。ID=0x100 优先级高于 0x101"
+            ],
+            [
+              "怎么保证紧急报文先发？",
+              "安全关键信号分配小ID（如ABS制动 0x0A0），非紧急信号大ID（如氛围灯 0x5A0）"
+            ],
+            [
+              "CAN是\"多主\"架构什么意思？",
+              "任何节点随时可以发，没有主机控制时序——靠仲裁自己抢"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"仲裁口诀：**线与打底、逐位比ID、显性吃隐性、小ID先走、输的下轮再来**。被追问和以太网CSMA/CD的区别就说：以太网是冲突检测（发完才知道撞，双方都得退），CAN是边发边听、逐位裁决——输的静默退场，赢的帧完整发完不受损，所以CAN高负载不崩溃，只是低优先级延迟变大。\""
+        },
+        {
+          "type": "h4",
+          "text": "阶段性回顾"
+        },
+        {
+          "type": "review",
+          "current": "**你到现在掌握的是**：CAN 从物理信号→结构化数据帧→非破坏性仲裁，解决了\"可靠地打包传数据 + 高效率抢线\"两个核心问题。",
+          "next": ""
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "**但现实不是理想的**：线束被挤压、电磁干扰、ECU 时钟漂移——数据传着传着就坏了。仲裁解决的只是\"谁发\"，还没解决\"发错了怎么办\"。下一章就是这个缺口。"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "sim",
+          "sim": "wiredand",
+          "title": "CAN 显性/隐性 线与 与 仲裁演示",
+          "caption": "切换两节点驱动电平，观察总线「线与」结果；再输入两个 ID 逐位比较，看谁赢得仲裁。"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "四、错误检测与容错",
+      "icon": "🛡️",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "**承上**：仲裁让 CAN 高效无冲突。错误检测机制让 CAN **可靠**——出错了不是\"凑合用\"，而是第一时间发现、定位、隔离故障节点。这是 CAN 能用在刹车/转向这种安全攸关场景的根本原因。"
+        },
+        {
+          "type": "h3",
+          "text": "五种错误类型"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "错误类型",
+            "检测机制",
+            "触发场景",
+            "容错/隔离措施"
+          ],
+          "rows": [
+            [
+              "**位错误**",
+              "发送方回读总线，对比自己发的和总线上的",
+              "发送隐性但总线是显性（被仲裁除外）",
+              "发送方立即发主动错误帧（6个显性位），全网同步丢弃该帧；TEC/REC累加，快速定位出错节点。"
+            ],
+            [
+              "**填充错误**",
+              "连续5个相同位后必须插入一个反位",
+              "某ECU时钟漂移导致6个相同位连续",
+              "接收方强制发错误帧中止当前帧传播；违规节点被计数器标记，防止错误帧持续污染总线。"
+            ],
+            [
+              "**CRC错误**",
+              "接收方算CRC ≠ 发送方",
+              "电磁干扰破坏数据",
+              "接收方丢弃该帧且不发送ACK；上层通过超时/重传恢复；持续CRC错误的节点进入被动错误甚至Bus Off。"
+            ],
+            [
+              "**格式错误**",
+              "固定格式位（CRC分隔符、ACK分隔符、EOF）被破坏",
+              "协议栈bug或严重EMC",
+              "接收方立即报错，确保只有结构完整、格式合法的帧才能进入接收缓冲；避免协议栈被无效数据污染。"
+            ],
+            [
+              "**应答错误**",
+              "发送方在ACK槽未检测到显性位",
+              "总线上没有接收方（目标ECU掉线）",
+              "发送方获知无接收方，向上层报发送超时/节点丢失；诊断层据此触发冗余或功能降级策略。"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "错误状态机"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "        发送错误计数(TEC) / 接收错误计数(REC)\n        \n  主动错误                   被动错误                  总线关闭\n  ┌──────┐    TEC>127      ┌──────┐    TEC>255      ┌──────┐\n  │ 正常 │ ──────────────→ │ 低调 │ ──────────────→ │ 静默 │\n  │ 通信 │ ←────────────── │ 通信 │ ←────────────── │ 隔离 │\n  └──────┘   TEC<128       └──────┘   128×11隐性    └──────┘\n   发送6个显性位                  发送6个隐性位            不上总线\n   (主动报错)                    (被动不破坏)           (自救机制)"
+        },
+        {
+          "type": "h4",
+          "text": "Bus Off 之后会发生什么？"
+        },
+        {
+          "type": "paragraph",
+          "text": "当某个 ECU 的 TEC 超过 255，CAN 控制器会强制它进入 **Bus Off（总线关闭/静默隔离）** 状态。这不是死机，而是一种**自我保护+保护总线**的容错机制："
+        },
+        {
+          "type": "list",
+          "style": "ol",
+          "items": [
+            "**立即停止发送**：该 ECU 不再发送数据帧，也不再发送主动/被动错误帧，从总线逻辑上静默退出。",
+            "**RX 多数仍监听**：控制器通常仍接收总线状态，但不会把错误帧计入自己，也不会影响其他 ECU 收发。",
+            "**应用层后果**：依赖该节点的信号全部超时/丢失，相关功能进入降级或安全状态（如仪表报警、动力受限、辅助驾驶退出）。",
+            "**自动恢复条件**：CAN 规范要求，当总线上出现 **128 次 11 个连续隐性位**（即总线空闲/无通信）后，控制器自动把 TEC/REC 清零，回到主动错误状态，随后可正常收发。实际项目中通常还会配合软件复位或重新初始化。",
+            "**测试关注点**：用 CANoe Statistics 监控 TEC/REC 是否越过 255；验证 Bus Off 后该节点不再制造错误帧风暴；验证总线空闲后能否在规定时间内恢复；确认恢复后应用层信号是否正常。"
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"CAN 错误状态机是整车可靠性的核心设计。单个节点出错不会拖垮整条总线——它会从主动错误→被动错误→Bus Off 自己退出。Bus Off 后该 ECU 停止收发，其他节点继续正常通信；等总线空闲 128×11 位后自动恢复。测试时要重点验证：节点进入 Bus Off 后错误帧是否消失、恢复后通信是否重建、应用层功能降级策略是否正确。\""
+        },
+        {
+          "type": "h4",
+          "text": "阶段性回顾"
+        },
+        {
+          "type": "review",
+          "current": "**你到现在掌握的是**：CAN 2.0 的完整闭环——物理层→帧格式→仲裁→错误处理。这四层构成了经典 CAN 的基石，是 1986 年 Bosch 发布以来 30 多年车载通信的绝对主力。",
+          "next": ""
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "**但瓶颈已经在眼前**：8 字节数据 + 1Mbps 速率 + 2048 个 ID——智能驾驶时代一个激光雷达每秒几百 KB，一辆车 ECU 从 20 个涨到 80+ 个。CAN 2.0 不够用了。所以才有了下一代的 CAN FD。"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "五、CAN FD：升级版",
+      "icon": "🚀",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "**承上**：前四章学的是 CAN 2.0。它的天花板写在帧格式里——DLC 4bit = 最大 8 字节、仲裁段最低 1Mbps。CAN FD（Flexible Data-rate）在保留核心仲裁机制的前提下，翻开了数据段的封印：64 字节 + 8Mbps。这是理解当前和未来车载通信的分水岭。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "参数",
+            "CAN 2.0",
+            "CAN FD"
+          ],
+          "rows": [
+            [
+              "最大速率(数据段)",
+              "1 Mbps",
+              "**8 Mbps**"
+            ],
+            [
+              "每帧数据",
+              "0-8 字节",
+              "0-64 字节"
+            ],
+            [
+              "标准帧ID",
+              "11 bit",
+              "11 bit"
+            ],
+            [
+              "扩展帧ID",
+              "29 bit",
+              "29 bit"
+            ],
+            [
+              "新增位",
+              "无",
+              "FDF(指示FD帧)、**BRS**(变速)、ESI(错误状态)"
+            ],
+            [
+              "标准",
+              "ISO 11898-1:2003",
+              "ISO 11898-1:2015"
+            ],
+            [
+              "兼容性",
+              "—",
+              "FD控制器可收发CAN 2.0帧"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "BRS位：CAN FD的精髓"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "仲裁段(低速1M)  ───BRS=1──→  数据段(高速8M)  ───CRC分隔符──→  回到低速\n                                                              \nFDF=1(这是FD帧)          BRS=1(切换到高速发数据)        发送完成降速"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"CAN FD的优势在哪？①大数据量——刷写ECU时64字节一帧传，比CAN 2.0快8倍 ②ADAS传感器数据量大需要FD ③但注意：总线上的CAN 2.0节点不认识FD帧，会发错误帧。所以过渡期需要网关做FD↔2.0转换。\""
+        },
+        {
+          "type": "h3",
+          "text": "CAN XL：第三代 CAN 协议（前瞻）"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "参数",
+            "CAN FD",
+            "CAN XL"
+          ],
+          "rows": [
+            [
+              "数据段速率",
+              "最高 8 Mbps",
+              "**约 10 Mbps（规划可达 20Mbps）**"
+            ],
+            [
+              "每帧数据",
+              "0~64 字节",
+              "**1~2048 字节**"
+            ],
+            [
+              "ID长度",
+              "11/29 bit",
+              "11 bit（XL仅支持标准帧ID）"
+            ],
+            [
+              "新增位",
+              "FDF, BRS, ESI",
+              "**XLF**(XL帧标志)、**ADS**(仲裁→数据切换)"
+            ],
+            [
+              "标准",
+              "ISO 11898-1:2015",
+              "CiA 610-1 (2024标准化中)"
+            ],
+            [
+              "应用",
+              "当前主力",
+              "IP传输(TCP/IP over CAN)、雷达原始数据"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "目前CAN XL还在标准化阶段，量产车尚未使用。面试能说出\"第三代，10Mbps（规划可达20Mbps）+2048字节\"足够加分。"
+        },
+        {
+          "type": "h4",
+          "text": "阶段性回顾"
+        },
+        {
+          "type": "review",
+          "current": "**你到现在掌握的是**：CAN 协议本身——从 2.0 到 FD 到 XL 三代演进。协议规定的是\"怎么传\"：用什么格式、怎么仲裁、怎么查错。但协议不规定\"传的数据是什么意思\"。",
+          "next": "**接下来要解决的**：CAN Trace 里一串 `0x1F4 06 A0 3C...` 的十六进制字节，你到底怎么知道这代表 500rpm 而不是 50km/h？这就是 DBC 文件——它能把你手中 Trace 的\"天书\"翻译成仪表上的物理数值。"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "六、DBC 文件：CAN信号的\"字典\"",
+      "icon": "📖",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "**承上**：协议是\"语言\"（语法规则），DBC 是\"词典\"（每个词什么意思）。这句话面试和实际工作都是关键认知——没有 DBC 的测试工程师就是在看外星文字。"
+        },
+        {
+          "type": "h3",
+          "text": "完整语法"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "VERSION \"\"                                                          # 版本声明\n\nBS_: 500000 : 0,0                                                   # 总线速率500K\n\nBU_: EMS BCM IPC Gateway                                            # 节点列表\n\nBO_ 256 EngineData: 8 EMS                                           # 报文: ID=256, 名称, 长度8字节, 发送节点\n SG_ EngineSpeed : 0|16@1+ (1,0) [0|8000] \"rpm\"  IPC,BCM           # 信号定义\n SG_ EngineTemp  : 16|8@1+ (1,-40) [-40|215] \"degC\"  IPC\n SG_ EngineStatus_m : 24|2@1+ (1,0) [0|3] \"\"  IPC                   # 状态枚举\n\nBA_DEF_ \"SignalType\" STRING ;                                       # 属性定义\nBA_ \"SignalType\" SG_ EngineStatus_m \"EngineRunning\";                # 属性赋值\n\nVAL_ 256 EngineStatus_m 0 \"Off\" 1 \"Idle\" 2 \"Running\" 3 \"Error\";    # 值表"
+        },
+        {
+          "type": "h3",
+          "text": "信号定义关键参数"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "参数",
+            "示例",
+            "含义"
+          ],
+          "rows": [
+            [
+              "**起始位/长度**",
+              "`0\\16`",
+              "从第0位开始，占16位"
+            ],
+            [
+              "**字节序**",
+              "`@1+` (Intel/Motorola)",
+              "Intel小端：先低字节。Motorola大端：先高字节"
+            ],
+            [
+              "**Factor/Offset**",
+              "`(1,0)`",
+              "物理值 = 原始值 × 1 + 0"
+            ],
+            [
+              "**范围**",
+              "`[0|8000]`",
+              "有效值0~8000 rpm"
+            ],
+            [
+              "**单位**",
+              "`\"rpm\"`",
+              "物理单位"
+            ],
+            [
+              "**接收节点**",
+              "`IPC,BCM`",
+              "哪些ECU使用这个信号"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "CANdb++ 实战：看懂 DBC 界面与信号矩阵"
+        },
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "前面讲的是 DBC 文本语法，实际工作中你更多是在 Vector CANdb++（或 CANoe 内置数据库编辑器）里点点鼠标。这一节把界面上的每一个区域对应回 DBC 语法，让你看到窗口就知道它在描述什么。"
+        },
+        {
+          "type": "h4",
+          "text": "1) 主界面：树状导航"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc/candb-main-network.webp",
+          "alt": "CANdb++ 主界面，左侧 Networks/ECUs/Network nodes/Messages/Signals 树状结构，右侧为 Messages 列表",
+          "caption": "CANdb++ 主界面：左侧树状结构从上到下对应网络→节点→报文→信号的层级"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "区域",
+            "对应 DBC 概念",
+            "测试时关注点"
+          ],
+          "rows": [
+            [
+              "Networks → CAN",
+              "总线网络",
+              "确认当前编辑的是哪条 CAN 总线"
+            ],
+            [
+              "ECUs",
+              "电子控制单元（BU_）",
+              "发送/接收节点的物理实体"
+            ],
+            [
+              "Network nodes",
+              "网络节点（BU_）",
+              "与 ECUs 对应，负责收发报文"
+            ],
+            [
+              "Messages",
+              "报文（BO_）",
+              "ID、名称、DLC、周期、发送方式"
+            ],
+            [
+              "Signals",
+              "信号（SG_）",
+              "起始位、长度、因子、偏移、单位、值表"
+            ]
+          ]
+        },
+        {
+          "type": "h4",
+          "text": "2) 报文定义窗口：以 Gear_Info (0x2CB) 为例"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Messages 列表中双击 Gear_Info，会弹出报文属性窗口。它分为 Definition / Signals / Transmitters / Receivers / Layout / Attributes / Comment 七个页签。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc/candb-msg-gear-definition.webp",
+          "alt": "Gear_Info 报文 Definition 页签，显示 Name/Gear_Info、Type/CAN Standard、ID/0x2CB、DLC/1、Transmitter/Gateway、Tx Method/Cyclic、Cycle Time/50",
+          "caption": "Definition 页签：报文名、ID、DLC、发送节点、发送方式、周期"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "字段",
+            "图中取值",
+            "含义"
+          ],
+          "rows": [
+            [
+              "Name",
+              "Gear_Info",
+              "报文在 DBC 中的名称，对应 BO_ 后的名字"
+            ],
+            [
+              "Type",
+              "CAN Standard",
+              "标准帧（11bit ID）"
+            ],
+            [
+              "ID",
+              "0x2CB",
+              "报文标识符，十六进制"
+            ],
+            [
+              "DLC",
+              "1",
+              "数据长度码，1 字节"
+            ],
+            [
+              "Transmitter",
+              "Gateway",
+              "发送节点"
+            ],
+            [
+              "Tx Method",
+              "Cyclic",
+              "周期发送"
+            ],
+            [
+              "Cycle Time",
+              "50",
+              "周期 50 ms"
+            ]
+          ]
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc/candb-msg-gear-signals.webp",
+          "alt": "Gear_Info 报文 Signals 页签，列出 Gear（Startbit 0, Length 3）和 GearLock（Startbit 3, Length 1）",
+          "caption": "Signals 页签：该报文包含的所有信号及其起始位、长度、字节序、值类型"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "字段",
+            "Gear",
+            "GearLock",
+            "说明"
+          ],
+          "rows": [
+            [
+              "Startbit",
+              "0",
+              "3",
+              "信号在 64bit 数据场中的起始位"
+            ],
+            [
+              "Length",
+              "3",
+              "1",
+              "信号占用的 bit 数"
+            ],
+            [
+              "Byte Order",
+              "Intel",
+              "Intel",
+              "小端（Intel）/ 大端（Motorola）"
+            ],
+            [
+              "Value Type",
+              "Unsigned",
+              "Unsigned",
+              "有符号 / 无符号"
+            ]
+          ]
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc/candb-msg-gear-transmitters.webp",
+          "alt": "Gear_Info 报文 Transmitters 页签，显示 Gateway 节点",
+          "caption": "Transmitters：该报文由哪个节点发出"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc/candb-msg-gear-receivers.webp",
+          "alt": "Gear_Info 报文 Receivers 页签，显示 IPC 和 BCM 节点",
+          "caption": "Receivers：哪些节点会接收并消费该报文"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc/candb-msg-gear-attributes.webp",
+          "alt": "Gear_Info 报文 Attributes 页签，显示 GenMsgCycleTime=50、GenMsgSendType=Cyclic 等属性",
+          "caption": "Attributes 页签：报文级属性，如周期、发送类型、网络管理相关配置"
+        },
+        {
+          "type": "h4",
+          "text": "3) 信号矩阵图（Layout）怎么读"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc/candb-msg-gear-layout.webp",
+          "alt": "Gear_Info 报文 Layout 页签，信号矩阵中 Gear 占用 Byte0 的 bit 0-2（蓝色），GearLock 占用 bit 3（橙色）",
+          "caption": "Layout 信号矩阵：横轴为 bit 位，纵轴为字节；彩色块表示每个信号占用的 bit"
+        },
+        {
+          "type": "paragraph",
+          "text": "信号矩阵是 DBC 最直观的视图。读图口诀：先看 Byte 行，再看 bit 列；颜色块就是信号，块左下角标注起始位，右下角标注 bit 长度。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "要素",
+            "图中表现",
+            "含义"
+          ],
+          "rows": [
+            [
+              "横向 0~7",
+              "Byte0 的 8 个 bit",
+              "本例 DLC=1，只有 1 个字节"
+            ],
+            [
+              "纵向 0",
+              "字节索引",
+              "从第 0 字节开始"
+            ],
+            [
+              "蓝色块 Gear",
+              "bit 0~2",
+              "起始位 0，长度 3 bit"
+            ],
+            [
+              "橙色块 GearLock",
+              "bit 3",
+              "起始位 3，长度 1 bit"
+            ],
+            [
+              "空白区域",
+              "bit 4~7",
+              "未使用，默认填充"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "DBC 语法里的 SG_ Gear : 0|3@1+ 和 Layout 图是完全等价的：0 是起始位，3 是长度，@1 是 Intel 字节序。读不懂文本时，先打开 Layout 图看一眼颜色块，马上知道哪个信号占了哪几位。"
+        },
+        {
+          "type": "h4",
+          "text": "4) 信号定义窗口：以 LockStatus 与 EngSpeed 为例"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Signals 树中双击某个信号，会弹出信号属性窗口。它分为 Definition / Messages / Receivers / Attributes / Value Descriptions / Comment 六个页签。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc/candb-sig-lockstatus-definition.webp",
+          "alt": "LockStatus 信号 Definition 页签，Length=2、Byte Order=Intel、Value Type=Unsigned、Factor=1、Offset=0、Minimum=0、Maximum=1",
+          "caption": "LockStatus 信号定义：2 bit 无符号，物理值 = 原始值 × 1 + 0，取值范围 0~1"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc/candb-sig-lockstatus-values.webp",
+          "alt": "LockStatus 信号 Value Descriptions 页签，0x0=Locked、0x1=Unlocked",
+          "caption": "Value Descriptions：枚举值的中文/英文释义，0=Locked（闭锁）、1=Unlocked（解锁）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc/candb-sig-engspeed-definition.webp",
+          "alt": "EngSpeed 信号 Definition 页签，Length=16、Unit=rpm、Minimum=0、Maximum=8000",
+          "caption": "EngSpeed 信号定义：16 bit 无符号，单位 rpm，量程 0~8000"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "字段",
+            "LockStatus",
+            "EngSpeed",
+            "说明"
+          ],
+          "rows": [
+            [
+              "Length [Bit]",
+              "2",
+              "16",
+              "信号占用的 bit 数"
+            ],
+            [
+              "Byte Order",
+              "Intel",
+              "Intel",
+              "字节序"
+            ],
+            [
+              "Value Type",
+              "Unsigned",
+              "Unsigned",
+              "无符号整数"
+            ],
+            [
+              "Factor",
+              "1",
+              "1",
+              "物理值 = 原始值 × Factor + Offset"
+            ],
+            [
+              "Offset",
+              "0",
+              "0",
+              "偏移量"
+            ],
+            [
+              "Unit",
+              "（空）",
+              "rpm",
+              "物理单位"
+            ],
+            [
+              "Minimum/Maximum",
+              "0/1",
+              "0/8000",
+              "物理量程范围"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "面试说：拿到一条报文，先在 CANdb++ 里双击看 Layout 图，确认每个信号的起始位和长度；再双击信号看 Definition，确认 Factor/Offset/单位/量程；最后看 Value Descriptions 确认枚举含义。这三步是 DBC 测试的'标准开箱流程'。"
+        },
+        {
+          "type": "h4",
+          "text": "5) 物理值 vs 原始值：换算示例"
+        },
+        {
+          "type": "paragraph",
+          "text": "信号在总线上传输的是「原始值（raw）」——一段二进制数；人能读懂的是「物理值（physical）」——带单位的工程值（如 150 rpm、23 °C）。两者由 Factor / Offset 换算：物理值 = 原始值 × Factor + Offset。原始值通常以十六进制给出，要先换算成十进制再代入公式。"
+        },
+        {
+          "type": "paragraph",
+          "text": "Factor 和 Offset 是 DBC 信号定义里的两个缩放参数。Factor（加权/缩放因子）决定原始值按多少倍率放大/缩小，比如 Factor=0.1 表示 raw 每变化 1，转速变化 0.1 rpm；Offset（偏移量）则是在缩放后整体平移，常用于表示带正负或带基准点的物理量，比如温度从 −40 °C 起步。两者配合就能把整型 raw 转成真实工程值。"
+        },
+        {
+          "type": "table",
+          "headers": ["参数", "含义", "具体用途", "典型值"],
+          "rows": [
+            ["Factor", "缩放因子 / 加权", "把原始值的计数单位映射为物理单位的最小步长", "0.1（转速）、0.001（电压）、1（开关量）"],
+            ["Offset", "偏移量", "对缩放后的结果做整体平移，设置物理量的零点或起始基准", "0（从零开始）、−40（温度零下偏移）、32768（有符号转无符号）"]
+          ]
+        },
+        {
+          "type": "table",
+          "headers": [
+            "场景",
+            "raw（原始值）",
+            "Factor",
+            "Offset",
+            "计算过程",
+            "物理值"
+          ],
+          "rows": [
+            [
+              "最简单（Factor=1, Offset=0）",
+              "0x5FF = 1535",
+              "1",
+              "0",
+              "1535 × 1 + 0",
+              "1535"
+            ],
+            [
+              "转速（连续量）",
+              "1500",
+              "0.1",
+              "0",
+              "1500 × 0.1 + 0",
+              "150 rpm"
+            ],
+            [
+              "温度（带负偏置）",
+              "40",
+              "1",
+              "-40",
+              "40 × 1 − 40",
+              "0 °C"
+            ],
+            [
+              "带偏置转速",
+              "2050",
+              "0.125",
+              "0",
+              "2050 × 0.125",
+              "256.25 rpm"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "反向也好用：想知道某物理值对应的原始值，用 raw = (物理值 − Offset) / Factor。例如温度要设 90 °C：raw = (90 − (−40)) / 1 = 130。"
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "code": "物理值 = raw × Factor + Offset\nraw   = (物理值 − Offset) / Factor\n\n例：EngineSpeed raw=1500, Factor=0.1, Offset=0\n   物理值 = 1500 × 0.1 = 150 rpm\n   若要 90 rpm：raw = (90 − 0) / 0.1 = 900"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc/dbc-value-calc.png",
+          "alt": "物理值与原始值换算示例：raw × Factor + Offset",
+          "caption": "物理值 = 原始值 × Factor + Offset：同一公式，Factor/Offset 不同，呈现的物理量就不同。"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "面试说：看到 Trace 里的原始值先别慌，记住『物理值 = raw × Factor + Offset』。Factor/Offset 填反或写错，物理值会整体偏移甚至乱跳——这是 DBC 联调最常见的坑之一。"
+        },
+        {
+          "type": "h3",
+          "text": "标准帧 vs 扩展帧：DBC定义差异"
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "code": "// 标准帧(11bit ID)：直接写ID\nBO_ 256 EngineData: 8 EMS                    // ID=0x100\n\n// 扩展帧(29bit ID)：ID高位必须置1标记\nBO_ 2147483904 ExtendedMsg: 8 BCM            // 2147483904 = 0x80000100\n// 实际CAN ID = 0x100，但DBC中写成 0x80000100（最高位置1表示扩展帧）\n\n// 更常见的写法：用负值表示扩展帧\nBO_ -2147483392 ExtMsg2: 8 BCM               // 实际上是扩展帧 ID=0x200"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "项目",
+            "标准帧 DBC",
+            "扩展帧 DBC"
+          ],
+          "rows": [
+            [
+              "ID格式",
+              "`BO_ 256 MsgName: ...`",
+              "`BO_ 2147483904 MsgName: ...` 或 `BO_ -2147483392 MsgName: ...`"
+            ],
+            [
+              "规则",
+              "ID < 0x80000000",
+              "ID最高位bit31=1"
+            ],
+            [
+              "实际CAN ID",
+              "ID直接对应",
+              "`ID & 0x1FFFFFFF` 得到实际29位ID"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "信号常用属性"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "属性",
+            "值示例",
+            "说明"
+          ],
+          "rows": [
+            [
+              "`GenMsgCycleTime`",
+              "10",
+              "报文周期10ms"
+            ],
+            [
+              "`GenMsgSendType`",
+              "Cyclic",
+              "周期型发送"
+            ],
+            [
+              "`GenSigStartValue`",
+              "0",
+              "信号初始值"
+            ],
+            [
+              "`SigType`",
+              "RangeContinuous",
+              "连续型（非枚举）"
+            ],
+            [
+              "`InitValue`",
+              "0xFF",
+              "无效值=0xFF→仪表显示\"--\""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"DBC是测试的命根子——没有DBC，Trace里全是十六进制天书；有了DBC，0x1F4自动变500rpm。拿到新DBC先核对三件事：ID是标准帧还是扩展帧、字节序Intel还是Motorola、Factor/Offset跟需求文档对不对得上。\""
+        },
+        {
+          "type": "h4",
+          "text": "阶段性回顾"
+        },
+        {
+          "type": "review",
+          "current": "**你到现在掌握的是**：CAN 协议全貌（物理→帧→仲裁→错误→FD→XL）+ DBC 信号字典。纸上谈兵结束——你脑子里有了一整套理论知识。",
+          "next": "**接下来要解决的**：把你脑子里的知识变成手上的技能。台架通电以后、示波器夹上去以后、CANoe Trace 开始滚以后——怎么用这些理论排查真实的故障？从\"知道\"到\"做到\"。"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "七、测试实战关联",
+      "icon": "🛠️",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "**承上**：协议+DBC 是\"知道为什么\"。测试实战是\"知道怎么干\"。这一章把前面的每一层理论映射到具体的排障动作：物理层→示波器、数据链路层→Trace统计、应用层→DBC核对。工程上排查 CAN 问题永远是从底层往上查。"
+        },
+        {
+          "type": "h3",
+          "text": "示波器波形诊断"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "正常波形                         缺少终端电阻(振铃)\nCAN_H ─┬─┐  ┌─┐  ┌──        CAN_H ─┬─┐╲╱┌─┐╲╱┌─\n       │ └──┘ └──┘ └─               │ └─╲╱─┘ ╲╱┘\nCAN_L ─┘ ┌──┐ ┌──┐ ┌─        CAN_L ─┘ ┌─╲╱─┐ ╲╱─┐\n         └┘  └┘  └┘                    └╲╱┘  ╲╱┘\n干净、振幅一致                      有过冲/欠冲、振荡"
+        },
+        {
+          "type": "h3",
+          "text": "Trace 分析常用操作"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "操作",
+            "目的",
+            "CANoe操作"
+          ],
+          "rows": [
+            [
+              "**过滤ID**",
+              "只看目标报文",
+              "Trace → Filter → Pass Filter"
+            ],
+            [
+              "**统计周期**",
+              "验证报文周期偏差",
+              "Statistics → Cycle Time列"
+            ],
+            [
+              "**信号解析**",
+              "原始值→物理值",
+              "加载DBC后自动解析"
+            ],
+            [
+              "**CRC错误统计**",
+              "评估总线质量",
+              "Statistics → Error Frames"
+            ],
+            [
+              "**对比Trace**",
+              "网关转发一致性",
+              "两路Trace并排对比信号值"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "常见CAN故障排查"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "故障现象",
+            "可能原因",
+            "排查方法"
+          ],
+          "rows": [
+            [
+              "仪表车速不显示",
+              "DBC 解析参数错误\n（factor/offset/起始位/字节序）",
+              "① Trace 中找到车速报文，对比 Raw Value 与 DBC 解析后的 Physical Value。\n② Raw 正确但 Physical 错误 → 检查 DBC 的 factor/offset、起始位、长度、Intel/Motorola 字节序。\n③ Raw 本身错误 → 查发送 ECU 的软件版本与信号映射。"
+            ],
+            [
+              "偶发错误帧",
+              "终端电阻缺失 / 线束接触不良 / 接地不良",
+              "① 断电测 CAN_H↔CAN_L 阻值，正常两端 120Ω 并联≈60Ω。\n② 阻值异常时分段拔 ECU/断开支线定位故障段。\n③ 示波器看 CAN_H/CAN_L 波形，确认显性/隐性电平、边沿、振铃。\n④ 检查接插件、接地点、保险丝与线束磨损。"
+            ],
+            [
+              "某ECU收不到信号",
+              "ID不匹配 / 网关未路由 / 接收过滤规则误配 / 该 ECU 波特率或采样点与总线不匹配",
+              "① 核对该 ECU 的接收 DBC 报文 ID 与 Trace 实际 ID 是否一致。\n② 查网关路由表，确认信号是否被转发到该 ECU 所在网段。\n③ 检查 ECU 接收过滤规则（Acceptance Filter）是否误过滤。\n④ 检查该 ECU 与总线的波特率、采样点是否一致；波特率/采样点严重不匹配时通常伴随错误帧或该 ECU 进入 Bus Off。"
+            ],
+            [
+              "网络偶尔瘫痪",
+              "某ECU进入Bus Off",
+              "① Statistics 中查看错误帧计数与 TEC/REC 计数器，定位错误源节点；Trace 中过滤该节点 ID 确认具体错误帧。\n② 逐个拔除/隔离 ECU，观察错误帧是否消失。\n③ 对嫌疑 ECU 单独供电并发送仿真报文，复现 Bus Off。\n④ 检查该 ECU 的错误处理策略与软件版本，必要时升级或加隔离。"
+            ],
+            [
+              "信号值偶发跳变",
+              "信号跨字节时发送端未原子锁存整帧（字节序错误不会导致偶发）",
+              "① DBC 中确认信号是否跨字节；字节序/起始位错误表现为**持续**解析异常，不会偶发，也不会产生错误帧。\n② Graphics 中同时观察相邻字节/信号的变化时序，确认跳变是否与发送周期边沿重合。\n③ 示波器确认发送端是否原子更新整帧数据。\n④ 若跨字节非原子更新，要求 ECU 发送前锁存整帧；必要时调整信号布局避免跨字节。"
+            ]
+          ]
+        },
+        {
+          "type": "h4",
+          "text": "CAN 故障排查方法论：从底到顶三板斧"
+        },
+        {
+          "type": "list",
+          "style": "ol",
+          "items": [
+            "**物理层先排**：断电测电阻（≈60Ω）、上电测差分电压（隐性2.5V/显性3.5V/1.5V）、看波形，确认线束/终端/接地没问题。",
+            "**数据链路层再看**：Statistics 里看错误帧计数/TEC/REC（判 Bus Off），Trace 里定位具体错误帧与节点，区分是总线质量差还是某节点在捣乱。",
+            "**应用层最后核**：对比 Raw Value / Physical Value、查 DBC 定义、查网关路由、查 ECU 接收过滤与软件版本。"
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"排查 CAN 问题要从底层往上排：先物理层（电阻/电压/波形），再数据链路层（错误帧/TEC/REC/Bus Off），最后应用层（DBC/网关/软件版本）。按三板斧分层定位，比一上来就翻 DBC 快得多，也显得你思路清晰。\""
+        },
+        {
+          "type": "h4",
+          "text": "阶段性回顾"
+        },
+        {
+          "type": "review",
+          "current": "**你到现在掌握的是**：从物理层到 CANoe 的全闭环——理论知识扎实了、工具操作会了、常见故障也知道怎么排了。",
+          "next": ""
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "**下一步**：面试官不考你\"会不会用 CANoe\"，考的是\"能不能三两句话把 CAN 的核心机制讲透\"。下面把这些知识点按面试场景重新组织——必会基础是\"答不出就别想过的\"，进阶是\"拉开差距的\"。"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "八、面试高频考点",
+      "icon": "🎯",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "**承上**：前面七章按原理到实战铺开，是\"学\"的顺序。面试是按问答组织的，30 秒答核心 + 2 分钟讲原理——得换一套讲述方式。下面两栏帮你完成这个切换。"
+        },
+        {
+          "type": "h3",
+          "text": "必会基础（答不上基本就挂了）"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "你要能说出来的"
+          ],
+          "rows": [
+            [
+              "**差分信号电压**",
+              "CAN_H隐性2.5V/显性3.5V，CAN_L隐性2.5V/显性1.5V"
+            ],
+            [
+              "**终端电阻**",
+              "120Ω在总线两端，测CAN_H↔CAN_L=60Ω"
+            ],
+            [
+              "**标准帧 vs 扩展帧**",
+              "标准帧11bit ID(0x000~0x7FF)、扩展帧29bit ID(0x00000000~0x1FFFFFFF)；IDE位区别(0=标准/1=扩展)；DBC中扩展帧ID最高bit置1"
+            ],
+            [
+              "**标准帧和扩展帧同ID谁赢**",
+              "标准帧赢——IDE位标准帧=0(显性)覆盖扩展帧=1(隐性)"
+            ],
+            [
+              "**仲裁规则**",
+              "ID越小优先级越高，逐位仲裁，显性覆盖隐性"
+            ],
+            [
+              "**CAN 2.0 vs CAN FD**",
+              "FD速度8倍(8M)、数据8倍(64字节)、新增BRS/FDF位"
+            ],
+            [
+              "**填充位规则**",
+              "连续5个相同位后插入1个反位；影响实际帧长度和负载率计算"
+            ],
+            [
+              "**采样点**",
+              "典型75%~87.5%，太早波形不稳、太晚同步出问题"
+            ],
+            [
+              "**DBC文件作用**",
+              "定义CAN信号的字典：ID→报文名→信号名→物理换算"
+            ],
+            [
+              "**五种错误类型**",
+              "位/填充/CRC/格式/应答，至少说3个"
+            ],
+            [
+              "**Bus Off**",
+              "TEC>255后节点自动退出总线，是自救机制"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "进阶加分项（拉开差距的关键）"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "高分回答思路"
+          ],
+          "rows": [
+            [
+              "**扩展帧为什么越来越多**",
+              "标准帧2048个ID不够用，扩展帧≈5.37亿个；新架构ECU数量暴增+每条报文一个ID"
+            ],
+            [
+              "**CAN FD与2.0混用会怎样？**",
+              "2.0节点不认识FD帧→发错误帧。需要网关做转换或逐步淘汰"
+            ],
+            [
+              "**为什么波特率500K不用1M？**",
+              "线束长→信号衰减→高速不可靠。500K是可靠性和速度的平衡"
+            ],
+            [
+              "**Intel vs Motorola字节序区别**",
+              "Intel(DBC中@1)：先低字节后高字节。Motorola(@0)：先高字节后低字节。同一信号跨字节解析值完全不同"
+            ],
+            [
+              "**DLC为什么只有4bit但数据可以64字节？**",
+              "CAN FD用DLC编码表示12/16/20/24/32/48/64字节，不是直接等于字节数"
+            ],
+            [
+              "**怎么定位偶发错误帧来源？**",
+              "逐个拔ECU缩小范围 + 带时间戳的错误帧统计 + 示波器定位波形异常时刻"
+            ],
+            [
+              "**填充位对负载率的影响**",
+              "理论负载率≠实际负载率，最坏情况多20%bit；总线设计留30%余量"
+            ],
+            [
+              "**CAN唤醒原理？**",
+              "ECU休眠时检测到CAN总线有显性位→唤醒→检查是否自己关心的ID→是则全唤醒"
+            ],
+            [
+              "**负载率多少算高？**",
+              "实测经验：>50%告警，>70%高危。高负载导致低优先级报文延迟过大"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "九、CANoe 实操关联",
+      "icon": "💻",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "CANoe功能",
+            "对应知识点",
+            "操作"
+          ],
+          "rows": [
+            [
+              "**Trace窗口**",
+              "帧格式、ID、DLC、Data",
+              "View → Trace，加载DBC解析"
+            ],
+            [
+              "**Statistics**",
+              "负载率、错误帧、周期偏差",
+              "Analysis → Statistics"
+            ],
+            [
+              "**IG发送**",
+              "信号值模拟",
+              "Simulation → IG → 选信号改值发送"
+            ],
+            [
+              "**Graphics**",
+              "信号波形可视化",
+              "Analysis → Graphics → 拖入信号"
+            ],
+            [
+              "**Logging**",
+              "离线回放分析",
+              "Measurement → Logging → blf格式"
+            ],
+            [
+              "**Panel面板**",
+              "模拟UI控制信号",
+              "加载xvp面板，可视化操作"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "**承上**：CANoe 是工具，排查问题是能力。下面这些不是\"理论上可能出错\"——全是真实台架上血淋淋的教训。每条都对应前面某一层理论没吃透。读的时候对号入座：这个坑是哪一层的锅？"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "⚠️ 实战中常见严重问题"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "严重度",
+            "现象",
+            "根因+教训"
+          ],
+          "rows": [
+            [
+              "**终端电阻忘接/少接**",
+              "严重",
+              "总线错误帧爆炸→CAN通信全面瘫痪→仪表所有指针归零",
+              "新车台架通电前必测CAN_H↔CAN_L=60Ω，这是铁律"
+            ],
+            [
+              "**DBC信号偏移定错**",
+              "严重",
+              "车速CAN值=0x7F→仪表显示320km/h（应为127km/h）→驾驶员恐慌",
+              "信号factor/offset必须在DBC发布前交叉评审"
+            ],
+            [
+              "**Motorola/Intel搞反**",
+              "严重",
+              "转速信号高低字节颠倒→怠速显示6000rpm→仪表进入红区报警",
+              "不同ECU可能用不同字节序，网关转发时要确认转换正确"
+            ],
+            [
+              "**CAN FD与2.0混用**",
+              "中等",
+              "CAN FD帧被2.0节点当成错误帧→错误帧风暴→Bus Off",
+              "过渡期新旧ECU共存，必须网关做FD↔2.0隔离转换"
+            ],
+            [
+              "**周期偏差过大**",
+              "中等",
+              "10ms报文实际12~18ms抖动→仪表指针卡顿→用户体验极差",
+              "CAN高负载(>70%)+低优先级ID被挤占，要监控负载率"
+            ],
+            [
+              "**CAN_H/CAN_L短路**",
+              "严重",
+              "总线电压恒定→所有ECU无法通信→车辆瘫在路上",
+              "线束走线磨损/装配挤压导致短路，实车耐久必测项"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "🎯 全文回顾：一张图串起整篇"
+        },
+        {
+          "type": "summary",
+          "title": "CAN 总线知识全景",
+          "items": [
+            {
+              "topic": "物理层",
+              "core": "差分信号(2.5→3.5/1.5V) + 终端电阻(120Ω)",
+              "note": "显性覆盖隐性 → 线与特性 → 仲裁的物理基础"
+            },
+            {
+              "topic": "帧格式",
+              "core": "7段结构：SOF → ID → 控制 → 数据 → CRC → ACK → EOF",
+              "note": "填充位(5同插1反)保证足够跳变；采样点 75%~87.5% 决定读位时机"
+            },
+            {
+              "topic": "仲裁机制",
+              "core": "CSMA/BA 逐位仲裁，ID 小者胜，非破坏性",
+              "note": "标准帧 vs 扩展帧由 IDE 位决胜负；仲裁期间发送隐性但总线显性的节点自动退出发送"
+            },
+            {
+              "topic": "错误检测",
+              "core": "5种错误：位/填充/CRC/格式/ACK + Bus Off 自救",
+              "note": "任一节点发现错误即发错误帧，TEC/REC 计数器驱动状态机，故障节点最终自我隔离"
+            },
+            {
+              "topic": "协议演进",
+              "core": "CAN 2.0(8B/1M) → CAN FD(64B/8M) → CAN XL(2KB/20M)",
+              "note": "智能驾驶数据洪流推动帧长与速率持续升级，但仲裁/错误机制内核保持一致"
+            },
+            {
+              "topic": "DBC 字典",
+              "core": "ID → 信号名 → 物理转换(Factor + Offset + 字节序)",
+              "note": "工程师视角的钥匙：把 Trace 里的十六进制 Raw Value 翻译成仪表能读的有效值"
+            },
+            {
+              "topic": "测试实战",
+              "core": "示波器(物理层) → Trace 统计(链路层) → DBC(应用层)",
+              "note": "三板斧排查法：先物理层、再数据链路层、最后应用层，从底往上查"
+            },
+            {
+              "topic": "面试输出",
+              "core": "必会 11 条(答不出挂) + 进阶 9 条(拉开差距)",
+              "note": "30 秒说清核心，2 分钟展开原理，关键要把各层之间的因果关系讲透"
+            }
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "**记住上面这张图就够了。** CAN 的所有设计都是环环相扣的——差分信号→线与→仲裁，填充位→帧长不固定→负载率算不准，扩展帧→2032个ID不够用→CAN FD。面试和实战的本质都是把这张图上的箭头讲清楚。"
+        },
+        {
+          "type": "paragraph",
+          "text": "⬅ 返回 [[MOC_车载测试]] | 继续 → [[03-LIN总线]]"
+        },
+        {
+          "type": "sim",
+          "sim": "canoe",
+          "title": "CANoe 仿真面板（Trace / 发送 / 总线负载 / 实时信号）",
+          "caption": "模拟 CANoe 总线环境：节点持续发帧、可手动发送、总线负载仪表与实时信号曲线动态刷新。点击「暂停」可定格观察。"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    }
+  ],
+  "summary": "CAN（Controller Area Network）是汽车上最核心的通信协议。所有 ECU 挂在一对差分线上（CAN_H/CAN_L），广播式通信——谁都能发、谁都能听，ID 越小优先级越高。",
+  "prev_chapter": {
+    "num": 1,
+    "name": "车载网络架构"
+  },
+  "next_chapter": {
+    "num": 3,
+    "name": "LIN总线"
+  }
+}

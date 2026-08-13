@@ -1,0 +1,979 @@
+{
+  "num": 1,
+  "slug": "车载网络架构",
+  "title": "车载网络架构 ⭐地基",
+  "oneliner": "车上的几十上百个 ECU（电子控制单元）通过不同总线网络连接，网关负责协议转换和信号路由，域控制器按功能集中调度——这就是整车的\"神经系统\"",
+  "sections": [
+    {
+      "title": "一、ECU：车载最小计算单元",
+      "icon": "🧩",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "硬件组成"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "组件",
+            "作用",
+            "面试关键点"
+          ],
+          "rows": [
+            [
+              "**MCU（微控制器）**",
+              "ECU的大脑，运行控制逻辑",
+              "常见：英飞凌TriCore、NXP S32K、瑞萨RH850"
+            ],
+            [
+              "**CAN收发器**",
+              "差分信号驱动，连接MCU和CAN总线",
+              "常见：TJA1040/TJA1050"
+            ],
+            [
+              "**存储器**",
+              "Flash（程序+Bootloader）、EEPROM（标定参数）、RAM（运行时）",
+              "刷写就是写Flash"
+            ],
+            [
+              "**电源管理**",
+              "稳压、KL15/KL30供电、休眠唤醒",
+              "KL30常电、KL15点火电"
+            ],
+            [
+              "**I/O接口**",
+              "数字量(开关)、模拟量(传感器)、PWM(电机)",
+              "测试关注阈值和精度"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "信号在ECU内部怎么流："
+        },
+        {
+          "type": "flow",
+          "caption": "信号在 ECU 内部的数据流",
+          "def": {
+            "nodes": [
+              {
+                "id": "in",
+                "x": 30,
+                "y": 70,
+                "w": 150,
+                "h": 64,
+                "type": "io",
+                "title": "传感器 / 开关",
+                "sub": "I/O 接口",
+                "icon": "🎛️"
+              },
+              {
+                "id": "mcu",
+                "x": 250,
+                "y": 55,
+                "w": 160,
+                "h": 86,
+                "type": "process",
+                "title": "MCU",
+                "sub": "运行控制逻辑",
+                "icon": "🧠",
+                "accent": true
+              },
+              {
+                "id": "can",
+                "x": 480,
+                "y": 70,
+                "w": 150,
+                "h": 64,
+                "type": "io",
+                "title": "CAN 收发器",
+                "sub": "CAN_H / CAN_L",
+                "icon": "📡"
+              },
+              {
+                "id": "mem",
+                "x": 250,
+                "y": 185,
+                "w": 160,
+                "h": 58,
+                "type": "process",
+                "title": "Flash/EEPROM/RAM",
+                "sub": "程序·标定·数据",
+                "icon": "💾"
+              },
+              {
+                "id": "pwr",
+                "x": 250,
+                "y": 285,
+                "w": 160,
+                "h": 58,
+                "type": "process",
+                "title": "电源管理",
+                "sub": "稳压·休眠唤醒",
+                "icon": "🔌"
+              },
+              {
+                "id": "batt",
+                "x": 30,
+                "y": 285,
+                "w": 150,
+                "h": 58,
+                "type": "start",
+                "title": "KL15 / KL30",
+                "sub": "常电 / 点火电",
+                "icon": "🔋"
+              }
+            ],
+            "edges": [
+              {
+                "from": "in",
+                "to": "mcu"
+              },
+              {
+                "from": "mcu",
+                "to": "can"
+              },
+              {
+                "from": "mcu",
+                "to": "mem"
+              },
+              {
+                "from": "mcu",
+                "to": "pwr",
+                "kind": "supply"
+              },
+              {
+                "from": "batt",
+                "to": "pwr",
+                "kind": "supply"
+              }
+            ]
+          }
+        },
+        {
+          "type": "h3",
+          "text": "软件分区"
+        },
+        {
+          "type": "diagram",
+          "code": "┌────────────────┐\n│   Bootloader   │ ← 刷写入口、更新App\n├────────────────┤\n│  Application   │ ← 控制逻辑、CAN通信、诊断\n├────────────────┤\n│  标定数据区     │ ← VIN码、配置参数、学习值\n└────────────────┘"
+        },
+        {
+          "type": "code",
+          "editor": true,
+          "filename": "memory_map.c",
+          "language": "c",
+          "code": "// ECU 存储分区（链接脚本视角）\ntypedef struct {\n    uint32_t app_valid_flag;   // App 有效性标记\n    uint32_t app_crc;          // 镜像校验和\n    uint8_t  vin[17];          // 车辆识别码\n    uint16_t config_ver;       // 配置参数版本\n} CalibData;\n\n#pragma section = \"CALIB\"\nstatic const CalibData* calib = (const CalibData*)0x0801F000;\n\nbool app_is_valid(void) {\n    return calib->app_valid_flag == 0xA5A5A5A5U\n        && crc32((void*)APP_BASE, APP_SIZE) == calib->app_crc;\n}"
+        },
+        {
+          "type": "paragraph",
+          "text": "上电启动流程（刷坏了为什么还能救）："
+        },
+        {
+          "type": "flow",
+          "caption": "上电启动流程（两道保险）",
+          "def": {
+            "nodes": [
+              {
+                "id": "s",
+                "x": 235,
+                "y": 20,
+                "w": 150,
+                "h": 46,
+                "type": "start",
+                "title": "上电 / 复位",
+                "icon": "⚡"
+              },
+              {
+                "id": "b",
+                "x": 230,
+                "y": 96,
+                "w": 160,
+                "h": 58,
+                "type": "process",
+                "title": "Bootloader 启动",
+                "sub": "校验自身完整性",
+                "icon": "🛡️"
+              },
+              {
+                "id": "d",
+                "x": 225,
+                "y": 190,
+                "w": 170,
+                "h": 64,
+                "type": "decision",
+                "title": "App 有效？",
+                "icon": "❓"
+              },
+              {
+                "id": "a",
+                "x": 230,
+                "y": 300,
+                "w": 160,
+                "h": 58,
+                "type": "process",
+                "title": "跳转 App",
+                "sub": "正常运行",
+                "icon": "▶️"
+              },
+              {
+                "id": "e1",
+                "x": 235,
+                "y": 404,
+                "w": 150,
+                "h": 46,
+                "type": "end",
+                "title": "正常运行中",
+                "icon": "✅"
+              },
+              {
+                "id": "w",
+                "x": 470,
+                "y": 200,
+                "w": 140,
+                "h": 58,
+                "type": "process",
+                "title": "停留 Bootloader",
+                "sub": "等待刷写",
+                "icon": "🔧"
+              },
+              {
+                "id": "e2",
+                "x": 470,
+                "y": 300,
+                "w": 140,
+                "h": 58,
+                "type": "end",
+                "title": "等待诊断仪",
+                "warn": true,
+                "icon": "⏳"
+              }
+            ],
+            "edges": [
+              {
+                "from": "s",
+                "to": "b"
+              },
+              {
+                "from": "b",
+                "to": "d"
+              },
+              {
+                "from": "d",
+                "to": "a",
+                "kind": "yes",
+                "label": "有效"
+              },
+              {
+                "from": "d",
+                "to": "w",
+                "kind": "no",
+                "label": "无效/请求刷写"
+              },
+              {
+                "from": "a",
+                "to": "e1"
+              },
+              {
+                "from": "w",
+                "to": "e2"
+              }
+            ]
+          }
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：刷写失败为什么不一定变砖？两道保险：①Bootloader在独立保护扇区，App刷坏了它还在，可重新刷写；②大Flash域控用A/B双Bank——新版本写入备用Bank、校验通过才切换，失败自动回滚旧版本。注意：不是所有ECU都有A/B双区，小ECU主要靠第一道保险，所以\"刷写中断电\"仍是必测的异常场景。"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "二、五大域：按功能划分的ECU家族",
+      "icon": "🧩",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "域",
+            "核心ECU",
+            "主要总线",
+            "测试重点"
+          ],
+          "rows": [
+            [
+              "**动力域**",
+              "EMS(发动机)、TCU(变速箱)、MCU(电机控制器)、VCU(整车控制器)",
+              "CAN 500K/1M、FlexRay",
+              "扭矩协调、故障降级、高压安全"
+            ],
+            [
+              "**底盘域**",
+              "ABS/ESP、EPS(转向)、EPB(驻车)、SAS(角度传感器)",
+              "CAN 500K、FlexRay",
+              "制动响应时间(<150ms)、故障注入、双路冗余"
+            ],
+            [
+              "**车身域**",
+              "BCM、PEPS(无钥匙)、空调、灯光、门窗",
+              "CAN 125-500K + LIN子网",
+              "组合逻辑、电源管理、休眠唤醒"
+            ],
+            [
+              "**座舱域**",
+              "仪表Cluster、中控IVI、HUD、T-BOX、DVR",
+              "CAN + 车载以太网 + LVDS",
+              "信号显示一致性、触屏响应、语音交互"
+            ],
+            [
+              "**智驾域**",
+              "ADAS域控、前雷达/角雷达、摄像头、Lidar",
+              "CAN FD + 车载以太网",
+              "传感器融合、功能安全(ASIL B/D)、误报/漏报"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"五大域各自用不同总线，网关是它们的翻译官。做域测试必须先搞清楚：这个域有哪些ECU、用什么总线通信、信号从哪来到哪去。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "三、架构演进：三代E/E架构",
+      "icon": "📈",
+      "content_blocks": [
+        {
+          "type": "ee-evolution",
+          "generations": [
+            {
+              "stage": "第一代",
+              "phase": "历史",
+              "title": "分布式",
+              "accent": "gen1",
+              "kind": "ecu",
+              "nodes": [
+                {
+                  "label": "ECU1",
+                  "sub": "车窗"
+                },
+                {
+                  "label": "ECU2",
+                  "sub": "灯光"
+                },
+                {
+                  "label": "ECU3",
+                  "sub": "车门"
+                },
+                {
+                  "label": "ECU4",
+                  "sub": "空调"
+                },
+                {
+                  "label": "ECU5",
+                  "sub": "ABS"
+                },
+                {
+                  "label": "ECU6",
+                  "sub": "仪表"
+                },
+                {
+                  "label": "ECU7",
+                  "sub": "中控"
+                },
+                {
+                  "label": "…",
+                  "sub": "上百个 ECU"
+                }
+              ],
+              "pain": "各自为政、线束噩梦",
+              "cars": "大众 PQ 平台",
+              "era": "传统燃油车时代"
+            },
+            {
+              "stage": "第二代",
+              "phase": "当前主流",
+              "title": "域集中",
+              "accent": "gen2",
+              "kind": "domain",
+              "domains": [
+                {
+                  "name": "动力域控",
+                  "items": [
+                    "EMS",
+                    "TCU",
+                    "BMS"
+                  ]
+                },
+                {
+                  "name": "车身域控",
+                  "items": [
+                    "BCM + 灯光/门窗",
+                    "PEPS"
+                  ]
+                },
+                {
+                  "name": "座舱域控",
+                  "items": [
+                    "仪表",
+                    "中控 IVI"
+                  ]
+                },
+                {
+                  "name": "智驾域控",
+                  "items": [
+                    "感知融合"
+                  ]
+                }
+              ],
+              "tag": "4 大域控集成",
+              "cars": "大众 MQB/MEB、特斯拉 Model 3/Y、蔚来 NT2.0",
+              "era": "域集中时代"
+            },
+            {
+              "stage": "第三代",
+              "phase": "未来趋势",
+              "title": "中央计算 + Zonal",
+              "accent": "gen3",
+              "kind": "zonal",
+              "vcc": {
+                "name": "中央计算平台 (VCC)",
+                "items": [
+                  "智能驾驶",
+                  "智能座舱",
+                  "车辆控制"
+                ]
+              },
+              "zones": [
+                "Zone1（前）",
+                "Zone2（左）",
+                "Zone3（右）",
+                "Zone4（后）"
+              ],
+              "highlight": "减少线束 50%+",
+              "cars": "特斯拉 Cybertruck、小鹏 G9 X-EEA 3.0",
+              "era": "中央计算时代"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "headers": [
+            "维度",
+            "分布式",
+            "域集中",
+            "中央计算"
+          ],
+          "rows": [
+            [
+              "ECU数量",
+              "100+",
+              "30-50",
+              "<20"
+            ],
+            [
+              "线束长度",
+              "3-5km",
+              "1.5-2km",
+              "<1km"
+            ],
+            [
+              "OTA能力",
+              "几乎无",
+              "域控可OTA",
+              "整车级OTA"
+            ],
+            [
+              "通信带宽",
+              "CAN为主",
+              "CAN FD+以太网",
+              "车载以太网为主"
+            ],
+            [
+              "算力",
+              "分散、低",
+              "域控集中",
+              "超级大脑(500+TOPS)"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"为什么车企都在做域集中？①降成本（减少ECU和线束）②能OTA（分布式ECU升级难）③算力集中（ADAS需要大算力）。我们测试也要跟着变——以前测单个ECU功能，现在要测域控内部的信号路由和域间交互。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "四、总线拓扑：ECU怎么连",
+      "icon": "🧩",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "四种拓扑长什么样"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "总线型（Bus）                          星型（Star）\n\n  ECU1    ECU2    ECU3    ECU4            ECU1      ECU2\n    │       │       │       │                \\      /\n120Ω═╪═══════╪═══════╪═══════╪═120Ω         [交换机]\n    共享主干：CAN_H / CAN_L                   /      \\\n    线束断/短路/电阻失效 = 全网瘫          ECU3      ECU4\n                                         分支断只坏一个；交换机挂 = 全网瘫\n\n环形（Ring）                           混合型（量产车的真实形态）\n\n  ECU1 ──────── ECU2                  ══动力CAN═╪══        ══车身CAN═╪══\n   │              │                         │                  │\n  ECU4 ──────── ECU3                      └──[网关]───以太网───[域控]──┘\n  断一处可从反方向继续通信                 网关 = 星型中心，每条CAN仍是总线型\n  代表：MOST多媒体环网"
+        },
+        {
+          "type": "h3",
+          "text": "对比与选型"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "拓扑",
+            "结构",
+            "优点",
+            "缺点",
+            "车载场景"
+          ],
+          "rows": [
+            [
+              "**总线型**",
+              "所有节点并在一对线上",
+              "布线简单、成本低",
+              "共享介质是单点：线束断/短路/终端电阻失效→**全网瘫痪**",
+              "CAN总线最常见"
+            ],
+            [
+              "**星型**",
+              "中央节点连接各终端",
+              "分支故障只影响单个节点",
+              "中央节点是单点+带宽瓶颈",
+              "以太网交换机、网关"
+            ],
+            [
+              "**环形**",
+              "首尾相连成环",
+              "断一处可反向绕行",
+              "延迟叠加、扩展麻烦",
+              "MOST多媒体环网（老款豪车）"
+            ],
+            [
+              "**混合型**",
+              "以上组合",
+              "兼顾成本和可靠性",
+              "设计复杂",
+              "实际量产车都是混合"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "warning",
+          "text": "⚠️ 易混点：FlexRay的高可靠靠**双通道冗余**（通道A/B互为备份），它本质是总线/星型组合，不是环形。车载真正的环形代表是MOST。"
+        },
+        {
+          "type": "h3",
+          "text": "三类故障，三种结局（高频考点）"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "故障1：ECU静默失效           故障2：共享介质故障            故障3：ECU\"发疯\"\n（断电/跑飞/不发报文）       （断线/短路/终端电阻失效）     （卡死显性电平/狂发错误帧）\n\nECU1   ECU2✖   ECU3         ECU1   ECU2   ECU3             ECU1   ECU2   ECU3✖\n  │      │       │            │      │      │                │      │       ✖\n══╪══════╪═══════╪══        ══╪═════╳══════╪══           ══╪══════╪═══════╝\n  │      │       │            │      │      │                │      │\n其他节点照常通信             全网瘫痪，谁也通不了           bus-off把疯节点踢下总线\n广播+多主仲裁，互不依赖       唯一的\"路\"断了，无绕行         TEC超阈值→自动自我隔离"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：为什么CAN用总线型？成本低——几十个ECU只需两根线（CAN_H/CAN_L），两端各一个120Ω电阻。被问\"单点故障\"时分两层答：**总线（共享介质）故障**——断线/短路/终端电阻失效，全网瘫痪，这是总线型的固有短板；**节点故障**——一个ECU坏了不发消息，不影响其他，因为CAN是广播+多主仲裁，谁都不依赖谁；就算节点\"发疯\"狂发错误帧，错误计数器也会把它打到bus-off踢下总线。口诀：**线坏全完、人坏无碍、人疯踢走**。"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": true,
+      "point_count": 0
+    },
+    {
+      "title": "五、网关：网络间的翻译官+守门员",
+      "icon": "🌉",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "为什么需要网关"
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "动力CAN跑500Kbps、车身CAN跑125Kbps、信息CAN常见125Kbps（部分平台500Kbps）、LIN跑19.2Kbps（常说20K）、以太网跑100Mbps——不同网络速率不同、协议不同，直接接一起没法通信。网关就是中间的翻译和路由。"
+        },
+        {
+          "type": "h3",
+          "text": "整车网络全景（网关居中路由）"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": " 动力CAN 500K（EMS/TCU/VCU） ────┐\n 底盘CAN 500K（ESP/EPS/EPB） ────┤\n 车身CAN 125K（BCM，下挂LIN 19.2Kbps（常说20K））─┼──[ 网关 ]── 信息CAN（仪表/中控/HUD，常见125K/500K）\n 诊断OBD口（接诊断仪） ──────────┘\n                                 └── 车载以太网 100M（座舱/智驾域控、T-BOX）"
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "测试要点：跨网信号（如EMS转速→仪表）要在网关两侧分别采Trace，对比信号值、周期、延迟是否在设计容限内。"
+        },
+        {
+          "type": "h3",
+          "text": "网关核心功能"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "功能",
+            "说明",
+            "测试验证点"
+          ],
+          "rows": [
+            [
+              "**协议转换**",
+              "CAN→以太网、CAN→LIN 的信号映射",
+              "DBC/ARXML信号一致性"
+            ],
+            [
+              "**路由转发**",
+              "动力CAN上发动机转速→车身CAN→网关→仪表CAN",
+              "Trace分别采两侧对比"
+            ],
+            [
+              "**信号过滤**",
+              "安全隔离，不该跨域的不转发",
+              "安全测试：尝试注入未授权信号"
+            ],
+            [
+              "**速率匹配**",
+              "CAN 500K ↔ LIN 19.2Kbps（常说20K），缓存+分段",
+              "LIN侧丢帧/延迟是否在容限内"
+            ],
+            [
+              "**网络管理**",
+              "休眠唤醒协调，保证整车功耗",
+              "静态电流测试、唤醒源测试"
+            ],
+            [
+              "**诊断路由**",
+              "诊断仪接OBD口→网关→目标ECU",
+              "诊断能访问到每个域的ECU"
+            ],
+            [
+              "**安全网关(SecOC)**",
+              "AUTOSAR安全通信，防重放/篡改",
+              "新鲜度值、MAC校验"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "典型信号路由链路"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "发动机转速信号的路由：\n\nEMS(动力CAN, 10ms周期) \n    → 网关(查路由表，500K→信息CAN) \n    → 仪表Cluster(信息CAN, 接收显示)\n    \n车速信号不止给仪表：\n\nESP(底盘CAN, 10ms) \n    → 网关(查路由表)\n    → 动力CAN: EMS(巡航控制)\n    → 信息CAN: 仪表(显示)\n    → 车身CAN: BCM(自动落锁>15km/h)"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"仪表上车速为什么不直接从ESP取？因为不同CAN网络隔离——ESP在底盘CAN、仪表在信息CAN，必须经网关转发。测试时分别采底盘CAN和信息CAN的Trace，对比信号值和延迟是否在设计容限内。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "六、域控制器 vs 分布式ECU",
+      "icon": "🧩",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "维度",
+            "分布式ECU",
+            "域控制器"
+          ],
+          "rows": [
+            [
+              "算力",
+              "单一MCU、<200DMIPS",
+              "多核SoC、>30K DMIPS"
+            ],
+            [
+              "软件",
+              "裸机/简单RTOS",
+              "Hypervisor + 多OS(Linux+RTOS+Android)"
+            ],
+            [
+              "功能",
+              "单一（如只控车窗）",
+              "统一调度（整个车身域）"
+            ],
+            [
+              "通信",
+              "对外CAN",
+              "对内高速总线+对外CAN/以太网"
+            ],
+            [
+              "OTA",
+              "难（逐个刷写）",
+              "易（域控一处升级，下发子节点）"
+            ],
+            [
+              "测试",
+              "测单ECU功能",
+              "测域内交互+域间交互+资源竞争"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"域控测试的新挑战：①资源竞争——多个APP抢GPU/内存时会不会卡死？②域间交互——智驾域控发制动请求到动力域控，协议和时间对不对？③OTA——域控升级失败回滚是否影响挂载的子节点？\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "七、面试高频考点",
+      "icon": "🎯",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "必会基础"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "你要能说出来的"
+          ],
+          "rows": [
+            [
+              "**ECU是什么**",
+              "电子控制单元=MCU+收发器+存储器，车上的\"小电脑\""
+            ],
+            [
+              "**五大域**",
+              "动力域/底盘域/车身域/座舱域/智驾域，各有什么ECU"
+            ],
+            [
+              "**CAN总线速率**",
+              "高速CAN 500K-1M、低速CAN 125K、CAN FD数据段最高8M（仲裁段仍≤1M）、LIN约19.2Kbps（常说20K）"
+            ],
+            [
+              "**终端电阻**",
+              "120Ω在总线两端，消除反射——少了通信不稳"
+            ],
+            [
+              "**bus-off**",
+              "节点错误计数器超限→自我隔离下线，防止一个\"发疯\"节点拖垮整条总线"
+            ],
+            [
+              "**网关三大作用**",
+              "协议转换、路由转发、安全隔离"
+            ],
+            [
+              "**架构演进**",
+              "分布式→域集中→中央计算，说出一款代表车型"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "进阶加分项"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "高分回答思路"
+          ],
+          "rows": [
+            [
+              "**为什么CAN用总线型不用星型？**",
+              "成本——几十个ECU星型要N×2根线，总线型只要2根。仲裁机制天然支持多主"
+            ],
+            [
+              "**网关怎么知道信号往哪转发？**",
+              "路由表（静态配置或动态），匹配CAN ID和源/目标网络"
+            ],
+            [
+              "**域集中架构对测试的影响？**",
+              "①测试范围从单ECU→域级交互 ②环境变复杂（Hypervisor多OS）③OTA测试变重要"
+            ],
+            [
+              "**信号一致性怎么测？**",
+              "三方对照：源ECU发出的CAN信号 vs 网关转发后的信号 vs 目标ECU接收显示的数值"
+            ],
+            [
+              "**CAN FD跟CAN 2.0在同一总线能混用吗？**",
+              "不能直接混。CAN FD控制器可以兼容CAN 2.0，但当总线上有CAN 2.0节点时，FD帧会被错误帧打断"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "八、测试实战关联",
+      "icon": "🛠️",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "中控/仪表测试"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "仪表显示的D档/R档来自TCU（动力CAN）→网关→信息CAN，测试时两边采Trace对比",
+            "中控的车控设置（如氛围灯颜色）经以太网→网关→LIN→灯控ECU，全链路验证"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "诊断测试"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "诊断仪接OBD口，请求发到网关，网关查路由表转发到目标ECU",
+            "测试点：物理寻址和功能寻址是否都路由正确",
+            "测试点：网关对角诊断（Tester现仅通过CAN向ECU请求→网关是否阻止）"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "ADAS测试"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "前向摄像头(以太网)→智驾域控(融合)→制动请求(底盘CAN)→ESP执行",
+            "测试点：端到端延迟（感知→决策→执行 < 200ms）"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "OTA测试"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "域集中架构下：云端→T-BOX→网关→目标域控→子ECU，逐级下发",
+            "测试点：网关的升级包校验、版本管理、回滚机制"
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "⚠️ 实战中常见严重问题"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "严重度",
+            "现象",
+            "根因+教训"
+          ],
+          "rows": [
+            [
+              "**网关路由表配错**",
+              "严重",
+              "发动机转速→仪表不显示，驾驶员误判车况",
+              "改DBC新增信号后必须同步更新网关路由表，缺少评审"
+            ],
+            [
+              "**终端电阻缺失**",
+              "严重",
+              "整条CAN总线错误帧激增、通信瘫痪",
+              "台架搭建后必须先测CAN_H↔CAN_L=60Ω再上电"
+            ],
+            [
+              "**波特率混用**",
+              "中等",
+              "新车改款：旧CAN 250K→新CAN 500K，部分ECU未更新→收不到报文",
+              "网络变更需全ECU清单逐项确认，不能\"只改部分\""
+            ],
+            [
+              "**域控资源竞争**",
+              "严重",
+              "中控导航+语音同时跑→GPU抢占→地图卡死",
+              "域控测试不能只测单功能，必须跑多APP并发场景"
+            ],
+            [
+              "**OTA后ECU变砖**",
+              "严重",
+              "FOTA刷BCM→中途断电→网关也挂了→整车瘫痪",
+              "双区设计+回滚机制是保命底线，异常断电场景必测"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "⬅ 返回 [[MOC_车载测试]] | 继续 → [[02-CAN总线]]"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 9
+    }
+  ],
+  "summary": "车上的几十上百个 ECU（电子控制单元）通过不同总线网络连接，网关负责协议转换和信号路由，域控制器按功能集中调度——这就是整车的\"神经系统\"",
+  "prev_chapter": null,
+  "next_chapter": {
+    "num": 2,
+    "name": "CAN总线"
+  }
+}

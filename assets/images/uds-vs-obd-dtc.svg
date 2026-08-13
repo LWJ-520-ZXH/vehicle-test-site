@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" width="100%" role="img"><title>OBD-II 与 UDS 故障码（DTC）形态对比</title><desc>左：OBD-II 2 字节 DTC 直接对应 5 字符码；右：UDS 3 字节 DTC + 状态，仅前 2 字节（High+Middle）参与 5 字符显示，第 3 字节为 Fault Type</desc><style>
+.t { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; fill: #1f2937; }
+.ts { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 12px; fill: #1f2937; }
+.th { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 15px; font-weight: 600; fill: #111827; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size: 13px; font-weight: 600; fill: #111827; }
+.box { stroke: #374151; stroke-width: 1; }
+.lbl { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 11px; fill: #1f2937; }
+.note { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 12px; fill: #1f2937; }
+</style>
+
+<!-- 背景画布：独立浅色卡片，确保在暗色站点主题下仍可读 -->
+<rect x="0" y="0" width="720" height="400" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+
+<text class="th" x="40" y="30">OBD-II 与 UDS 故障码（DTC）形态对比</text>
+<text class="ts" x="40" y="50">同一条 P0420，线上字节数完全不同：OBD-II 是 2 字节 DTC；UDS 是 3 字节 DTC + 1 字节状态，且第 3 字节是故障类型。</text>
+
+<!-- ① OBD-II -->
+<text class="th" x="40" y="82">① OBD-II（ISO 15031-6）— DTC 为 2 字节</text>
+<g transform="translate(40, 96)">
+  <rect class="box" x="0" y="0" width="130" height="48" rx="4" fill="#60a5fa"/>
+  <text class="mono" x="65" y="22" text-anchor="middle">高字节</text>
+  <text class="lbl" x="65" y="38" text-anchor="middle">HB</text>
+  <rect class="box" x="130" y="0" width="130" height="48" rx="4" fill="#4ade80"/>
+  <text class="mono" x="195" y="22" text-anchor="middle">低字节</text>
+  <text class="lbl" x="195" y="38" text-anchor="middle">LB（2 字节 DTC 的低位）</text>
+</g>
+<text class="note" x="40" y="168">2 字节 DTC（16 bit）直接对应 5 字符码，无 Fault Type、无独立状态字节。</text>
+
+<!-- ② UDS -->
+<text class="th" x="40" y="200">② UDS（ISO 14229-1，Format 0x04）— DTC 为 3 字节 + 状态</text>
+<g transform="translate(40, 214)">
+  <rect class="box" x="0" y="0" width="92" height="48" rx="4" fill="#60a5fa"/>
+  <text class="mono" x="46" y="22" text-anchor="middle">高字节</text>
+  <text class="lbl" x="46" y="38" text-anchor="middle">HB</text>
+  <rect class="box" x="92" y="0" width="92" height="48" rx="4" fill="#4ade80"/>
+  <text class="mono" x="138" y="22" text-anchor="middle">中字节</text>
+  <text class="lbl" x="138" y="38" text-anchor="middle">MB</text>
+  <rect class="box" x="184" y="0" width="92" height="48" rx="4" fill="#fb923c"/>
+  <text class="mono" x="230" y="22" text-anchor="middle">低字节</text>
+  <text class="lbl" x="230" y="38" text-anchor="middle">LB=FaultType</text>
+  <rect class="box" x="276" y="0" width="92" height="48" rx="4" fill="#9ca3af"/>
+  <text class="mono" x="322" y="22" text-anchor="middle">状态字节</text>
+  <text class="lbl" x="322" y="38" text-anchor="middle">Status</text>
+</g>
+<text class="note" x="40" y="286">3 字节 DTC 编号 + 1 字节状态；仅前 2 字节（HB+MB）参与 5 字符显示，第 3 字节 LB 是故障类型，不进显示码。</text>
+
+<!-- 共享显示码 -->
+<text class="th" x="40" y="318">两者前 2 字节按 SAE J2012 解成 5 字符显示码</text>
+<g transform="translate(40, 330)">
+  <rect class="box" x="0" y="0" width="56" height="44" rx="4" fill="#fde047"/>
+  <text class="mono" x="28" y="28" text-anchor="middle">P</text>
+  <rect class="box" x="56" y="0" width="56" height="44" rx="4" fill="#fde047"/>
+  <text class="mono" x="84" y="28" text-anchor="middle">0</text>
+  <rect class="box" x="112" y="0" width="56" height="44" rx="4" fill="#fde047"/>
+  <text class="mono" x="140" y="28" text-anchor="middle">4</text>
+  <rect class="box" x="168" y="0" width="56" height="44" rx="4" fill="#fde047"/>
+  <text class="mono" x="196" y="28" text-anchor="middle">2</text>
+  <rect class="box" x="224" y="0" width="56" height="44" rx="4" fill="#fde047"/>
+  <text class="mono" x="252" y="28" text-anchor="middle">0</text>
+</g>
+<text class="ts" x="300" y="358" fill="#7f1d1d" font-weight="600">例：P0420（具体故障含义以 OEM DTC 手册为准）</text>
+
+<text class="note" x="40" y="392">UDS 用 $19 01 响应的 Format 字节声明 DTC 格式：0x00 = OBD（2B DTC），0x04 = UDS（3B DTC）；本章默认 0x04。</text>
+</svg>

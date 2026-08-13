@@ -1,0 +1,528 @@
+{
+  "num": 9,
+  "slug": "CAPL脚本",
+  "title": "CAPL 脚本 ⭐核心工具",
+  "oneliner": "类 C 的事件驱动语言，挂在 CANoe 仿真节点上：用它模拟还没做出的 ECU、自动注入测试激励、编写可判定的自动化用例。",
+  "sections": [
+    {
+      "title": "一、CAPL 是什么",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "CAPL（CAN Access Programming Language）是 Vector 为 CANoe/CANalyzer 设计的类 C 事件驱动语言。它让工具从「只会看总线的观察员」变成「能主动发帧、能响应交互的演员」。你写的 .can 文件编译后挂到某个仿真节点（Simulation Node）上运行，节点的行为就由这段脚本定义。"
+        },
+        {
+          "type": "blockquote",
+          "style": "核心理念",
+          "text": "CAPL 没有 main() 函数，程序靠「事件」触发：按键、定时器到点、收到某条报文、某系统变量变化……这就是事件驱动。理解这一点，就不会写出「为什么我的代码没执行」的困惑——因为它不在事件里。"
+        }
+      ]
+    },
+    {
+      "title": "二、程序基本结构",
+      "content_blocks": [
+        {
+          "type": "code",
+          "language": "capl",
+          "filename": "Template.can",
+          "code": "/*@!Encoding:936*/      // 指定源文件编码，中文注释必加，否则乱码\nincludes\n{\n  // 引入其他 .can 文件\n}\n\nvariables\n{\n  msTimer myTimer;     // 定时器变量\n  message 0x100 msg;   // 报文变量\n}\n\non start               // 测量启动时执行一次\n{\n  write(\"CAPL 已加载\");\n}"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/capl-editor.svg",
+          "alt": "CAPL Browser 编辑器：浏览器树与代码区",
+          "caption": "CAPL Browser：左侧事件/变量/函数树，右侧代码区，编译即可加载到节点"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "文件头 /*@!Encoding:936*/：中文注释必须声明，否则编译乱码（高频坑）",
+            "includes：复用其他 .can 文件的函数与变量",
+            "variables：声明报文、定时器、系统变量、自定义变量",
+            "事件块（on ...）：真正干活的代码所在地"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "三、常用事件类型",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "事件",
+            "触发时机",
+            "典型用途"
+          ],
+          "rows": [
+            [
+              "on start",
+              "测量启动",
+              "初始化、打印日志"
+            ],
+            [
+              "on key 'x'",
+              "按下键盘 x",
+              "手动触发某个动作（调试利器）"
+            ],
+            [
+              "on timer t",
+              "定时器 t 到点",
+              "周期发帧（需自行复位定时器）"
+            ],
+            [
+              "on message 0x100",
+              "收到 ID=0x100 报文",
+              "响应/记录/转发"
+            ],
+            [
+              "on sysvar NS::sv",
+              "系统变量变化",
+              "面板控件联动"
+            ],
+            [
+              "on signal Sig",
+              "DBC 信号更新",
+              "基于信号值做逻辑"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "warning",
+          "text": "on timer 里的代码只执行一次！想要周期发送，必须在事件末尾再 setTimer(t, period) 复位自己，否则定时器只触发一帧。新手 90% 的「节点只发了一帧就不发了」都是这个原因。"
+        }
+      ]
+    },
+    {
+      "title": "四、信号、系统变量与环境变量",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "CAPL 里访问数据的三种「变量」语法极易混淆，必须分清："
+        },
+        {
+          "type": "table",
+          "headers": [
+            "前缀",
+            "含义",
+            "示例"
+          ],
+          "rows": [
+            [
+              "$",
+              "DBC 中的信号/报文",
+              "$EngineState::EngineSpeed = 0（写信号）"
+            ],
+            [
+              "@",
+              "系统变量 System Variable",
+              "@Engine::EngineSpeedEntry（面板滑块值）"
+            ],
+            [
+              "@",
+              "环境变量 Environment Variable",
+              "@EnvDoorState（早期交互变量）"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "$ 操作的是「总线信号」（会被编码成报文发出），@ 操作的是「CANoe 内部的全局变量」（常用于面板交互、节点间解耦通信）。面板控件通常绑定 @系统变量，再由 CAPL 的 on sysvar 事件把它翻译成 $信号 下发到总线——这就是仿真节点「承上启下」的标准套路。"
+        }
+      ]
+    },
+    {
+      "title": "五、实战：半仿真 vs 全仿真",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "半仿真：CAPL 主动 output 报文"
+        },
+        {
+          "type": "code",
+          "language": "capl",
+          "filename": "Door.can（半仿真）",
+          "code": "variables { msTimer doorTimer; }\n\non key 's' { setTimer(doorTimer, 1000); }\n\non timer doorTimer {\n  message DoorState doormsg;\n  doormsg.Door_L = 1;   // 左门开\n  doormsg.Door_R = 1;   // 右门开\n  output(doormsg);      // 发送到总线\n  setTimer(doorTimer, 1000);  // 复位定时器→周期发送\n}"
+        },
+        {
+          "type": "h3",
+          "text": "全仿真：响应面板控件，联动信号与显示"
+        },
+        {
+          "type": "code",
+          "language": "capl",
+          "filename": "Engine.can（全仿真）",
+          "code": "// 面板滑块 EngineSpeedEntry 变化时\non sysvar Engine::EngineSpeedEntry {\n  if (@Engine::EngineStateSwitch)        // 引擎已开\n    $EngineState::EngineSpeed = @this;    // 滑块值→信号\n}\n\n// Display 节点收到引擎状态报文后更新仪表\non message EngineState {\n  @Engine::EngineSpeedDspMeter = $EngineState::EngineSpeed / 1000.0;\n}\n\n// 车门状态：用位运算把两个信号编码成一个环境变量\non message DoorState {\n  @EnvDoorState = this.Door_L + this.Door_R * 2;  // 0关 1左 2右 3全开\n}"
+        },
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "半仿真适合「快速造数据、验证接收端」，全仿真适合「完整模拟一个有逻辑的 ECU」。实际项目里两者常混合：用半仿真把还没联调的节点顶上，等真实 ECU 到位再替换为 Real Bus。"
+        }
+      ]
+    },
+    {
+      "title": "六、Test Feature Set（TFS）判定函数族",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "自 CANoe 5.0 起集成的 Test Feature Set，是一组专门用于「自动化测试判定与报告」的函数，是写 Test Module 的核心武器（详见 [[23-CANoe-TestModule]]）。按用途分三类："
+        },
+        {
+          "type": "table",
+          "headers": [
+            "类别",
+            "代表函数",
+            "作用"
+          ],
+          "rows": [
+            [
+              "判别",
+              "TestStepPass / TestStepFail / TestCaseFail / TestSetVerdict",
+              "给出步骤/用例/模块的 pass/fail 判定"
+            ],
+            [
+              "架构",
+              "TestGroupBegin/End、TestCaseDescription、TestStep、TestInfoTable/Row",
+              "组织用例结构、写结构化报告"
+            ],
+            [
+              "报告",
+              "TestReportAddSetupInfo、TestReportAddSUTInfo、TestCaseComment",
+              "记录测试环境、样品、备注等元信息"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "配套还有检测函数族（Check Descriptions）：Signal Evaluation（信号数值/周期/稳定性）、Message Evaluation（报文丢失/周期/DLC/错误帧）、Time Evaluation（连续帧/超时）。它们把「人工看 Trace」变成「机器自动判定」，是回归测试的基础。"
+        }
+      ]
+    },
+    {
+      "title": "七、常见坑与排错",
+      "content_blocks": [
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "中文乱码 → 文件头忘记 /*@!Encoding:936*/",
+            "只发一帧 → on timer 末尾没复位 setTimer",
+            "信号写不进去 → 分不清 $信号 与 @系统变量，或节点未激活",
+            "编译报错 → includes 里引用的 .can 文件不存在或路径错",
+            "面板不联动 → 控件绑定的系统变量命名空间（NS::sv）与 on sysvar 不一致"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "八、面试高频考点",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "要点"
+          ],
+          "rows": [
+            [
+              "CAPL 为什么没有 main",
+              "事件驱动，靠 on 事件触发"
+            ],
+            [
+              "$ 和 @ 区别",
+              "$是总线信号，@是系统/环境变量"
+            ],
+            [
+              "怎么实现周期发帧",
+              "on timer + 末尾 setTimer 自复位"
+            ],
+            [
+              "如何做自动化判定",
+              "TFS 的 TestStepPass/Fail + 检测函数"
+            ],
+            [
+              "半仿真与全仿真区别",
+              "主动output vs 响应控件联动信号"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "飞书笔记：CAPL 编程实战",
+      "content_blocks": [
+        {
+          "type": "h4",
+          "text": "CAPL 简介"
+        },
+        {
+          "type": "paragraph",
+          "text": "CAPL（Communication Access Programming Language）是 Vector 公司开发的专用脚本语言，用于 CANoe 和 CANalyzer 中的自动化测试。CAPL 类似于 C 语言，专门针对汽车总线通信设计。"
+        },
+        {
+          "type": "h4",
+          "text": "CAPL 基本语法"
+        },
+        {
+          "type": "paragraph",
+          "text": "1. 程序结构"
+        },
+        {
+          "type": "paragraph",
+          "text": "```Plain Text\nincludes\n{\n // 头文件引用\n}"
+        },
+        {
+          "type": "paragraph",
+          "text": "variables\n{\n // 全局变量定义\n}"
+        },
+        {
+          "type": "paragraph",
+          "text": "on start\n{\n // 仿真启动时执行\n}"
+        },
+        {
+          "type": "paragraph",
+          "text": "on message CAN1.xxx\n{\n // 接收到特定报文时执行\n}\n```"
+        },
+        {
+          "type": "paragraph",
+          "text": "2. 常用数据类型"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "类型",
+            "说明",
+            "示例"
+          ],
+          "rows": [
+            [
+              "byte",
+              "8 位无符号",
+              "byte msg[8]"
+            ],
+            [
+              "word",
+              "16 位无符号",
+              "word id"
+            ],
+            [
+              "dword",
+              "32 位无符号",
+              "dword canId"
+            ],
+            [
+              "int",
+              "16 位有符号",
+              "int count"
+            ],
+            [
+              "long",
+              "32 位有符号",
+              "long value"
+            ],
+            [
+              "float",
+              "浮点数",
+              "float speed"
+            ],
+            [
+              "timer",
+              "定时器",
+              "timer t1"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "3. 变量定义示例"
+        },
+        {
+          "type": "paragraph",
+          "text": "```Plain Text\nvariables\n{\n byte CAN_Data[8]; // CAN数据数组\n word EngineSpeed; // 发动机转速信号\n dword msgID = 0x100; // 报文ID\n int cycleTime = 100; // 周期时间(ms)\n timer tSend; // 发送定时器\n}\n```"
+        },
+        {
+          "type": "h4",
+          "text": "CAPL 常用函数"
+        },
+        {
+          "type": "paragraph",
+          "text": "1. 报文发送函数"
+        },
+        {
+          "type": "paragraph",
+          "text": "```Plain Text\n// 发送CAN报文\noutput(message_name);"
+        },
+        {
+          "type": "paragraph",
+          "text": "// 发送带扩展ID的报文\ncanID = 0x123;\ndlc = 8;\nCAN_Data[0] = 0x01;\nCAN_Data[1] = 0x02;\noutput(myMessage);\n```"
+        },
+        {
+          "type": "paragraph",
+          "text": "2. 环境变量操作"
+        },
+        {
+          "type": "paragraph",
+          "text": "```Plain Text\n// 读取环境变量\nvalue = getValue(env_VariableName);"
+        },
+        {
+          "type": "paragraph",
+          "text": "// 设置环境变量\nsetValue(env_VariableName, value);\n```"
+        },
+        {
+          "type": "paragraph",
+          "text": "3. 信号操作"
+        },
+        {
+          "type": "paragraph",
+          "text": "```Plain Text\n// 读取信号值\nspeed = getSignal(Signal_Name);"
+        },
+        {
+          "type": "paragraph",
+          "text": "// 设置信号值\nsetSignal(Signal_Name, value);\n```"
+        },
+        {
+          "type": "paragraph",
+          "text": "4. 定时器函数"
+        },
+        {
+          "type": "paragraph",
+          "text": "```Plain Text\n// 启动定时器\nsetTimer(timerName, timeMs);"
+        },
+        {
+          "type": "paragraph",
+          "text": "// 取消定时器\ncancelTimer(timerName);"
+        },
+        {
+          "type": "paragraph",
+          "text": "// 定时器回调\non timer tSend\n{\n // 定时触发执行\n output(myMessage);\n setTimer(tSend, 100); // 重新设置定时器\n}\n```"
+        },
+        {
+          "type": "paragraph",
+          "text": "5. 判断函数"
+        },
+        {
+          "type": "paragraph",
+          "text": "```Plain Text\n// 检查报文是否收到\nif (this.Q == 1) // Q是QUALITY属性\n{\n // 报文有效\n}"
+        },
+        {
+          "type": "paragraph",
+          "text": "// 检查信号值\nif (EngineSpeed > 5000)\n{\n // 超过红线转速\n}\n```"
+        },
+        {
+          "type": "paragraph",
+          "text": "6. 诊断函数"
+        },
+        {
+          "type": "paragraph",
+          "text": "```Plain Text\n// 发送诊断请求\ndiagRequest Powertrain.DTC_Read req;\ndiagSendRequest(req);"
+        },
+        {
+          "type": "paragraph",
+          "text": "// 等待响应\non diagResponse Powertrain.DTC_Read\n{\n // 处理诊断响应\n}\n```"
+        },
+        {
+          "type": "paragraph",
+          "text": "7. 日志函数"
+        },
+        {
+          "type": "paragraph",
+          "text": "```Plain Text\n// 写入日志\nwrite(\"Engine Speed: %d\", EngineSpeed);\nwriteDbgStr(\"Debug info: %s\", str);\nwriteExLog(\"Extra log: %x\", value);\n```"
+        },
+        {
+          "type": "h4",
+          "text": "CAPL 测试用例示例"
+        },
+        {
+          "type": "paragraph",
+          "text": "示例 1：周期发送报文"
+        },
+        {
+          "type": "paragraph",
+          "text": "```Plain Text\nincludes\n{\n \n}"
+        },
+        {
+          "type": "paragraph",
+          "text": "variables\n{\n message EngineData msgEngine;\n timer tCycle;\n}"
+        },
+        {
+          "type": "paragraph",
+          "text": "on start\n{\n msgEngine.id = 0x100;\n msgEngine.DLC = 8;\n setTimer(tCycle, 100); // 100ms周期\n}"
+        },
+        {
+          "type": "paragraph",
+          "text": "on timer tCycle\n{\n msgEngine.EngineSpeed = 3000;\n msgEngine.ThrottlePos = 50;\n output(msgEngine);\n setTimer(tCycle, 100);\n}\n```"
+        },
+        {
+          "type": "paragraph",
+          "text": "示例 2：响应报文测试"
+        },
+        {
+          "type": "paragraph",
+          "text": "```Plain Text\nvariables\n{\n message DoorStatus msgDoor;\n byte doorOpenCount = 0;\n}"
+        },
+        {
+          "type": "paragraph",
+          "text": "on message 0x200 // 门状态报文ID\n{\n if (this.Door_L == 1 || this.Door_R == 1)\n {\n doorOpenCount++;\n write(\"左车门或右车门打开，次数：%d\", doorOpenCount);\n }\n}"
+        },
+        {
+          "type": "paragraph",
+          "text": "on key 'a'\n{\n // 按A键模拟开门\n msgDoor.Door_L = 1;\n output(msgDoor);\n}\n```"
+        },
+        {
+          "type": "paragraph",
+          "text": "示例 3：断言测试"
+        },
+        {
+          "type": "paragraph",
+          "text": "```Plain Text\nvariables\n{\n int testPass = 0;\n int testFail = 0;\n}"
+        },
+        {
+          "type": "paragraph",
+          "text": "on start\n{\n // 测试1：验证发动机启动信号\n setSignal(Engine_Start, 1);\n if (getSignal(Engine_RPM) > 0)\n {\n write(\"测试1 PASS: 发动机启动成功\");\n testPass++;\n }\n else\n {\n write(\"测试1 FAIL: 发动机启动失败\");\n testFail++;\n }\n \n // 测试2：验证车门未关报警\n setSignal(Door_Open, 1);\n if (getSignal(Door_Warning) == 1)\n {\n write(\"测试2 PASS: 车门报警正常\");\n testPass++;\n }\n else\n {\n write(\"测试2 FAIL: 车门报警异常\");\n testFail++;\n }\n \n write(\"测试完成: 通过=%d, 失败=%d\", testPass, testFail);\n}\n```"
+        },
+        {
+          "type": "h4",
+          "text": "CAPL 与 CANoe 结合使用"
+        },
+        {
+          "type": "paragraph",
+          "text": "1. 创建 CAPL 测试模块"
+        },
+        {
+          "type": "paragraph",
+          "text": "- 在 CANoe 中创建 Test Module\n- 选择\"CAPL\"作为测试语言\n- 编写测试用例"
+        },
+        {
+          "type": "paragraph",
+          "text": "2. 常用测试函数"
+        },
+        {
+          "type": "paragraph",
+          "text": "```Plain Text\n// 断言\ntestStep(\"描述\"); // 测试步骤\ntestReport(); // 生成报告\ntestAddCondition(); // 添加条件\ntestCheck(); // 检查结果"
+        },
+        {
+          "type": "paragraph",
+          "text": "// 检查点\nif (actualValue == expectedValue)\n{\n testStepPass(\"检查点名称\");\n}\nelse\n{\n testStepFail(\"检查点名称\");\n}\n```"
+        },
+        {
+          "type": "paragraph",
+          "text": "3. 自动化测试流程"
+        },
+        {
+          "type": "paragraph",
+          "text": "```Plain Text\nvoid TestMain()\n{\n // 初始化\n testInitialize();\n \n // 测试用例1\n testCase(\"测试用例1名称\");\n // 执行测试...\n \n // 测试用例2\n testCase(\"测试用例2名称\");\n // 执行测试...\n \n // 结束\n testTerminate();\n}\n```"
+        },
+        {
+          "type": "h4",
+          "text": "函数库"
+        }
+      ]
+    }
+  ],
+  "summary": "CAPL 是 Vector 的类 C 事件驱动语言，编译后挂在 CANoe 仿真节点上运行，让工具能主动发帧并响应交互。它没有 main()，逻辑全在 on 事件（start/key/timer/message/sysvar/signal）里。访问数据要分清：$ 操作 DBC 总线信号，@ 操作系统/环境变量；面板控件通常绑 @系统变量，再由 on sysvar 翻译成 $信号 下发，这是仿真节点承上启下的标准套路。实战分半仿真（CAPL 主动 output 周期报文）与全仿真（响应面板控件联动信号与显示）。自动化靠 Test Feature Set：TestStepPass/Fail 做判定，TestGroup/TestCase 组织用例，检测函数族自动校验信号/报文/时间。高频坑：忘写 Encoding 声明乱码、定时器不复位只发一帧、把 $ 与 @ 混用。",
+  "prev_chapter": 8,
+  "next_chapter": 10
+}

@@ -1,0 +1,985 @@
+[
+  {
+    "id": "Q-50-00-01",
+    "chapterNum": 50,
+    "sectionIndex": 0,
+    "sectionTitle": "一、安装与首次启动",
+    "module": "A",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "首次启动",
+      "示例工程",
+      "新手弯路"
+    ],
+    "stem": "第一次使用 CANoe 时，本章推荐的正确入门姿势是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "立刻新建空白工程，自己从零配置数据库和通道"
+      },
+      {
+        "key": "B",
+        "text": "打开安装目录自带的 Sample Configuration，在示例工程基础上学、在它基础上改"
+      },
+      {
+        "key": "C",
+        "text": "先把默认选项全部改成自定义设置，再启动软件"
+      },
+      {
+        "key": "D",
+        "text": "卸载现有版本重装最新版，保证界面与教程完全一致"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "本节的警示写得非常直接：别急着新建工程，新手最大的弯路就是自己从空白搭，结果卡在数据库和通道配置上；正确姿势是打开安装目录自带的 Sample Configuration，在它基础上学、在它基础上改。所以选 B。A 正是原文点名的弯路：空白工程什么都没有，你既没有数据库也没有仿真节点，点 Start Measurement 后 Trace 一片空白，很难判断是配置错了还是硬件没接上。C 与原文首段冲突，原文建议首次启动先用默认配置，不要一上来就改选项，改乱了连恢复默认都不知道从哪下手。D 没有必要，原文说 CANoe 版本众多，界面大逻辑一致，功能区名称是一样的。实际带新人时也是这个套路：先让他打开示例工程跑起来，看到 Trace 在滚，建立起「我确实连上总线了」的正反馈，再逐步替换数据库、改节点，学习曲线会平缓很多。",
+    "keyPoints": [
+      "先开 Sample Configuration，不要从空白建工程",
+      "首次启动用默认配置，不急着改选项",
+      "空白工程易卡在数据库与通道配置上"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "一、安装与首次启动·warning 提示框（别急着「新建工程」）"
+    },
+    "relatedTerms": [
+      "CANoe",
+      "工程配置",
+      "通道"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-50-00-02",
+    "chapterNum": 50,
+    "sectionIndex": 0,
+    "sectionTitle": "一、安装与首次启动",
+    "module": "A",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "CANoe 版本",
+      "界面差异",
+      "功能区"
+    ],
+    "stem": "判断：CANoe 版本众多（11/12/13 等），界面大逻辑一致，手上版本的按钮位置可能略有差异，但功能区名称是一样的。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "T"
+    ],
+    "explanation": "正确，这与本节原文表述一致。原文说明本篇以通用逻辑为准，正是因为不同版本之间按钮的摆放位置、图标样式会调整，但顶部功能区的名称与职责分工是稳定的：File、Home、Analysis、Simulation、Test、Diagnostics、Environment、Hardware、Tools、Layout。理解这一点对学习方式有直接影响——你要记的是「测量启停归 Home 管、分析窗口归 Analysis 管」这种能力地图，而不是死记某个按钮在屏幕左起第几个。后者换个版本就失效，前者十年不变。工作中这个差异很现实：网上教程、公司内部文档、同事的截图往往来自不同版本，如果按图索骥找不到按钮就卡住，效率会很低；正确做法是先判断这个操作属于哪个功能区，再去该功能区里找名称相近的入口。另外提醒一句，工程文件的版本兼容是单向的，高版本能打开低版本工程，反过来常常打不开，跨版本协作前要先对齐。",
+    "keyPoints": [
+      "各版本界面大逻辑一致，功能区名称相同",
+      "按钮位置可能随版本变化",
+      "记能力地图而不是死记按钮位置"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "一、安装与首次启动·首段（CANoe 版本众多）"
+    },
+    "relatedTerms": [
+      "CANoe",
+      "工具栏",
+      "配置"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-50-01-01",
+    "chapterNum": 50,
+    "sectionIndex": 1,
+    "sectionTitle": "二、认识主界面",
+    "module": "A",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "工具栏",
+      "Home",
+      "测量启停"
+    ],
+    "stem": "按本节给出的「能力地图」，负责管测量启停的功能区是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Home"
+      },
+      {
+        "key": "B",
+        "text": "Analysis"
+      },
+      {
+        "key": "C",
+        "text": "Simulation"
+      },
+      {
+        "key": "D",
+        "text": "Hardware"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "本节把顶部工具栏称为 CANoe 的能力地图，并逐个说明职责：Home 管测量启停，Analysis 管分析窗口，Simulation 管节点，Test 管自动化，Diagnostics 管诊断，Environment 管变量，Hardware 管硬件通道。所以 A 正确。B 的 Analysis 里放的是 Trace、Graphics 这类分析窗口；C 的 Simulation 用来管理仿真节点与网络结构；D 的 Hardware 负责硬件通道映射，也就是把逻辑通道对到实际插着的 VN 设备上。需要补充的是，测量启停除了 Home 功能区，左上角的快速访问区也放了 Start/Stop Measurement 一键按钮，实际操作中大家更常用快捷入口或 F9 之类的快捷键。初学时把这七个功能区的职责背下来非常划算：以后遇到任何操作需求，先在脑子里判断它属于哪一类，再去对应功能区找，比在十个标签页里乱翻要快得多。",
+    "keyPoints": [
+      "Home 管测量启停",
+      "Analysis 管分析窗口，Simulation 管节点",
+      "Hardware 管硬件通道，Environment 管变量"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "二、认识主界面·工具栏能力地图段落"
+    },
+    "relatedTerms": [
+      "CANoe",
+      "Measurement",
+      "工具栏"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-50-01-02",
+    "chapterNum": 50,
+    "sectionIndex": 1,
+    "sectionTitle": "二、认识主界面",
+    "module": "A",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "反向",
+    "tags": [
+      "功能区职责",
+      "Environment",
+      "反向辨析"
+    ],
+    "stem": "关于 CANoe 顶部工具栏各功能区的职责，下列说法错误的有：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Environment 用来管理硬件通道映射"
+      },
+      {
+        "key": "B",
+        "text": "Test 用来导入和管理 DBC 数据库"
+      },
+      {
+        "key": "C",
+        "text": "Hardware 用来管理硬件通道"
+      },
+      {
+        "key": "D",
+        "text": "Analysis 用来管理 Trace、Graphics 等分析窗口"
+      },
+      {
+        "key": "E",
+        "text": "Simulation 用来管理仿真节点"
+      }
+    ],
+    "answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "按本节能力地图，C、D、E 三项描述都是对的。A 错在张冠李戴：Environment 管的是变量（环境变量），硬件通道归 Hardware 管，这两个功能区经常被新人搞混，因为名字都比较抽象。B 也错：Test 管的是自动化，也就是 Test Module、Test Unit 这类自动化测试的组织与执行；而数据库的导入在本章第五节写得很明确，是通过 Tools 里的 CANdb++ Editor 打开数据库工具，或者在新工程里通过 Simulation Setup 添加 DBC，跟 Test 功能区没有关系。这两个错项对应的是真实排错场景：找不到 DBC 在哪加的人，十有八九是在 Test 或 Analysis 里翻了半天；而通道对不上、报文发不出去的人，往往是没意识到要去 Hardware 里做通道映射。把职责边界记清楚，能省下大量摸索时间。",
+    "keyPoints": [
+      "Environment 管变量，Hardware 管通道",
+      "Test 管自动化，不负责导入 DBC",
+      "DBC 通过 Tools 或 Simulation Setup 添加"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "二、认识主界面·工具栏能力地图段落"
+    },
+    "relatedTerms": [
+      "DBC",
+      "Simulation Setup",
+      "系统变量"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-50-01-03",
+    "chapterNum": 50,
+    "sectionIndex": 1,
+    "sectionTitle": "二、认识主界面",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "快速访问区",
+      "界面分区",
+      "状态栏"
+    ],
+    "stem": "按本节对主界面的划分，Start/Stop Measurement、Load/Save Configuration 这类一键按钮位于：",
+    "options": [
+      {
+        "key": "A",
+        "text": "快速访问区（左上）"
+      },
+      {
+        "key": "B",
+        "text": "状态栏"
+      },
+      {
+        "key": "C",
+        "text": "工作区"
+      },
+      {
+        "key": "D",
+        "text": "Layout 功能区"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "本节把主界面拆成四块：快速访问区在左上，放 Start/Stop Measurement、Load/Save Configuration 等一键按钮；工具栏在顶部，包含 File、Home、Analysis、Simulation、Test、Diagnostics、Environment、Hardware、Tools、Layout 这些标签；工作区在中间，用来摆放 Trace、Graphics、Panel 等各种窗口；状态栏显示测量状态、通道和时间。所以 A 正确。B 的状态栏只显示状态信息，不放操作按钮，但它很有用——排查问题时先看状态栏能确认测量到底有没有在跑、当前用的是哪个通道。C 是窗口容器。D 的 Layout 是工具栏中的一个标签，管的是窗口布局。这个分区认知在实操中的价值是：出现异常时能迅速判断该看哪里。比如报文不刷新，先看状态栏确认测量是否已启动，再看工作区里的 Trace 窗口是不是被过滤条件挡住了。",
+    "keyPoints": [
+      "快速访问区在左上，放启停与配置按钮",
+      "工作区放 Trace/Graphics/Panel 等窗口",
+      "状态栏显示测量状态、通道与时间"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "二、认识主界面·界面分区列表第 1 条"
+    },
+    "relatedTerms": [
+      "Measurement",
+      "Trace",
+      "Panel"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-50-02-01",
+    "chapterNum": 50,
+    "sectionIndex": 2,
+    "sectionTitle": "三、打开示例工程",
+    "module": "A",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "示例工程",
+      "菜单路径",
+      "Sample Configuration"
+    ],
+    "stem": "按本节描述，打开 CANoe 自带示例工程的操作路径是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "File → Open，定位到 CANoe 安装目录的 Sample Configuration"
+      },
+      {
+        "key": "B",
+        "text": "Tools → CANdb++ Editor，在数据库工具里打开示例"
+      },
+      {
+        "key": "C",
+        "text": "Home → Panel，从面板列表中选择示例工程"
+      },
+      {
+        "key": "D",
+        "text": "Simulation Setup → Interactive Generators，加载示例配置"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "本节的操作步骤是：File → Open，定位到 CANoe 安装目录的 Sample Configuration，挑一个和你要学的网络匹配的工程（例如 CAN 的示例），打开后直接 Start Measurement，就能看到 Trace 窗口开始滚动报文。所以 A 正确。B 的 Tools → CANdb++ Editor 是第五节里打开数据库工具的入口，处理的是 DBC 而不是工程；C 的 Home → Panel 是第六节里打开面板的入口，面板是测试交互 UI；D 的 Interactive Generators 出现在第七节，是在 Simulation Setup 里加的交互发生器，用来手动填 ID 和数据发帧。这三个干扰项都是本章真实存在的路径，只是功能不同，容易记串。建议第一次操作时把这几条路径分别记成一句话：开工程走 File，开数据库走 Tools，开面板和写窗口走 Home，发帧走 Simulation Setup。路径记准了，跟着教程做才不会卡在找入口这一步。",
+    "keyPoints": [
+      "打开示例工程走 File → Open",
+      "示例工程位于 CANoe 安装目录 Sample Configuration",
+      "打开后直接 Start Measurement 即可看报文"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "三、打开示例工程·操作段落（File → Open）"
+    },
+    "relatedTerms": [
+      "CANoe",
+      "Measurement",
+      "Trace"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-50-02-02",
+    "chapterNum": 50,
+    "sectionIndex": 2,
+    "sectionTitle": "三、打开示例工程",
+    "module": "A",
+    "type": "judge",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "反向",
+    "tags": [
+      "示例工程",
+      "网络匹配",
+      "选工程"
+    ],
+    "stem": "判断：打开 Sample Configuration 时随便挑一个工程即可，不需要考虑它和你要学的网络类型是否匹配。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误。本节原文要求「挑一个和你要学的网络匹配的工程（如 CAN 的示例）」。CANoe 的示例库覆盖 CAN、LIN、FlexRay、以太网等多种网络，不同示例的数据库、节点模型和窗口布局完全不同。如果你要学 CAN，却打开了一个 LIN 或以太网示例，看到的 Trace 内容、Simulation Setup 里的节点结构都跟教程对不上，很容易误以为是自己操作错了，白白浪费时间。更重要的是，示例工程的价值在于给你一个能跑通的参照系——你要在它的基础上改数据库、改节点、加窗口，参照系选错，后面每一步都在偏。实际工作中挑示例还有一个隐含条件：尽量挑与当前项目总线类型和波特率接近的，这样后续把自己的 DBC 换进去、把通道映射到实际硬件时改动最小。养成先确认网络类型再打开工程的习惯，是入门阶段少走弯路的关键一步。",
+    "keyPoints": [
+      "示例工程要与所学网络类型匹配",
+      "示例库覆盖 CAN/LIN/以太网等多种网络",
+      "参照系选错会导致后续每步都偏"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "三、打开示例工程·操作段落（挑一个和你要学的网络匹配的工程）"
+    },
+    "relatedTerms": [
+      "CAN",
+      "总线",
+      "Trace"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-50-03-01",
+    "chapterNum": 50,
+    "sectionIndex": 3,
+    "sectionTitle": "四、第一次看 Trace",
+    "module": "A",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Trace 窗口",
+      "列含义",
+      "报文"
+    ],
+    "stem": "按本节要求，第一次看 Trace 窗口时应重点关注的列包括：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Time（时间）"
+      },
+      {
+        "key": "B",
+        "text": "Channel（通道）"
+      },
+      {
+        "key": "C",
+        "text": "ID（报文标识）"
+      },
+      {
+        "key": "D",
+        "text": "Factor（精度）"
+      },
+      {
+        "key": "E",
+        "text": "StartBit（起始位）"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "本节原文列出的关注列是 Time（时间）、Channel（通道）、ID（报文标识）、Name（由 DBC 解析出的名字）、Data（数据），所以 A、B、C 正确。D 的 Factor 和 E 的 StartBit 都不是 Trace 的列，它们是 DBC 里信号的属性，属于下一章的内容，在 CANdb++ 这类数据库编辑器里才看得到。把这两个概念放进选项，是因为初学者常把「Trace 里看到的东西」和「DBC 里定义的东西」混为一谈：Trace 展示的是总线上实际跑的一帧一帧数据，DBC 描述的是这些数据该怎么翻译。实际排查问题时这五列各有用处：Time 用来算周期和判断有没有丢帧，Channel 用来确认报文来自哪一路总线（多通道工程尤其重要，经常有人在通道 1 上找通道 2 的报文），ID 用来定位目标报文，Name 用来确认 DBC 是否生效，Data 用来看具体字节或物理值。",
+    "keyPoints": [
+      "Trace 关注列：Time、Channel、ID、Name、Data",
+      "Factor/StartBit 属 DBC 信号属性，不在 Trace",
+      "Time 判周期丢帧，Channel 确认总线路数"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "四、第一次看 Trace·首段（看 Time、Channel、ID、Name、Data）"
+    },
+    "relatedTerms": [
+      "Trace",
+      "报文",
+      "DBC"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-50-03-02",
+    "chapterNum": 50,
+    "sectionIndex": 3,
+    "sectionTitle": "四、第一次看 Trace",
+    "module": "A",
+    "type": "single",
+    "cat": "故障定位",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "Trace",
+      "Name 列为空",
+      "DBC 未加载"
+    ],
+    "stem": "启动测量后 Trace 窗口正常滚动报文，但 Name 列是空的、只有数字 ID，最可能的原因是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "这个工程没有加载对应的 DBC"
+      },
+      {
+        "key": "B",
+        "text": "总线波特率配置错误，导致报文名无法解析"
+      },
+      {
+        "key": "C",
+        "text": "硬件通道没有映射到实际的 VN 设备"
+      },
+      {
+        "key": "D",
+        "text": "Measurement 没有真正启动，显示的是历史数据"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "本节原文写得很清楚：如果 Name 列是空的、只有数字 ID，说明这个工程没加载对应 DBC，那就只看到原始字节，看不到语义。所以 A 正确。判断这道题的关键是看现象的完整性：Trace 能正常滚动，说明总线通信是好的——波特率若配错，你会看到大量错误帧或者干脆一帧都收不到，而不是能收到帧却没有名字，所以 B 排除；通道没映射到硬件同样会导致收不到任何报文，与题干描述不符，C 排除；测量没启动时 Trace 根本不会刷新，D 也排除。本节的面试问答把这个逻辑总结成一句话：DBC 是信号的翻译字典，没有它 CANoe 只能显示原始 ID 和十六进制数据，无法解析成车速等于 65 这样的语义。实际工作中还有一个变体值得注意：Name 列只有部分报文有名字，其余仍是数字，这通常说明加载的 DBC 版本与当前网络不一致，缺了新增的报文，此时要找项目组要对应版本的数据库。",
+    "keyPoints": [
+      "有 ID 无 Name 说明未加载对应 DBC",
+      "波特率错会收不到帧或大量错误帧",
+      "部分报文无名多为 DBC 版本不匹配"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "四、第一次看 Trace·首段（如果 Name 列是空的、只有数字 ID）"
+    },
+    "relatedTerms": [
+      "DBC",
+      "Trace",
+      "报文",
+      "信号"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-50-03-03",
+    "chapterNum": 50,
+    "sectionIndex": 3,
+    "sectionTitle": "四、第一次看 Trace",
+    "module": "A",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "反向",
+    "tags": [
+      "DBC",
+      "翻译字典",
+      "误判归因"
+    ],
+    "stem": "判断：Trace 中只显示 ID 和十六进制数据、看不到信号名与物理值，说明总线波特率配置错误。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误，归因搞反了。本节的面试问答明确给出结论：Trace 里只有 ID 没有名字，是因为没导入 DBC。DBC 是信号的翻译字典，没有它 CANoe 只能显示原始 ID 和十六进制数据，无法解析成车速等于 65。而波特率配置错误属于物理层与链路层的问题，表现完全不同——轻则大量错误帧、报文断续，重则一帧都收不到、节点被总线错误计数踢下线，绝不会出现「帧收得好好的只是没名字」这种现象。把这两类问题分清楚很重要，因为处理方向截然相反：DBC 缺失是配置层面的事，去 Tools 里的 CANdb++ Editor 或 Simulation Setup 补上数据库即可；波特率不匹配要改通道配置甚至查硬件接线与终端电阻。实际排查时可以用一个简单的分层判断法：先看有没有帧（物理与链路层），再看帧对不对（协议层），最后看能不能解成信号（数据库层），逐层往下走，不容易误判。",
+    "keyPoints": [
+      "无信号名是缺 DBC，不是波特率问题",
+      "波特率错表现为错误帧或收不到帧",
+      "排查按有没有帧、帧对不对、能否解码分层"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "四、第一次看 Trace·面试说提示框（Trace 里只有 ID 没有名字）"
+    },
+    "relatedTerms": [
+      "DBC",
+      "波特率",
+      "总线"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-50-04-01",
+    "chapterNum": 50,
+    "sectionIndex": 4,
+    "sectionTitle": "五、导入 DBC 并看信号",
+    "module": "A",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "CANdb++",
+      "导入 DBC",
+      "Simulation Setup"
+    ],
+    "stem": "按本节步骤，在 CANoe 中打开数据库工具或为新工程添加 DBC 的入口是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Tools → CANdb++ Editor，或在新工程里通过 Simulation Setup 添加 DBC"
+      },
+      {
+        "key": "B",
+        "text": "Home → Write，在写窗口中输入数据库路径"
+      },
+      {
+        "key": "C",
+        "text": "Analysis → Trace，在 Trace 窗口右键导入数据库"
+      },
+      {
+        "key": "D",
+        "text": "Hardware → 通道配置，在通道属性里绑定 DBC"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "本节第一步原文就是：Tools → CANdb++ Editor 打开数据库工具，或在新工程里通过 Simulation Setup 添加 DBC。所以 A 正确。B 的 Write 窗口是第六节讲的 CAPL 输出窗口，相当于脚本调试的 printf，跟数据库无关；C 的 Trace 属于分析窗口，只负责展示，不负责挂数据库；D 的 Hardware 管的是硬件通道映射，把逻辑通道对到实际设备上，也不是加载数据库的地方。这里要区分两个概念：CANdb++ Editor 是编辑 DBC 文件本身的工具，用来看和改报文、信号定义；而在 Simulation Setup 里添加 DBC，是把数据库挂到当前工程的某个网络上，让工程具备解码能力。新人常见的困惑是：我用 CANdb++ 打开 DBC 看到信号了，为什么 Trace 里还是没名字——因为只是打开了文件，没有把它关联到工程的网络上。正确顺序是先在 Simulation Setup 的网络节点下挂上数据库，再启动测量。",
+    "keyPoints": [
+      "入口：Tools → CANdb++ Editor",
+      "新工程可在 Simulation Setup 添加 DBC",
+      "打开 DBC 文件不等于挂到工程网络上"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "五、导入 DBC 并看信号·步骤列表第 1 条"
+    },
+    "relatedTerms": [
+      "DBC",
+      "Simulation Setup",
+      "CANoe"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-50-04-02",
+    "chapterNum": 50,
+    "sectionIndex": 4,
+    "sectionTitle": "五、导入 DBC 并看信号",
+    "module": "A",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "拖拽信号",
+      "Graphics",
+      "物理值"
+    ],
+    "stem": "关于导入 DBC 之后的操作与现象，下列说法正确的有：",
+    "options": [
+      {
+        "key": "A",
+        "text": "可以把 DBC 中的报文或信号拖到 Trace 或 Graphics 窗口"
+      },
+      {
+        "key": "B",
+        "text": "再看 Trace 时，Name 列会出现报文名，Data 列会出现信号物理值"
+      },
+      {
+        "key": "C",
+        "text": "在 Graphics 里选中某个信号，可以看到它随时间变化的曲线"
+      },
+      {
+        "key": "D",
+        "text": "导入 DBC 后，CANoe 会自动修正 ECU 中错误的信号定义"
+      },
+      {
+        "key": "E",
+        "text": "只要导入了 DBC，就不再需要配置硬件通道"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 与本节四步操作一一对应。D 错得比较根本：DBC 只是给工具看的翻译字典，它描述报文与信号该怎么解释，对 ECU 内部的实现没有任何写入或纠正能力。如果 ECU 发出来的字节位置与 DBC 定义不一致，那是被测件或数据库其中之一有问题，需要人去判断该改哪边，工具不会替你修。E 也错：加载数据库解决的是「看得懂」的问题，硬件通道映射解决的是「连得上」的问题，两者互相独立。通道没配好，连报文都收不到，谈何解码。实际测试中有个高价值场景正好体现 A 与 C 的用途：验证一个渐变类信号（比如车速爬升）时，把信号拖到 Graphics 画曲线，比在 Trace 里一行行翻数字直观得多，一眼就能看出有没有跳变、卡顿或者超范围。而 B 提到的物理值显示，就是判断 DBC 是否真正生效的最直接标志。",
+    "keyPoints": [
+      "可将报文/信号拖到 Trace 或 Graphics",
+      "Graphics 用曲线看信号随时间变化",
+      "DBC 不修改 ECU，也不替代通道配置"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "五、导入 DBC 并看信号·步骤列表第 2 至 4 条"
+    },
+    "relatedTerms": [
+      "DBC",
+      "信号",
+      "Trace",
+      "物理值"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-50-04-03",
+    "chapterNum": 50,
+    "sectionIndex": 4,
+    "sectionTitle": "五、导入 DBC 并看信号",
+    "module": "A",
+    "type": "short",
+    "cat": "实战应用",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "操作链路",
+      "DBC 生效",
+      "信号物理值"
+    ],
+    "stem": "请完整描述从「Trace 里只看到 ID 和十六进制数据」到「能看见信号物理值和曲线」的操作链路，并说明为什么 DBC 是看懂总线的前提。",
+    "options": [],
+    "answer": [],
+    "explanation": "这道题把第四节和第五节串成一条完整链路，考的是能否把现象、原因和操作对应起来。新人容易只记住结论「没名字就是缺 DBC」，却说不清补上之后要做哪几步、怎么确认生效。答题时要体现三段结构：先定位现象与原因，再给出可复现的操作步骤，最后落到验证标准上——Name 列出现报文名、Data 列出现物理值、Graphics 能画出曲线，这三条同时满足才算真正生效。实际工作中这条链路几乎每天都在走，接手新项目、换新版本数据库、切换到另一路网络时都要重来一遍，把它固化成肌肉记忆能省下大量时间。",
+    "keyPoints": [
+      "现象归因：无 Name 列即未加载 DBC",
+      "操作：Tools 或 Simulation Setup 挂 DBC 后拖信号",
+      "验证：Name、物理值、Graphics 曲线三者齐全"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "五、导入 DBC 并看信号·步骤列表 + 四、第一次看 Trace 的现象描述"
+    },
+    "relatedTerms": [
+      "DBC",
+      "信号",
+      "Trace",
+      "Graphics"
+    ],
+    "refAnswer": "一、现象与原因\nTrace 能正常滚动却只有数字 ID 和十六进制数据，说明工程没有加载对应的 DBC，工具拿不到语义，只能显示原始字节。\n二、完整操作链路\n1. 通过 Tools → CANdb++ Editor 打开数据库工具查看这份 DBC，或在新工程里通过 Simulation Setup 把 DBC 添加到对应网络上；\n2. 把 DBC 中的报文或信号拖到 Trace 或 Graphics 窗口；\n3. 重新观察 Trace，此时 Name 列应出现报文名，Data 列应出现解析后的信号物理值；\n4. 在 Graphics 中选中某个信号，观察它随时间变化的曲线，确认数值走势合理。\n三、验证是否真正生效\n以三条同时满足为准：Name 列有名字、Data 列是物理值而非纯十六进制、Graphics 能画出连续曲线。若只有部分报文有名字，通常是 DBC 版本与当前网络不一致，要向项目组索取正确版本。\n四、为什么 DBC 是看懂总线的前提\nDBC 是信号的翻译字典，它规定了某个 ID 的报文里第几位到第几位是哪个信号、怎么换算成物理量。没有它，CANoe 只能显示原始 ID 和十六进制数据，无法解析成车速等于 65 这样的结论，测试人员就只能对着字节猜，既无法编写基于信号的判定，也没办法定位是哪个信号出了问题。所以导入 DBC 不是可选步骤，而是把总线数据变成可分析信息的必要一环。"
+  },
+  {
+    "id": "Q-50-05-01",
+    "chapterNum": 50,
+    "sectionIndex": 5,
+    "sectionTitle": "六、用 Write 窗口与 Panel",
+    "module": "A",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Write 窗口",
+      "CAPL 调试",
+      "printf"
+    ],
+    "stem": "CAPL 脚本中 write 函数的输出内容会显示在哪个窗口？",
+    "options": [
+      {
+        "key": "A",
+        "text": "Trace 窗口"
+      },
+      {
+        "key": "B",
+        "text": "Write 窗口（Home → Write）"
+      },
+      {
+        "key": "C",
+        "text": "Graphics 窗口"
+      },
+      {
+        "key": "D",
+        "text": "Panel 面板"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "本节原文：Home → Write 打开写窗口，CAPL 里的 write 输出会显示在这里，是脚本调试的 printf。所以 B 正确。A 的 Trace 显示的是总线上的报文，脚本打印的文本不会出现在那里；C 的 Graphics 画的是信号曲线，只接受数值型信号；D 的 Panel 是交互 UI，用来放按钮、滑块、指示灯。把 Write 窗口理解成 printf 非常贴切：写 CAPL 时没有传统 IDE 那种逐行断点调试的顺手体验，绝大多数人靠的就是在关键分支里打印一行日志，确认代码到底走没走到、变量值是多少。实际用的时候有两个经验：一是打印时带上时间或标识前缀，否则多个事件同时触发，输出混在一起分不清来源；二是不要在高频周期事件里无节制打印，比如 10ms 报文的接收回调里每帧都打印，Write 窗口会被瞬间刷爆，还可能影响测量性能，调试完记得清理掉。",
+    "keyPoints": [
+      "Home → Write 打开写窗口",
+      "write 输出即 CAPL 的 printf 调试口",
+      "高频事件里慎用打印，避免刷屏"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "六、用 Write 窗口与 Panel·首段（Home → Write）"
+    },
+    "relatedTerms": [
+      "CAPL",
+      "CANoe",
+      "调试"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-50-05-02",
+    "chapterNum": 50,
+    "sectionIndex": 5,
+    "sectionTitle": "六、用 Write 窗口与 Panel",
+    "module": "A",
+    "type": "judge",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Panel",
+      "系统变量",
+      "交互 UI"
+    ],
+    "stem": "判断：Panel 是测试交互 UI，可以在上面放按钮、滑块、指示灯并绑定系统变量，实现点一下面板就往总线发一帧。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "T"
+    ],
+    "explanation": "正确，与本节原文一致。Panel 通过 Home → Panel 打开，本质是一层图形化的交互外壳：你在面板上放的控件并不直接操作总线，而是绑定到系统变量上，再由 CAPL 或仿真节点监听这些变量的变化，去执行发帧、改信号值等动作。所以原文那句「点一下面板，总线发一帧」，中间其实隔着变量与脚本这一层，理解这个链路对排错很关键——面板点了没反应时，要分三段查：控件有没有绑对变量、变量值有没有真的变化、监听变量的脚本逻辑有没有被触发。实际项目里 Panel 的价值主要有两个：一是把复杂操作封装成按钮，让不写代码的同事也能执行测试步骤，比如在台架上模拟开关门、加减速；二是用指示灯和数值框做实时状态看板，比盯 Trace 直观。做交付时给测试工程师配一套设计良好的面板，往往比给一堆脚本更受欢迎。",
+    "keyPoints": [
+      "Panel 由 Home → Panel 打开，是交互 UI",
+      "控件绑定系统变量，由脚本响应发帧",
+      "面板无反应按控件、变量、脚本三段排查"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "六、用 Write 窗口与 Panel·首段（Home → Panel）"
+    },
+    "relatedTerms": [
+      "Panel",
+      "系统变量",
+      "CAPL"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-50-06-01",
+    "chapterNum": 50,
+    "sectionIndex": 6,
+    "sectionTitle": "七、发出你的第一帧",
+    "module": "A",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "Interactive Generators",
+      "on key",
+      "发帧"
+    ],
+    "stem": "关于本节介绍的两种发出第一帧的方式及示例 CAPL，下列说法正确的有：",
+    "options": [
+      {
+        "key": "A",
+        "text": "可以在 Simulation Setup 里加一个 Interactive Generators（交互发生器），手动填 ID 和数据发送"
+      },
+      {
+        "key": "B",
+        "text": "可以挂一小段 CAPL，用 on key 事件触发发送"
+      },
+      {
+        "key": "C",
+        "text": "示例 CAPL 中通过 output 函数把构造好的报文发到总线上"
+      },
+      {
+        "key": "D",
+        "text": "示例 CAPL 中把 DLC 设为 8 并填满了 8 个字节"
+      },
+      {
+        "key": "E",
+        "text": "发送任何一帧报文之前，都必须先在 Test 功能区新建 Test Module"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B 是本节明确给出的两种最快方式，C 与示例代码一致——构造 message 后调用 output 把它发出去。D 与代码不符：示例里 DLC 被设成 2，只填了 byte(0) 等于 0x01、byte(1) 等于 0x02 两个字节。E 是凭空加的门槛，Test 功能区管的是自动化测试的组织与执行，手动发一帧根本用不到它。这三个错项对应新人的三种典型误解：以为 DLC 必须是 8、以为发帧一定要写测试用例、以为交互发生器和 CAPL 只能二选一。实际工作中两种方式各有适用场景：Interactive Generators 适合临时验证，比如怀疑某个 ID 没被接收方处理，随手填个数据发一帧看反应，不用写代码也不用编译；CAPL 适合可复现、要组合时序的场景，比如按固定间隔发若干帧再检查响应。台架调试时常见组合是先用 IG 快速试通，确认链路没问题后再固化成脚本。",
+    "keyPoints": [
+      "两种方式：Interactive Generators 与 on key CAPL",
+      "示例中用 output 把报文发到总线",
+      "示例 DLC 为 2，不是 8"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "七、发出你的第一帧·FirstFrame.can 代码块与前置说明段"
+    },
+    "relatedTerms": [
+      "CAPL",
+      "报文",
+      "Simulation Setup"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-50-06-02",
+    "chapterNum": 50,
+    "sectionIndex": 6,
+    "sectionTitle": "七、发出你的第一帧",
+    "module": "A",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "CAPL 示例",
+      "报文 ID",
+      "DLC"
+    ],
+    "stem": "本节示例脚本 FirstFrame.can 中，按下键盘 t 键后发出的报文，其 ID、DLC 与数据字节分别是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "ID = 0x100，DLC = 2，byte(0) = 0x01、byte(1) = 0x02"
+      },
+      {
+        "key": "B",
+        "text": "ID = 0x100，DLC = 8，前两字节为 0x01、0x02，其余补零"
+      },
+      {
+        "key": "C",
+        "text": "ID = 0x200，DLC = 2，byte(0) = 0x01、byte(1) = 0x02"
+      },
+      {
+        "key": "D",
+        "text": "ID = 0x001，DLC = 2，byte(0) = 0x00、byte(1) = 0x02"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "示例代码在 on key 事件里声明了一个 ID 为 0x100 的 message，把 DLC 设为 2，再分别给 byte(0) 赋值 0x01、byte(1) 赋值 0x02，最后调用 output 发送并打印一行日志，所以 A 正确。B 的 DLC 写成 8 是最常见的记忆偏差，很多人默认 CAN 报文就是 8 字节，其实 DLC 由你自己决定，实际发出的数据场长度就是 DLC 指定的字节数。C 把 ID 记成了 0x200，那是第 51 章动手实验里新建报文用的 ID，不是本节示例。D 的 ID 与数据都对不上。理解这段代码的价值在于它把发帧拆成了四个动作：声明报文、设长度、填数据、发送——这个骨架换成周期发送、按信号赋值等场景同样适用。调试时如果按了键没反应，先确认 Write 窗口有没有打印，能打印说明脚本触发了，问题在发送链路（通道映射、总线状态）；不打印则说明按键事件根本没进来，多半是焦点不在 CANoe 主窗口或脚本没挂到节点上。",
+    "keyPoints": [
+      "示例报文 ID 为 0x100，DLC 为 2",
+      "数据字节为 0x01、0x02，由 output 发送",
+      "DLC 由代码指定，不是固定 8 字节"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "七、发出你的第一帧·FirstFrame.can（on key 事件）"
+    },
+    "relatedTerms": [
+      "CAPL",
+      "报文",
+      "DLC"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-50-07-01",
+    "chapterNum": 50,
+    "sectionIndex": 7,
+    "sectionTitle": "八、下一步学什么",
+    "module": "A",
+    "type": "single",
+    "cat": "实战应用",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "学习路径",
+      "Filter",
+      "Replay"
+    ],
+    "stem": "按本节给出的后续学习清单，要系统掌握「功能区、运行模式、Filter、Replay 全解」，应当去学：",
+    "options": [
+      {
+        "key": "A",
+        "text": "08-CANoe"
+      },
+      {
+        "key": "B",
+        "text": "09-CAPL脚本"
+      },
+      {
+        "key": "C",
+        "text": "51-DBC入门"
+      },
+      {
+        "key": "D",
+        "text": "27-台架搭建与HIL"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "本节列出四条后续路径，各自主题很明确：08-CANoe 讲功能区、运行模式、Filter、Replay 全解；09-CAPL脚本 讲事件驱动、信号与系统变量、TFS 判定；51-DBC入门 讲怎么看懂一份 DBC；27-台架搭建与HIL 讲怎么把工程接到真实零部件上。所以 A 正确。这四条路径的排布其实暗含一条成长曲线：本章只是让你把工具跑起来、看到第一条 Trace，属于能用；08 章把工具用透，尤其是 Filter 和 Replay 这两个日常高频能力——Filter 决定你能不能在几千帧每秒的总线上找到目标报文，Replay 决定你能不能把现场录到的数据在办公室复现，这两项直接影响排障效率；09 章让你从手动操作走向自动化；51 章补上语义层，让你看得懂数据；27 章则把虚拟环境接到真实硬件上。建议按能用、用透、能自动化、能解读、能接实物的顺序推进，不要跳步。",
+    "keyPoints": [
+      "08-CANoe 讲功能区、运行模式、Filter、Replay",
+      "Filter 用于海量报文中定位目标",
+      "Replay 用于复现现场录制的数据"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "八、下一步学什么·列表第 1 条"
+    },
+    "relatedTerms": [
+      "CANoe",
+      "Filter",
+      "Replay"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-50-07-02",
+    "chapterNum": 50,
+    "sectionIndex": 7,
+    "sectionTitle": "八、下一步学什么",
+    "module": "A",
+    "type": "short",
+    "cat": "实战应用",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "学习规划",
+      "能力进阶",
+      "路径排序"
+    ],
+    "stem": "一名新人刚跟着本章跑通了示例工程并发出了第一帧。请结合本节列出的四条后续路径，为他排一个学习顺序并说明每一步要解决什么问题。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题考查能否把工具学习纳入一条有逻辑的能力链条，而不是东一榔头西一棒子。本章的定位是入门体验课：会开工程、认界面、看 Trace、导 DBC、发一帧，属于能跑起来。接下来四条路径分别补齐工具深度、语义理解、自动化能力和真实环境接入。评分要点在于顺序是否合理、每一步的目标是否说得清楚，而不是把四个章节名复述一遍。实际工作中新人培养也是按这个节奏走的：先让他能独立抓一份现场数据并说清里面的信号，再让他写脚本，最后才放到台架上动真实零部件，跳步的代价通常是台架上出了问题却不知道从哪查起。",
+    "keyPoints": [
+      "先 51-DBC入门补语义，再 08-CANoe 用透工具",
+      "然后 09-CAPL脚本 进入自动化",
+      "最后 27-台架搭建与HIL 接真实零部件"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "八、下一步学什么·四条学习路径列表"
+    },
+    "relatedTerms": [
+      "DBC",
+      "CAPL",
+      "CANoe",
+      "HIL"
+    ],
+    "refAnswer": "建议顺序：51-DBC入门 → 08-CANoe → 09-CAPL脚本 → 27-台架搭建与HIL。\n第一步：51-DBC入门，解决看得懂的问题。本章第四节已经暴露了痛点——没有 DBC，Trace 里只有 ID 和十六进制。先学会读 DBC 的 Message 与 Signal 结构、StartBit、Length、字节序和 Factor/Offset 换算，才能把字节变成有意义的车速、转速，后面所有分析和判定都建立在这一层上。\n第二步：08-CANoe，解决用得透的问题。重点是功能区全貌、运行模式、Filter 与 Replay。Filter 让你在每秒上千帧的总线上快速定位目标报文，Replay 让你把现场录制的数据在办公室复现，这两项是日常排障效率的分水岭。\n第三步：09-CAPL脚本，解决自动化的问题。掌握事件驱动模型、信号与系统变量的读写、TFS 判定后，就能把本章手动按键发帧的操作升级成可重复执行、可自动判定结果的测试用例，也才能和 Panel 配合做出好用的交互工具。\n第四步：27-台架搭建与HIL，解决接实物的问题。把前面在纯仿真环境里验证过的工程接到真实零部件上，处理供电、接线、终端电阻、通道映射等现实问题。\n理由：这条顺序遵循先看懂数据、再用透工具、然后自动化、最后接真实硬件的递进关系。若跳过 DBC 直接上台架，出现异常时既读不懂信号也说不清是被测件还是环境的问题，排查会非常被动。"
+  }
+]

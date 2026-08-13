@@ -1,0 +1,550 @@
+{
+  "num": 14,
+  "slug": "中控IVI测试",
+  "title": "中控 / IVI 测试 ⭐核心（导航汇总页）",
+  "oneliner": "中控大屏（IVI = In-Vehicle Infotainment）是用户交互最密集的模块——触屏、导航、多媒体、蓝牙、语音、车控设置、倒车影像、CarPlay全在这。本卡片为导航汇总，每个子模块已拆分为独立知识卡片",
+  "sections": [
+    {
+      "title": "一、IVI 系统架构与车控链路",
+      "icon": "🖥️",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "中控不仅是信息娱乐终端，还是座舱域控的核心节点——通过以太网/CAN与网关、各域ECU通信。"
+        },
+        {
+          "type": "h3",
+          "text": "车控设置全链路闭环"
+        },
+        {
+          "type": "paragraph",
+          "text": "用户在中控屏上操作一个车控设置（如调节氛围灯颜色、设置充电限值），信号经过以下完整链路："
+        },
+        {
+          "type": "topology",
+          "kind": "flow",
+          "title": "车控设置全链路闭环",
+          "layers": [
+            {
+              "name": "操作层",
+              "items": [
+                "中控HMI",
+                "触屏点击",
+                "设置项变化"
+              ]
+            },
+            {
+              "name": "网络层",
+              "items": [
+                "以太网/CAN",
+                "SOME/IP信号"
+              ]
+            },
+            {
+              "name": "执行层",
+              "items": [
+                "网关路由",
+                "查路由表转发"
+              ]
+            },
+            {
+              "name": "回显层",
+              "items": [
+                "目标ECU执行",
+                "灯/LIN节点等"
+              ]
+            }
+          ],
+          "feedback": {
+            "label": "状态回显闭环",
+            "steps": [
+              {
+                "name": "ECU执行结果反馈"
+              },
+              {
+                "name": "网关回传状态",
+                "sub": "信号路由"
+              },
+              {
+                "name": "中控更新UI",
+                "sub": "显示实际值"
+              }
+            ]
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            "环节",
+            "测试关注点"
+          ],
+          "rows": [
+            [
+              "**HMI→网络**",
+              "点击操作是否正确编码为SOME/IP或CAN信号，信号值位数/精度是否符合DBC/ARXML定义"
+            ],
+            [
+              "**网络→网关**",
+              "网关路由表是否正确转发到目标网络（如信息CAN→车身CAN）"
+            ],
+            [
+              "**网关→ECU**",
+              "ECU是否正确解析信号并执行（如BCM收到氛围灯颜色值→调PWM输出）"
+            ],
+            [
+              "**ECU→回显**",
+              "ECU执行结果能否正确回传到中控显示；HMI显示值与ECU实际值是否一致"
+            ],
+            [
+              "**断连恢复**",
+              "以太网断开重连后，中控能否自动恢复与网关的通信、设控操作是否恢复可用"
+            ],
+            [
+              "**掉电保存**",
+              "熄火后重启动，上次设置的值（如氛围灯颜色、空调模式）是否保持"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"测车控设置不能只看HMI上能不能点、能不能保存。要拿着DBC/ARXML信号表对比：你点的设置对应哪个信号？信号走什么网络到网关？网关转给谁？ECU执行后有没有返回状态？HMI显示的值和ECU实际值一致吗？——这才是车载测试和App测试的本质区别。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "二、核心测试维度",
+      "icon": "🔑",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "维度",
+            "说明",
+            "关键测试场景"
+          ],
+          "rows": [
+            [
+              "**状态一致性**",
+              "HMI显示值与ECU实际值一致",
+              "空调温度/风量、氛围灯、驾驶模式三者对照（HMI + CAN Trace + 实际表现）"
+            ],
+            [
+              "**多任务并发**",
+              "IVI同时跑导航+语音+多媒体",
+              "CPU/内存/GPU资源竞争、ANR检测、Monkey压测"
+            ],
+            [
+              "**断连恢复**",
+              "网络中断→恢复后功能自愈",
+              "拔网关线5s→插回，设控可操作且状态回显正确"
+            ],
+            [
+              "**掉电保存**",
+              "KL15断电→重新上电，设置保持",
+              "全设置项遍历：熄火前改每个设置→重新上电逐项核对"
+            ],
+            [
+              "**权限/安全**",
+              "行车中锁定部分功能",
+              "车速>5km/h时视频播放/文字输入应锁定（法规要求）"
+            ],
+            [
+              "**信号映射**",
+              "DBC/ARXML信号值→HMI显示值的映射精度",
+              "0-100%进度条对应CAN信号0x00-0xFF，精度±1LSB"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"IVI测试最容易踩的坑是把IVI当手机App来测——只看HMI界面，不看底层信号。车载的本质是：HMI操作→网络信号→ECU执行→状态回传→HMI更新。少了任何一环的验证，都是漏测。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "三、子模块卡片索引",
+      "icon": "⚡",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "模块",
+            "卡片",
+            "难度",
+            "核心测试方向"
+          ],
+          "rows": [
+            [
+              "**触屏交互**",
+              "[[31-触屏交互]]",
+              "⭐⭐",
+              "点击/滑动/多点/手套/水滴/高低温"
+            ],
+            [
+              "**多媒体**",
+              "[[32-多媒体测试]]",
+              "⭐⭐",
+              "USB/蓝牙音乐/收音机/音效/全格式"
+            ],
+            [
+              "**蓝牙电话**",
+              "[[33-蓝牙电话测试]]",
+              "⭐⭐",
+              "配对/通话/通讯录/双蓝牙/eCall"
+            ],
+            [
+              "**语音助手**",
+              "[[34-语音助手测试]]",
+              "⭐⭐⭐",
+              "唤醒率/识别率/方言/多轮/离线"
+            ],
+            [
+              "**车辆设置**",
+              "[[35-车辆设置测试]]",
+              "⭐⭐",
+              "空调/灯光/门锁/充电/CAN信号链路"
+            ],
+            [
+              "**CarPlay/Carlife**",
+              "[[36-CarPlay-Carlife]]",
+              "⭐⭐",
+              "无线/有线/投屏/音频/异常断连"
+            ],
+            [
+              "**系统性能**",
+              "[[37-系统性能测试]]",
+              "⭐⭐⭐",
+              "冷热启动/CPU/内存/ANR/Monkey"
+            ],
+            [
+              "**倒车影像**",
+              "[[38-倒车影像测试]]",
+              "⭐⭐",
+              "启动延迟/画质/轨迹线/RCTA/AVM"
+            ],
+            [
+              "**导航模块**",
+              "[[15-导航模块测试]]",
+              "⭐⭐⭐",
+              "GPS定位/路线/渲染/语音/DR推导"
+            ],
+            [
+              "**OTA升级**",
+              "[[18-OTA升级测试]]",
+              "⭐⭐⭐",
+              "SOTA/FOTA/6阶段/异常/安全"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "四、ADB 常用命令（座舱测试通用）",
+      "icon": "💺",
+      "content_blocks": [
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# 连接\nadb devices                          # 查看设备\nadb connect 192.168.x.x              # 网络连接\n\n# 日志\nadb logcat -v time > log.txt         # 全量日志\nadb logcat | grep -i \"error\\|crash\\|ANR\"\n\n# 性能\nadb shell top -n 1 | head -20        # CPU排行\nadb shell dumpsys meminfo            # 内存详情\nadb shell dumpsys gfxinfo            # 帧率\nadb shell dumpsys input              # 触控事件\n\n# Monkey\nadb shell monkey -p <包名> -v 20000 --throttle 200\n\n# 截图录屏\nadb shell screencap /sdcard/screen.png\nadb shell screenrecord /sdcard/video.mp4"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"ADB是座舱测试的基本功——不是背命令，是知道什么时候用哪个。看ANR用 logcat | grep ANR、查性能用 top + dumpsys meminfo、查触屏延迟用 dumpsys input → systrace 逐帧追 Input→UI 渲染链路。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": false,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "五、面试高频考点",
+      "icon": "🎯",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "必会基础"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "你要能说出来的"
+          ],
+          "rows": [
+            [
+              "**IVI是什么**",
+              "In-Vehicle Infotainment，车载信息娱乐系统，座舱域核心ECU"
+            ],
+            [
+              "**中控车控设置完整链路**",
+              "HMI操作→以太网/CAN信号→网关路由→目标ECU执行→状态回显→HMI更新"
+            ],
+            [
+              "**为什么测状态一致性**",
+              "HMI显示值≠ECU实际值会导致用户误判车况（空调设26度实际吹热风）"
+            ],
+            [
+              "**行车中哪些功能应锁定**",
+              "视频播放、文本输入、复杂设置——法规/安全要求，车速>5km/h触发（存疑：具体阈值各车企不同，此处为常见值）"
+            ],
+            [
+              "**Monkey测试目的**",
+              "随机操作压测，发现ANR/崩溃/内存泄漏"
+            ],
+            [
+              "**断连恢复怎么测**",
+              "拔网关/拔以太网线→恢复→验证车控可操作+状态回显正确"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "进阶加分项"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "高分回答思路"
+          ],
+          "rows": [
+            [
+              "**SOME/IP和CAN信号有什么区别？**",
+              "SOME/IP走以太网，面向服务、动态发现；CAN是固定周期广播。座舱内大量SOME/IP做服务调用"
+            ],
+            [
+              "**车控设置信号映射怎么验证？**",
+              "三方对照：HMI操作值 ↔ DBC/ARXML信号值 ↔ CAN Trace抓取值"
+            ],
+            [
+              "**多任务并发测试怎么设计？**",
+              "导航路线+蓝牙音乐+语音唤醒同时跑，监测CPU>80%或fps<20即异常"
+            ],
+            [
+              "**为什么掉电保存是必测项？**",
+              "用户预期设置过的东西下次还一样。底层依赖ECU写EEPROM/NVM，断电时点不对会丢数据"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "六、测试实战关联",
+      "icon": "🛠️",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "与车控设置（车辆设置）的联调"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "中控HMI点击空调温度 → 检查CAN Trace上ClimateControl信号是否正确",
+            "驾驶模式切换(ECO/SPORT) → 验证动力域EMS/TCU响应 + 仪表显示同步"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "与系统性能的关联"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "Monkey压测后检查：ANR率、内存是否泄漏（连续运行24h增长<50MB）",
+            "冷启动时间：从上电到主界面可操作（存疑：具体秒数因SoC方案而异，高端平台<5s、中低端<15s）"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "与诊断的关联"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "诊断仪通过OBD→网关→IVI，能读到IVI的DTC码和版本信息",
+            "IVI产生的故障码应存入NVM，熄火不掉"
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "⚠️ 实战中常见严重问题"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "严重度",
+            "现象",
+            "根因+教训"
+          ],
+          "rows": [
+            [
+              "**车控设置状态不一致**",
+              "严重",
+              "HMI显示空调22°C→实际出风口30°C",
+              "网关转发信号延迟/丢帧，回显逻辑未做超时容错；必须三方对照验证"
+            ],
+            [
+              "**以太网断连后设控失效**",
+              "严重",
+              "拔网线5s插回→设控按钮全灰不可点",
+              "SOME/IP服务发现未重连，缺少heartbeat保活机制"
+            ],
+            [
+              "**导航+语音并发→ANR**",
+              "严重",
+              "语音唤醒同时导航路线重算→中控黑屏10秒",
+              "域控GPU/CPU资源抢占，需设资源优先级策略"
+            ],
+            [
+              "**掉电后设置丢失**",
+              "中等",
+              "氛围灯颜色每次重启变回默认",
+              "ECU写NVM时机不对（断电平推前未完成写入），需加掉电检测中断"
+            ],
+            [
+              "**Monkey后CarPlay断连**",
+              "中等",
+              "Monkey跑1h后插iPhone→CarPlay无法启动",
+              "USB驱动崩溃未恢复，需增加USB协议栈异常后自动reset机制"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "⬅ 返回 [[MOC_车载测试]] | 继续 → [[15-导航模块测试]]"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 6
+    },
+    {
+      "title": "飞书笔记：中控与座舱业务测试",
+      "content_blocks": [
+        {
+          "type": "h4",
+          "text": "车机交互"
+        },
+        {
+          "type": "paragraph",
+          "text": "主流机车互联产品："
+        },
+        {
+          "type": "paragraph",
+          "text": "1.HICar（华为）"
+        },
+        {
+          "type": "paragraph",
+          "text": "2.CarPlay（苹果）"
+        },
+        {
+          "type": "paragraph",
+          "text": "测试重点："
+        },
+        {
+          "type": "paragraph",
+          "text": "1.一致性：同一应用功能同步"
+        },
+        {
+          "type": "paragraph",
+          "text": "2.功能性："
+        },
+        {
+          "type": "paragraph",
+          "text": "3.独立性：手机、车机独立使用，互不干扰"
+        },
+        {
+          "type": "paragraph",
+          "text": "4.兼容性：不同手机连接使用的兼容性"
+        },
+        {
+          "type": "paragraph",
+          "text": "5.性能："
+        },
+        {
+          "type": "paragraph",
+          "text": "6.稳定性："
+        },
+        {
+          "type": "paragraph",
+          "text": "测试点分析"
+        },
+        {
+          "type": "h4",
+          "text": "多媒体"
+        },
+        {
+          "type": "h4",
+          "text": "语音识别"
+        },
+        {
+          "type": "h4",
+          "text": "导航"
+        },
+        {
+          "type": "h4",
+          "text": "新能源充电业务"
+        },
+        {
+          "type": "h4",
+          "text": "HUD+NOA+自动泊车等"
+        }
+      ]
+    }
+  ],
+  "summary": "中控大屏（IVI = In-Vehicle Infotainment）是用户交互最密集的模块——触屏、导航、多媒体、蓝牙、语音、车控设置、倒车影像、CarPlay全在这。本卡片为导航汇总，每个子模块已拆分为独立知识卡片",
+  "prev_chapter": {
+    "num": 13,
+    "name": "仪表测试"
+  },
+  "next_chapter": {
+    "num": 15,
+    "name": "导航模块测试"
+  }
+}

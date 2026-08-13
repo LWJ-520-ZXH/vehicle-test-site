@@ -1,0 +1,3599 @@
+{
+  "num": 8,
+  "slug": "CANoe",
+  "title": "CANoe ⭐核心工具",
+  "oneliner": "Vector 的整车网络仿真与测试旗舰平台：从报文收发、Trace 分析到 CAPL 自动化与硬件在环，一辆车在电脑里跑起来。",
+  "sections": [
+    {
+      "title": "零、CANoe 界面与功能区总览",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "第一次打开 CANoe，满屏的窗口、工具栏、树形结构很容易劝退。这一节先把整体界面在脑子里建好：顶部是菜单栏与功能区（Ribbon），左侧是仿真配置树（Simulation Setup），中间和四周是可任意停靠的分析窗口（Trace / Graphics / ...）。先认骨架，再逐章深入，后面每讲一个功能你都能在界面上「对号入座」。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-guide-overview.png",
+          "alt": "CANoe 整体界面布局：菜单栏 / 功能区 / 仿真配置树 / 停靠窗口",
+          "caption": "CANoe 整体界面布局（基于 CANoe 11 SP2）：菜单栏 + 功能区 Ribbon + 仿真配置树 + 可停靠分析窗口"
+        },
+        {
+          "type": "h3",
+          "text": "整体界面四区"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "菜单栏（Menu Bar）：文件、编辑、视图、仿真、分析、测试、诊断、环境、硬件、工具等经典下拉菜单，老用户的最爱",
+            "功能区 Ribbon：把常用操作按场景分组到各个 Tab（Home / Analysis / Test ...），是新版主推的入口，按钮带图标更直观",
+            "仿真配置树（Simulation Setup）：图形化呈现每条总线、每个 ECU 节点、通道映射，是「工程的骨架」",
+            "可停靠窗口（Dockable Windows）：Trace、Graphics、Write、Panel 等窗口可拖动停靠在任意位置，关掉也不影响测量"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "九大功能区（Ribbon Tabs）导览"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "功能区",
+            "职责",
+            "常用入口"
+          ],
+          "rows": [
+            [
+              "File",
+              "工程的新建/打开/保存、数据库导入、打印与导出",
+              "Open / New Configuration、Import Database"
+            ],
+            [
+              "Home",
+              "测量启停、在线/离线切换、Write 窗口、面板入口",
+              "Start / Stop、Online / Offline、Write、Panel"
+            ],
+            [
+              "Analysis",
+              "启用并打开各分析窗口，配置测量采集",
+              "Measurement Setup、Trace、Graphics、Statistics、Logging"
+            ],
+            [
+              "Simulation",
+              "仿真节点配置、总线/网络设置、CAPL 节点挂载",
+              "Simulation Setup、Network 配置、CAPL Browser"
+            ],
+            [
+              "Test",
+              "测试模块的组织、运行与报告",
+              "Test Setup、Test Module、Reports"
+            ],
+            [
+              "Diagnostics",
+              "诊断文件加载与诊断控制台",
+              "Diagnostic ISO TP、Diagnostic Console（CDD / ODX）"
+            ],
+            [
+              "Environment",
+              "系统变量、符号映射、起始值等全局绑定",
+              "System Variables、Symbol Mapping、Start Values"
+            ],
+            [
+              "Hardware",
+              "通道映射、网络硬件配置、接口卡管理",
+              "Channel Mapping、Network Hardware"
+            ],
+            [
+              "Tools",
+              "独立工具集：DBC 编辑器、CAPL 浏览器、面板设计器、日志转换",
+              "CANdb++ Editor、CAPL Browser、Panel Designer、Logging File Conversion"
+            ]
+          ]
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-guide-ribbon.png",
+          "alt": "CANoe 功能区 Ribbon 各 Tab：File / Home / Analysis / Simulation / Test ...",
+          "caption": "功能区 Ribbon：按使用场景把操作分组到各 Tab，是日常最高频的入口"
+        },
+        {
+          "type": "h3",
+          "text": "快速访问工具栏（Quick Access）"
+        },
+        {
+          "type": "paragraph",
+          "text": "功能区左上角的快速访问栏可自定义「一键常用」按钮（保存、撤销、Start / Stop 等），不必每次切到对应 Tab。把测量启停钉在这里，实战里能省不少鼠标路程。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-guide-quickaccess.png",
+          "alt": "CANoe 快速访问工具栏：自定义常用按钮",
+          "caption": "快速访问工具栏：把最高频操作（如保存、测量启停）钉在左上角，减少 Tab 切换"
+        },
+        {
+          "type": "h3",
+          "text": "各功能区按钮详解（视图说明）"
+        },
+        {
+          "type": "paragraph",
+          "text": "下面按 Ribbon 的 9 个 Tab 逐一展开。每张图都给出了该 Tab 下可见按钮/分组的用途、典型使用场景和常用操作方法，帮你把按钮和功能直接对应起来。"
+        },
+        {
+          "type": "h4",
+          "text": "Home 功能区"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-tab-home.png",
+          "alt": "CANoe Home 功能区按钮：Start/Stop/Step/Break/Animate、Online Mode/Real Bus/Standalone Mode、Write/Panel/Favorites",
+          "caption": "Home 功能区：测量启停、运行模式切换、Write 窗口与 Panel 入口"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "按钮/分组",
+            "用途",
+            "典型使用场景",
+            "使用方法"
+          ],
+          "rows": [
+            [
+              "Start",
+              "启动整个测量（总线收发、仿真节点、日志记录全部开始）",
+              "每次联调或回放前必点",
+              "点击闪电图标或按空格；确认 Hardware 通道映射已完成"
+            ],
+            [
+              "Stop",
+              "停止测量，所有窗口定格在当前状态",
+              "测试结束、保存日志前",
+              "点击六边形 Stop 图标；停止后可导出 Logging 文件"
+            ],
+            [
+              "Step",
+              "单步执行指定毫秒数后自动暂停",
+              "调试 CAPL 定时器、看逐帧变化",
+              "在编辑框输入步长（默认 100ms），点击 Step"
+            ],
+            [
+              "Break",
+              "暂停/继续测量而不释放资源",
+              "临时冻结画面查看某一时刻报文",
+              "与 Stop 不同：Break 不重置测量，Continue 后从暂停点恢复"
+            ],
+            [
+              "Animate",
+              "按仿真时间播放面板动画",
+              "演示 Panel 状态变化、录制操作视频",
+              "启动后 Panel 上的控件会随变量变化动态更新"
+            ],
+            [
+              "Online Mode",
+              "切换 Online（接硬件）/ Offline（日志回放）",
+              "台架联调切 Online，问题复现切 Offline",
+              "下拉选择；Online 下还需在 Simulation Setup 为每条网络选 Real / Simulated"
+            ],
+            [
+              "Real Bus",
+              "把当前网络设为真实总线（收发真实 ECU 报文）",
+              "需要真实 ECU 参与通信",
+              "仅对 Online 模式生效；与 Simulated 可在不同网络共存"
+            ],
+            [
+              "Standalone Mode",
+              "脱离硬件，仅用仿真节点独立运行",
+              "没有接口卡时验证 CAPL / Panel 逻辑",
+              "切换后 CANoe 不尝试访问任何物理通道"
+            ],
+            [
+              "dec/hex/sym/num",
+              "切换 Trace 与信号数值显示格式",
+              "看原始字节选 hex，看物理量选 dec / sym",
+              "点选对应按钮即时生效"
+            ],
+            [
+              "Window Synchronization",
+              "让所有分析窗口共享同一时间游标",
+              "跨 Trace / Graphics / Data 定位同一事件",
+              "启用后点击某条报文，其他窗口自动跳到对应时刻"
+            ],
+            [
+              "Write",
+              "打开 Write 窗口（CAPL write() 输出）",
+              "调试 CAPL 脚本、打印中间变量",
+              "点击后弹出停靠窗口；CAPL 中用 write() 输出文本"
+            ],
+            [
+              "Panel",
+              "打开已设计好的交互面板",
+              "用虚拟开关/仪表与仿真节点交互",
+              "先确保工程里已创建 Panel，再在 Home 打开"
+            ],
+            [
+              "Favorites",
+              "打开收藏夹窗口，快速访问常用功能",
+              "大型工程里快速定位频繁使用的节点/变量",
+              "右键对象选择 Add to Favorites"
+            ]
+          ]
+        },
+        {
+          "type": "h4",
+          "text": "Analysis 功能区"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-tab-analysis.png",
+          "alt": "CANoe Analysis 功能区按钮：Measurement Setup/Offline Mode/Filter/Logging、Trace/Graphics/Data/State Tracker/System Scanner/Statistics、GPS/Video/Scope/GNSS Monitor",
+          "caption": "Analysis 功能区：配置测量、打开各类分析窗口与日志记录"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "按钮/分组",
+            "用途",
+            "典型使用场景",
+            "使用方法"
+          ],
+          "rows": [
+            [
+              "Measurement Setup",
+              "配置整个测量系统：分析哪些总线、启用哪些窗口、日志策略",
+              "新建工程或修改分析视图时",
+              "双击打开配置树，勾选/拖动窗口块到总线分支"
+            ],
+            [
+              "Offline Mode",
+              "切换到离线回放模式",
+              "用 .blf/.asc 做离线分析",
+              "点击后选择日志文件，再 Start 回放"
+            ],
+            [
+              "Filter",
+              "打开过滤器配置",
+              "Trace 数据太多，只看目标报文",
+              "在 Measurement Setup 里对总线或窗口配置 Filter"
+            ],
+            [
+              "Logging",
+              "打开日志记录块配置",
+              "需要把总线数据录成 .blf/.asc",
+              "在 Measurement Setup 里添加 Logging Block，设文件名与触发条件"
+            ],
+            [
+              "Trace",
+              "打开 Trace 窗口（报文时间轴）",
+              "实时或离线查看所有报文",
+              "点击即开；配合 Filter、搜索框快速定位"
+            ],
+            [
+              "Graphics",
+              "打开 Graphics 窗口（信号曲线）",
+              "观察信号随时间变化趋势",
+              "从 Symbol Explorer 拖信号到 Graphics"
+            ],
+            [
+              "Data",
+              "打开 Data 窗口（信号当前值表格）",
+              "持续监视若干信号的当前值",
+              "与 Graphics 互补；拖信号到 Data 窗口"
+            ],
+            [
+              "State Tracker",
+              "跟踪状态变量/系统状态转换",
+              "验证状态机跳转是否正确",
+              "配置要跟踪的变量，Start 后自动记录状态变化"
+            ],
+            [
+              "System Scanner",
+              "扫描系统变量/信号变化",
+              "批量检查多个信号是否按预期变化",
+              "配置扫描列表与判定条件"
+            ],
+            [
+              "Statistics",
+              "打开 Statistics 窗口",
+              "看总线负载、错误帧数、报文计数",
+              "点击即开；Start 后实时刷新"
+            ],
+            [
+              "GPS / Video / Scope / GNSS Monitor",
+              "外部传感器数据同步显示",
+              "实车路试时把 GPS/视频/示波器与 CAN 时间戳对齐",
+              "需硬件支持并配置数据源"
+            ]
+          ]
+        },
+        {
+          "type": "h4",
+          "text": "Simulation 功能区"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-tab-simulation.png",
+          "alt": "CANoe Simulation 功能区按钮：Simulation Setup/Model Generation Wizard/Node Network Panels/Security Configuration、Interactive Generator/ISO11783 Virtual Terminal/ISO11783 Interactive Task Controller/CANopen NMT、Automation/Signal Generators/GNSS Simulator",
+          "caption": "Simulation 功能区：仿真节点配置、激励生成与自动化序列"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "按钮/分组",
+            "用途",
+            "典型使用场景",
+            "使用方法"
+          ],
+          "rows": [
+            [
+              "Simulation Setup",
+              "打开仿真配置树",
+              "增删总线、节点、网络；切换 Real/Simulated",
+              "双击打开；右键网络/节点进行属性设置"
+            ],
+            [
+              "Model Generation Wizard",
+              "从 DBC 等自动生成仿真节点",
+              "快速搭建剩余总线仿真",
+              "按向导选择数据库与要生成的节点"
+            ],
+            [
+              "Node/Network Panels",
+              "打开节点/网络面板",
+              "可视化控制仿真节点行为",
+              "选择节点后打开对应 Panel"
+            ],
+            [
+              "Security Configuration",
+              "配置安全模块（SecOC/DT）",
+              "网络安全测试",
+              "需 Security Manager 授权"
+            ],
+            [
+              "Interactive Generator",
+              "交互式发送单帧/周期报文",
+              "临时手动激励某条报文",
+              "配置 ID、数据、周期，点击发送"
+            ],
+            [
+              "ISO11783 Virtual Terminal / Interactive Task Controller",
+              "农机总线虚拟终端与任务控制器",
+              "拖拉机/农机网络测试",
+              "加载对应数据库后使用"
+            ],
+            [
+              "CANopen NMT",
+              "CANopen 网络管理工具",
+              "CANopen 设备测试",
+              "发送 NMT 指令控制节点状态"
+            ],
+            [
+              "Automation",
+              "打开自动化序列编辑器",
+              "按时间线发送报文序列",
+              "编写时间触发的事件序列"
+            ],
+            [
+              "Signal Generators",
+              "生成正弦/斜坡/阶跃等信号",
+              "给被测 ECU 施加标准激励",
+              "选择信号类型、幅值、频率，绑定到系统变量"
+            ],
+            [
+              "GNSS Simulator",
+              "模拟 GNSS 定位数据",
+              "ADAS/导航测试",
+              "需 Vector GNSS 硬件或授权"
+            ]
+          ]
+        },
+        {
+          "type": "h4",
+          "text": "Test 功能区"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-tab-test.png",
+          "alt": "CANoe Test 功能区按钮：Test Setup/Test Configuration/Test Trace/Debugger（Test Units）、Test Setup/Test Module/Debugger（Test Modules）",
+          "caption": "Test 功能区：Test Unit 与 Test Module 两种自动化测试入口"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "按钮/分组",
+            "用途",
+            "典型使用场景",
+            "使用方法"
+          ],
+          "rows": [
+            [
+              "Test Setup（Test Units）",
+              "打开 Test Unit 测试配置",
+              "使用 vTESTstudio 生成的测试单元",
+              "双击 Test Setup，Add Test Unit"
+            ],
+            [
+              "Test Configuration",
+              "配置测试运行参数",
+              "设置迭代次数、失败停止策略等",
+              "打开 Test Configuration 对话框"
+            ],
+            [
+              "Test Trace",
+              "打开测试执行 Trace",
+              "查看测试模块运行时的详细步骤",
+              "运行测试时自动或手动打开"
+            ],
+            [
+              "Debugger（Test Units）",
+              "调试 Test Unit",
+              "单步执行测试单元",
+              "对 Test Unit 设置断点"
+            ],
+            [
+              "Test Setup（Test Modules）",
+              "打开 Test Module 测试配置树",
+              "挂载 CAPL/.NET/XML 测试模块",
+              "双击 Test Setup，Add Test Module"
+            ],
+            [
+              "Test Module",
+              "添加/编辑 CAPL Test Module",
+              "编写自动化用例",
+              "在 Test Setup 里右键新建 .can 文件"
+            ],
+            [
+              "Debugger（Test Modules）",
+              "调试 CAPL Test Module",
+              "单步执行 CAPL 测试用例",
+              "在 CAPL Browser 中设置断点"
+            ]
+          ]
+        },
+        {
+          "type": "h4",
+          "text": "Diagnostics & XCP 功能区"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-tab-diagnostics.png",
+          "alt": "CANoe Diagnostics & XCP 功能区按钮：Diagnostic/ISO TP/Basic Diagnostic/Diagnostic Parameters、Diagnostic Console/Fault Memory/Session Control/OBD-II、CANdelaStudio/ODXStudio、J1939 DTC Monitor/J1939 Diagnostic Memory Access/J1939 OBD I/M-Monitor、XCP/CCP/ASAP2 Viewer",
+          "caption": "Diagnostics & XCP 功能区：诊断配置、UDS 控制台、J1939 诊断与标定协议"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "按钮/分组",
+            "用途",
+            "典型使用场景",
+            "使用方法"
+          ],
+          "rows": [
+            [
+              "Diagnostic/ISO TP",
+              "配置诊断传输层（ISO-TP）",
+              "加载 CDD/ODX 前必须先配好 TP 参数",
+              "右键诊断节点，设置请求/响应 ID、物理/功能寻址"
+            ],
+            [
+              "Basic Diagnostic",
+              "基础诊断配置入口",
+              "快速设置常见诊断服务",
+              "选择 ECU 后配置会话、安全访问"
+            ],
+            [
+              "Diagnostic Parameters",
+              "诊断时序参数（P2/P2*/S3）",
+              "匹配不同 ECU 的诊断超时要求",
+              "按诊断规范填写 P2 等时间"
+            ],
+            [
+              "Diagnostic Console",
+              "手动发送 UDS 服务请求",
+              "诊断功能冒烟、探索性测试",
+              "选择服务 SID + 子功能/DID，点击发送"
+            ],
+            [
+              "Fault Memory",
+              "读取/清除故障码（DTC）",
+              "读 DTC、确认故障是否修复",
+              "打开后点击 Read DTC / Clear DTC"
+            ],
+            [
+              "Session Control",
+              "切换诊断会话（默认/扩展/编程）",
+              "刷写前切编程会话，读取数据用默认/扩展",
+              "选择目标会话，发送 $10"
+            ],
+            [
+              "OBD-II",
+              "OBD 服务入口",
+              "排放相关诊断",
+              "选择 Mode $01~$0A 服务"
+            ],
+            [
+              "CANdelaStudio / ODXStudio",
+              "编辑诊断描述文件",
+              "维护 CDD/ODX 文件",
+              "调用外部 Vector 工具"
+            ],
+            [
+              "J1939 DTC Monitor / Diagnostic Memory Access / OBD I/M-Monitor",
+              "商用车 J1939 诊断监控",
+              "卡车/客车网络诊断",
+              "加载 J1939 DBC/DD 后使用"
+            ],
+            [
+              "XCP/CCP",
+              "标定协议入口",
+              "在线标定、读测量变量",
+              "连接 ECU 标定接口"
+            ],
+            [
+              "ASAP2 Viewer",
+              "查看 A2L 标定文件",
+              "了解标定变量、测量量、存储结构",
+              "打开 .a2l 文件浏览"
+            ]
+          ]
+        },
+        {
+          "type": "h4",
+          "text": "Environment 功能区"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-tab-environment.png",
+          "alt": "CANoe Environment 功能区按钮：Symbol Explorer/System Variables/Symbol Mapping/Start Values、Communication Setup/Compile All Nodes/Documents/Tool Couplings/Licensing",
+          "caption": "Environment 功能区：符号、系统变量、映射、起始值与工程管理"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "按钮/分组",
+            "用途",
+            "典型使用场景",
+            "使用方法"
+          ],
+          "rows": [
+            [
+              "Symbol Explorer",
+              "浏览工程所有信号、变量、报文",
+              "找要拖到 Trace/Graphics 的符号",
+              "打开后按树形浏览 DBC / 系统变量"
+            ],
+            [
+              "System Variables",
+              "创建/管理系统变量",
+              "CAPL、Panel、测试脚本之间交互",
+              "右键 Namespaces 新建变量；CAPL 中用 @var 读写"
+            ],
+            [
+              "Symbol Mapping",
+              "一个信号变化自动驱动另一个符号",
+              "把 DBC 信号值同步给系统变量或反之",
+              "建立 Source → Target 映射关系与转换公式"
+            ],
+            [
+              "Start Values",
+              "设置信号/变量的初始值",
+              "测量启动时给变量预设状态",
+              "在列表中填写变量名与初始值"
+            ],
+            [
+              "Communication Setup",
+              "配置通信参数（如 CAN 控制器）",
+              "设波特率、采样点、FD 参数",
+              "在 Network Hardware 里更常用，这里为快捷入口"
+            ],
+            [
+              "Compile All Nodes",
+              "编译所有 CAPL 节点",
+              "修改 CAPL 后一次性编译",
+              "点击后看 Output 窗口是否有报错"
+            ],
+            [
+              "Documents",
+              "管理工程关联文档",
+              "把需求/规范链接到工程",
+              "添加文档路径作为参考"
+            ],
+            [
+              "Tool Couplings",
+              "配置与其他工具（如 vTESTstudio、CANape）的耦合",
+              "多工具协同测试",
+              "按向导配置接口"
+            ],
+            [
+              "Licensing",
+              "查看/管理 CANoe 授权",
+              "授权即将到期或功能不可用",
+              "打开查看已激活的选项与到期时间"
+            ]
+          ]
+        },
+        {
+          "type": "h4",
+          "text": "Hardware 功能区"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-tab-hardware.png",
+          "alt": "CANoe Hardware 功能区按钮：Channel Usage/Channel Mapping/Network Hardware、VT System Configuration/Control/Tools、Protocol Configuration/Vector I/O、GPS/Video/Other Configuration",
+          "caption": "Hardware 功能区：通道映射、网络硬件、VT 系统与 I/O 配置"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "按钮/分组",
+            "用途",
+            "典型使用场景",
+            "使用方法"
+          ],
+          "rows": [
+            [
+              "Channel Usage",
+              "查看各逻辑通道当前占用情况",
+              "多通道复杂工程排查",
+              "打开窗口看哪些通道已分配"
+            ],
+            [
+              "Channel Mapping",
+              "逻辑通道 → 物理接口映射",
+              "必须步骤：把 CAN1/CAN2 映到 VN1630 的物理通道",
+              "打开后拖动逻辑通道到硬件接口"
+            ],
+            [
+              "Network Hardware",
+              "配置网络硬件参数（波特率、总线类型）",
+              "设 500k / 250k / CAN FD 等",
+              "双击网络，在 Hardware 选项卡设置"
+            ],
+            [
+              "VT System Configuration/Control/Tools",
+              "Vector VT 硬件在环系统",
+              "HIL 台架、故障注入",
+              "需 VT 板卡；配置通道与负载"
+            ],
+            [
+              "Protocol Configuration",
+              "配置总线协议细节",
+              "如 CAN FD 的数据段波特率、采样点",
+              "在 Network Hardware 中进一步细化"
+            ],
+            [
+              "Vector I/O",
+              "配置 Vector 接口卡的数字/模拟 I/O",
+              "用硬件 I/O 触发或采集台架信号",
+              "打开 I/O 配置，绑定系统变量"
+            ],
+            [
+              "GPS / Video / Other Configuration",
+              "外部设备配置",
+              "实车采集 GPS/摄像头同步",
+              "连接对应硬件后配置"
+            ]
+          ]
+        },
+        {
+          "type": "h4",
+          "text": "Tools 功能区"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-tab-tools.png",
+          "alt": "CANoe Tools 功能区按钮：CANdb++ Editor/AUTOSAR Explorer/CANeds/ProCANopen/Security Manager、CAPL Browser/Debugger/Panel Designer/FDX Editor/Logging File Conversion",
+          "caption": "Tools 功能区：数据库编辑器、CAPL 浏览器、面板设计器、日志转换等独立工具"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "按钮/分组",
+            "用途",
+            "典型使用场景",
+            "使用方法"
+          ],
+          "rows": [
+            [
+              "CANdb++ Editor",
+              "编辑 DBC / CDD 数据库",
+              "新增报文、信号、值表；修改字节序",
+              "点击打开，导入 DBC 后编辑"
+            ],
+            [
+              "AUTOSAR Explorer",
+              "浏览 AUTOSAR 描述文件（ARXML）",
+              "AUTOSAR 工程查看接口与信号",
+              "导入 ARXML 后浏览"
+            ],
+            [
+              "CANeds",
+              "编辑 EDS 文件（CANopen）",
+              "CANopen 设备配置",
+              "打开 .eds 文件编辑"
+            ],
+            [
+              "ProCANopen",
+              "CANopen 网络配置工具",
+              "CANopen 主从站配置",
+              "需对应授权"
+            ],
+            [
+              "Security Manager",
+              "管理安全配置文件（SecOC/DT）",
+              "网络安全测试",
+              "配置密钥与新鲜度值"
+            ],
+            [
+              "CAPL Browser",
+              "打开 CAPL 脚本编辑器",
+              "编写/编译 CAPL 代码",
+              "双击 .can 文件或从 Simulation Setup 打开"
+            ],
+            [
+              "Debugger",
+              "调试 CAPL / 测试模块",
+              "设断点、单步执行",
+              "在 CAPL Browser 中 F9 设断点"
+            ],
+            [
+              "Panel Designer",
+              "设计交互面板",
+              "做开关、仪表、LED 等虚拟控件",
+              "新建 .xvp 文件，拖控件并绑定变量"
+            ],
+            [
+              "FDX Editor",
+              "编辑 FDX 协议描述",
+              "与 HIL/第三方仿真工具交互",
+              "配置 FDX 接口"
+            ],
+            [
+              "Logging File Conversion",
+              "日志格式转换",
+              ".blf ↔ .asc 互转",
+              "选择源文件与目标格式，点击转换"
+            ]
+          ]
+        },
+        {
+          "type": "h4",
+          "text": "Layout 功能区"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-tab-layout.png",
+          "alt": "CANoe Layout 功能区按钮：Cascade/Tile Horizontally/Tile Vertically/Activate Window、Automatic Fit/Magnetic Windows",
+          "caption": "Layout 功能区：窗口排列与自动吸附"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "按钮/分组",
+            "用途",
+            "典型使用场景",
+            "使用方法"
+          ],
+          "rows": [
+            [
+              "Cascade",
+              "所有窗口层叠排列",
+              "窗口很多时快速概览",
+              "点击后所有停靠窗口层叠"
+            ],
+            [
+              "Tile Horizontally",
+              "水平平铺窗口",
+              "左右对比两个窗口",
+              "点击后窗口横向均分"
+            ],
+            [
+              "Tile Vertically",
+              "垂直平铺窗口",
+              "上下对比两个窗口",
+              "点击后窗口纵向均分"
+            ],
+            [
+              "Activate Window",
+              "激活指定窗口",
+              "窗口被最小化或隐藏时唤出",
+              "下拉选择要激活的窗口名"
+            ],
+            [
+              "Automatic Fit",
+              "自动适配窗口大小",
+              "让窗口随容器自动缩放",
+              "勾选生效"
+            ],
+            [
+              "Magnetic Windows",
+              "窗口磁性吸附",
+              "拖动窗口时自动对齐边缘",
+              "勾选生效；双屏/多窗口布局时推荐开启"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "warning",
+          "text": "新版（v12 / v18 等）功能区命名与布局与 11 SP2 基本一致，可放心对照。记住这条主线：功能区管「操作入口」、Simulation Setup 管「工程骨架」、Dockable Windows 管「观察与分析」——三者分清，界面就不再乱。"
+        }
+      ]
+    },
+    {
+      "title": "一、工程配置结构",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "CANoe 的启动文件是 .cfg 工程文件，它把数据库（DBC/ODX/CDD）、网络拓扑、仿真节点、面板、测试模块、硬件通道映射全部打包在一起。双击 .cfg 即可还原整套工作环境——这意味着「工程即文档」，交接时只要把 .cfg 连同数据库一起发给人，对方就能 1:1 复现你的测试现场。"
+        },
+        {
+          "type": "blockquote",
+          "style": "warning",
+          "text": "汽车行业封闭、网络资料少，最容易踩的坑是「从零新建工程」。正确做法是先打开安装目录自带的 Sample Configuration（示例工程），在它基础上改。Vector 的示例覆盖 CAN/LIN/FlexRay/以太网、诊断、测试模块，是免费且权威的教科书，吃透三五个示例比看十篇博客有用。"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "Database：导入 DBC（信号层）/CDD、ODX（诊断层），决定 CANoe 能否「看懂」总线上的字节",
+            "Simulation Setup：图形化呈现总线、节点、通道，可单独激活/屏蔽某个 ECU 节点",
+            "Test Setup：挂载 CAPL/.NET/XML 编写的测试模块，承载自动化用例",
+            "Hardware：把逻辑通道映射到真实硬件（如 VN1630）的物理通道，并设总线类型与波特率",
+            "Environment：系统变量、面板、符号映射，是交互与数据绑定的中枢"
+          ]
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-guide-overview.png",
+          "alt": "CANoe 界面功能汇总图（基于 CANoe 11 SP2）",
+          "caption": "CANoe 界面功能汇总图：菜单栏、功能区（Ribbon）、仿真配置树与停靠窗口"
+        },
+        {
+          "type": "blockquote",
+          "text": "以下界面截图基于 **CANoe 11 SP2**，新版（v12 / v18 等）功能区命名与布局基本一致，可放心对照学习。"
+        },
+        {
+          "type": "paragraph",
+          "text": "**Environment（环境）** 区是 CANoe「全局变量与绑定」的中枢：**System Variables（系统变量）** 是最常用的全局变量，面板、CAPL、测试脚本都通过它交互；**Symbol Mapping** 让一个信号/变量变化时，按设定的转换关系自动驱动另一个；**Start Values** 则在工程启动时对信号/变量做初始化赋值。它与 Database / Simulation Setup / Test Setup / Hardware 一起，构成「配置即文档」的完整骨架。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-guide-environment.png",
+          "alt": "CANoe Environment 功能区：系统变量 / 符号映射 / 起始值",
+          "caption": "Environment 功能区：系统变量、Symbol Mapping、Start Values 是交互与数据绑定的中枢"
+        }
+      ]
+    },
+    {
+      "title": "二、全仿真与半仿真工程",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "「一、工程配置结构」讲到 .cfg 打包了 Database / Simulation Setup / Test Setup / Hardware / Environment 这五大部分，但还没说怎么把它们拼成一个「能跑起来」的仿真工程。这一节补上最关键的拼装逻辑：半仿真（部分节点用 CAPL 模拟、真实 ECU 在环）与全仿真（所有节点、信号、面板、测试全由工程驱动，现场没有任何真实 ECU）。读懂这两种程度，后面讲 CAPL、面板、测试才有落脚点。"
+        },
+        {
+          "type": "h3",
+          "text": "一句话区分"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "对比维度",
+            "半仿真（Partial / Restbus Sim）",
+            "全仿真（Full Sim）"
+          ],
+          "rows": [
+            [
+              "真实 ECU 是否参与",
+              "有——被测 ECU 或一部分节点是真实的",
+              "无——网络里每个节点都由工程模拟"
+            ],
+            [
+              "谁在发报文",
+              "真实节点自发 + CAPL 补齐缺失节点",
+              "全部由仿真节点 CAPL / Interactive Layer 输出"
+            ],
+            [
+              "典型用途",
+              "台架联调、缺 DBC 节点补位、单 ECU 功能测试",
+              "早期软件未就绪时的功能验证、回归测试、离线演示"
+            ],
+            [
+              "硬件接口卡",
+              "通常需要（接真实总线上的被测件）",
+              "可纯软件运行（全部 Simulated，无需接口卡）"
+            ],
+            [
+              "搭建难度",
+              "中——只需补缺失节点逻辑",
+              "高——需要完整 DBC + 每个节点的信号行为建模"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "半仿真的典型样子"
+        },
+        {
+          "type": "paragraph",
+          "text": "举「车门 ECU 在环」的例子：真实车门 ECU 通过接口卡挂在 CAN 上，但网络里车身、动力等节点没有实物。这时在 Simulation Setup 里给这些「缺的节点」各加一个 CAPL 仿真节点，周期性 output 它们应有的状态帧。被测车门 ECU 收到「周围节点」的报文后才正常工作——它并不知道对端是真是假。"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "只给「缺失节点」加 CAPL 仿真节点，真实存在的节点保持原样，别重复建模",
+            "CAPL 用 output(msg) 按真实节点的 DBC 周期发帧（如 100ms 心跳），频率尽量贴近实车",
+            "注意信号初值：真实节点收到全 0 可能误判「通信丢失」，on start 里先给关键信号赋合理默认值",
+            "不想写代码也能半仿真：用 Interactive Generator（IG）面板手动 / 定时补报文"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "全仿真工程创建七步"
+        },
+        {
+          "type": "paragraph",
+          "text": "下面以「从 Sample Configuration 起一个全仿真工程」为例，走完整 7 步。每一步都能在「一、工程配置结构」讲的 Simulation Setup 树里对号入座。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 1 · 新建 / 打开工程"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-newcfg.png",
+          "alt": "File → New Configuration，选择 CAN 500kBaud 1ch 模板",
+          "caption": "新建工程：File → New Configuration，按总线类型选模板（如 CAN 500kBaud 1ch）。"
+        },
+        {
+          "type": "paragraph",
+          "text": "File → New Configuration 新建，或直接基于安装目录里的 Sample Configuration（如 CANoe 自带的 Demo、BasicCAN）起步最快。保存为 *.cfg。新手建议先打开一个 Sample 看整体结构，再另存成自己的工程，避免从空白开始漏配。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 2 · 导入数据库（DBC / FIBEX / LDF）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-importdbc.png",
+          "alt": "Simulation Setup 中把 DBC 加入 Databases",
+          "caption": "导入数据库：在 Simulation Setup 的网络下把 .dbc 加入 Databases，仿真节点才能用 $信号。"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Simulation Setup 里右键网络节点 → Import Database，选工程对应的 *.dbc。导入后每条报文与信号出现在数据库浏览器，仿真节点才能用 $信号 读写。没有 DBC 就做不了信号级仿真，只能发原始字节帧。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 3 · 搭建 Simulation Setup 节点"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-addnode.png",
+          "alt": "在总线上 Insert Network Node，创建 ECU1/ECU2 并绑 CAPL",
+          "caption": "搭建仿真节点：在总线上 Insert Network Node，创建 ECU 并绑定 .can 文件。"
+        },
+        {
+          "type": "paragraph",
+          "text": "在对应总线下 Add → Network Node，给每个要模拟的 ECU 建一个仿真节点（Simulated Node）。真实存在的节点不要加，否则「两个节点抢同一报文」会出仲裁冲突。全仿真工程里网络下全是仿真节点，真实节点数为 0。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 4 · 挂载 CAPL / 仿真节点逻辑"
+        },
+        {
+          "type": "paragraph",
+          "text": "双击仿真节点 → 绑定 .can 文件：用 on start 初始化、on timer 周期 output 报文、用 $SignalName 直接驱动 DBC 信号。也可以用 CANoe 内置的 Interactive Layer（IL，需对应 license）按 DBC 周期自动发所有报文，零代码就能让网络「活」起来。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 5 · 设计 Panel（操作面板）"
+        },
+        {
+          "type": "paragraph",
+          "text": "Tools → Panel Designer 拖开关 / 滑块 / 数值控件，绑定到系统变量（sysvar）或 DBC 信号。面板上点一下「车门解锁」，背后是写 @SysVar_Panel::DoorUnlock = 1，CAPL 用 on sysvar 响应去 output 对应的状态帧——这就是「全仿真联动」的精髓：人操作的不是报文，而是信号。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 6 · Channel Mapping 与硬件"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-runstart.png",
+          "alt": "Home 区 Start 运行，Write 窗口输出",
+          "caption": "运行验证：Home 区 Start（闪电）运行，Write 窗口可见 CAPL 输出。"
+        },
+        {
+          "type": "paragraph",
+          "text": "若接真实接口卡（VN 系列），到 Hardware → Network Hardware 把 Database 通道映射到物理 Channel，选 Vector 驱动。纯仿真演示则全部走 Simulated，不用接口卡也能 Start 测量。关键提醒：Real Bus 网络下仿真节点是「哑」的，必须将该网络设为 Simulated 才能看到节点 output 的报文。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 7 · 运行验证"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-traceview.png",
+          "alt": "Trace 窗口实时显示总线报文",
+          "caption": "Trace 窗口实时显示报文流动，确认仿真节点确实在发帧。"
+        },
+        {
+          "type": "paragraph",
+          "text": "点 Home → Start（或 Online），打开 Trace / Graphics 窗口，确认仿真节点在发报文、Panel 操作能改变信号、Graphics 曲线在动。再写个最小 Test Module 断言「启动 2 秒内收到节点心跳帧」，通过即说明整个仿真工程打通。"
+        },
+        {
+          "type": "h3",
+          "text": "常见坑（务必避开）"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "网络选了 Real 却指望仿真节点发报文 → 永远哑火；全仿真请把对应网络一律设为 Simulated",
+            "周期写错：把 100ms 帧写成 1000ms，真实 ECU 因超时进入默认状态，现象诡异难查",
+            "信号初始值全 0：部分 ECU 收到全 0 会报「通信丢失」，记得在 on start 给关键信号赋初值",
+            "两个节点 output 同一报文：ID 重复导致仲裁冲突，Trace 里看到诡异重传",
+            "DBC 还没导入就写 $信号 → CAPL 编译报 unknown signal，先导入数据库再写代码"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "上面只搭了骨架。真正「让节点活起来」的 CAPL 写法（on start / on timer / output / on sysvar / $信号）在「九、CAPL 脚本快速入门」展开；面板与系统变量联动、Test Module 断言在「十、自动化测试框架」。读完这两节再回来看本节七步，会更顺。"
+        }
+      ]
+    },
+    {
+      "title": "三、DBC 数据库操作",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "DBC 是 CANoe 的「通信字典」——它固化了总线上有哪些报文、每条报文含哪些信号、信号怎么布局（起始位 / 长度 / 字节序）、哪些节点收哪些节点发。没有 DBC，你只能发原始字节帧；有了 DBC，才能用 $信号名 直接读写，在 Trace / Graphics 里按信号名观察。CANoe 用 CANdb++ Editor 创建和编辑 DBC。"
+        },
+        {
+          "type": "h3",
+          "text": "CANdb++ Editor 与 DBC 的角色"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-editor.png",
+          "alt": "CANdb++ Editor 主界面：导航区列出 Networks/Nodes/Messages/Signals",
+          "caption": "CANdb++ Editor 是 Vector 自带的数据库编辑器，一个 DBC 把「报文—信号—节点」三层关系固化，是仿真与诊断的共同基础。"
+        },
+        {
+          "type": "paragraph",
+          "text": "CANdb++ Editor 左侧导航区按层级展示总线对象，右侧是编辑区。所有报文、信号、节点、属性都从这里定义，再被 CANoe 工程引用。"
+        },
+        {
+          "type": "h3",
+          "text": "数据库的对象层级"
+        },
+        {
+          "type": "paragraph",
+          "text": "新建完成后导航区自上而下排列：Networks → Network Nodes → ECUs → Messages → Signals → Environment Variables。理解这个层级，才知道信号挂在哪条报文、报文归哪个节点、变量由谁驱动。下面以 X-Vehicle 工程为例，按「网络 → 节点 → 报文 → 信号 → 映射 → 属性 → 数值表 → 导入」的顺序从零搭一个 DBC。"
+        },
+        {
+          "type": "h3",
+          "text": "从零搭建一个 DBC（实战演练：X-Vehicle）"
+        },
+        {
+          "type": "paragraph",
+          "text": "先准备好 CANoe 工程（File → New，选 CAN 500kBaud 1ch 模板，存为 XVehicle.cfg，在工程下建 CANdb / Nodes / Panels 子目录）。下面专注 DBC 本身的创建。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 1 · 基于模板新建数据库"
+        },
+        {
+          "type": "paragraph",
+          "text": "Tools → CANdb++ Editor 打开编辑器；File → Create Database，选 Vector_IL_Basic Template.dbc（或 CANoe Template）。保存到工程 X-Vehicle 下的 CANdb 目录，命名 XVehicle.dbc。基于模板可省去大量默认属性配置。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-createdb.png",
+          "alt": "Create Database 对话框：选择 Vector_IL_Basic Template 模板",
+          "caption": "基于模板新建可省去大量默认配置；模板已带常用属性与信号布局约定。",
+          "class": "kb-image-sm"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-nav-arch.png",
+          "alt": "新建后 CANdb++ 导航区自动列出当前总线网络架构与对象",
+          "caption": "新建完成即自动生成 Networks / Nodes / Messages / Signals 骨架，后续往里填内容。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 2 · 设置 Network 协议"
+        },
+        {
+          "type": "paragraph",
+          "text": "右键网络（默认 XVehicle）→ Edit Network，将 Protocol 属性改为 CAN（总线）。这一项决定数据库按 CAN 规则校验 ID / DLC，别漏。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-network-edit.png",
+          "alt": "Network 属性对话框：将 Protocol 改为 CAN",
+          "caption": "网络协议是数据库生效的前提；改成 CAN 后编辑器才会按 CAN 规则约束报文与信号。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 3 · 创建 Network Nodes（网络节点）"
+        },
+        {
+          "type": "paragraph",
+          "text": "右键 Network Nodes → New，依次创建 Engine（地址 0x1）、Door（0x2）、Display（0x3）。每定义一个网络节点，CANdb++ 会自动生成一个同名 ECU，形成一一对应关系——节点是通信接口，ECU 是逻辑实体。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-nodes-new.png",
+          "alt": "Network Nodes 下新建 Engine / Door / Display，并设置地址",
+          "caption": "节点地址（Address）用于区分同一网络上的不同 ECU；建节点后自动生成同名 ECU。"
+        },
+        {
+          "type": "paragraph",
+          "text": "创建好 Engine 节点后双击它，属性对话框里各页签分别管名称/地址、收发信号、发送报文、所属网络、ECU 对应和节点属性。下面逐页签对照。"
+        },
+        {
+          "type": "h4",
+          "text": "Definition（名称与地址）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-node-engine-definition.png",
+          "alt": "Engine 节点 Definition 页签",
+          "caption": "Definition：Name=Engine，Address=0x1。地址用于区分同一网络上的不同 ECU。"
+        },
+        {
+          "type": "h4",
+          "text": "Mapped Tx Sig（发送信号）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-node-engine-tx-sig.png",
+          "alt": "Engine 节点 Mapped Tx Sig 页签",
+          "caption": "Mapped Tx Sig：Engine 节点负责发送 EngineSpeed、OnOff 两个信号。"
+        },
+        {
+          "type": "h4",
+          "text": "Mapped Rx Sig（接收信号）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-node-engine-rx-sig.png",
+          "alt": "Engine 节点 Mapped Rx Sig 页签",
+          "caption": "Mapped Rx Sig：当前为空，表示 Engine 在本例中只发不收。"
+        },
+        {
+          "type": "h4",
+          "text": "Tx Messages（发送报文）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-node-engine-tx-messages.png",
+          "alt": "Engine 节点 Tx Messages 页签",
+          "caption": "Tx Messages：Engine 节点发送 EngineState（ID 0x150，DLC 2）。"
+        },
+        {
+          "type": "h4",
+          "text": "Networks（所属网络）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-node-engine-networks.png",
+          "alt": "Engine 节点 Networks 页签",
+          "caption": "Networks：Engine 节点挂载在 IPC 网络，协议为 CAN。"
+        },
+        {
+          "type": "h4",
+          "text": "Control units（ECU 对应）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-node-engine-control-units.png",
+          "alt": "Engine 节点 Control units 页签",
+          "caption": "Control units：CANdb++ 自动生成同名 ECU，节点是通信接口，ECU 是逻辑实体。"
+        },
+        {
+          "type": "h4",
+          "text": "Attributes（节点属性）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-node-engine-attributes.png",
+          "alt": "Engine 节点 Attributes 页签",
+          "caption": "Attributes：节点级属性，如 NodeLayerModules、网络管理参数 NmNode / NmStationAddress 等。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 4 · 定义报文 Messages"
+        },
+        {
+          "type": "paragraph",
+          "text": "右键 Messages → New，创建 EngineState（标准帧，ID 0x150，DLC 2）、DoorState（ID 0x200，DLC 1）。ID 与 DLC 必须和真实 ECU 一致，否则总线仲裁与解析都会乱。建好后切到 Transmitters 选项卡 → Add，把对应网络节点设为发送节点。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-messages.png",
+          "alt": "Messages 下新建报文 EngineState / DoorState，设置 ID 与 DLC",
+          "caption": "报文是信号的容器；ID 决定总线仲裁优先级，DLC 决定数据场长度。"
+        },
+        {
+          "type": "paragraph",
+          "text": "以 EngineState（0x150）为例，双击报文打开属性对话框，各页签分别展示报文定义、所含信号、接收节点、位布局与报文属性。"
+        },
+        {
+          "type": "h4",
+          "text": "Definition（报文定义）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-msg-engstate-definition.png",
+          "alt": "EngineState 报文 Definition 页签",
+          "caption": "Definition：Name=EngineState，ID=0x150，Type=CAN Standard，DLC=2，Transmitter=Engine，Tx Method=Cyclic，Cycle Time=200 ms。"
+        },
+        {
+          "type": "h4",
+          "text": "Signals（所含信号）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-msg-engstate-signals.png",
+          "alt": "EngineState 报文 Signals 页签",
+          "caption": "Signals：EngineState 报文包含 EngineSpeed（15 bit，起始位 0）和 OnOff（1 bit，起始位 15）两个信号。"
+        },
+        {
+          "type": "h4",
+          "text": "Receivers（接收节点）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-msg-engstate-receivers.png",
+          "alt": "EngineState 报文 Receivers 页签",
+          "caption": "Receivers：当前 EngineState 的接收节点只有 Engine（0x1）；后续如有其他 ECU 需要消费该报文，在这里 Add。"
+        },
+        {
+          "type": "h4",
+          "text": "Layout（位布局）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-msg-engstate-layout.png",
+          "alt": "EngineState 报文 Layout 页签",
+          "caption": "Layout：可视化位布局，EngineSpeed 占 bit 0-14，OnOff 占 bit 15；Intel 字节序，总长度 2 字节。"
+        },
+        {
+          "type": "h4",
+          "text": "Attributes（报文属性）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-msg-engstate-attributes.png",
+          "alt": "EngineState 报文 Attributes 页签",
+          "caption": "Attributes：报文级属性，如 GenMsgCycleTime=200 ms、发送类型 Cyclic、网络管理相关参数等。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-messages-tx.png",
+          "alt": "在 Transmitters 选项卡 Add 报文的发送节点",
+          "caption": "只有指定了发送节点的报文，仿真节点（或 IL）才会替它 output；漏设会导致报文「发不出来」。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 5 · 定义信号 Signals"
+        },
+        {
+          "type": "paragraph",
+          "text": "右键 Signals → New，创建 EngineSpeed（长度 15 bit，Intel 字节序，单位 r.p.m.，Value Type 为 Unsigned，Maximum 5500，其余默认）。按同样方式创建 DoorState、Door_L、Door_R、OnOff 等信号（长度、字节序、初始值严格按通信矩阵表填写，本例其余取默认）。然后在该信号的 Signal 选项卡单击 Add 关联到报文 EngineState，并把 Startbit（起始位）设为 0。信号布局（Motorola / Intel、起始位、长度）是 DBC 最容易出错的地方，需对照真实矩阵表逐项核对。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-signals.png",
+          "alt": "Signals 下新建 EngineSpeed，设置长度/字节序/单位",
+          "caption": "信号是真正被应用读取的最小单元；字节序（Intel/Motorola）填反会导致数值完全错位。"
+        },
+        {
+          "type": "paragraph",
+          "text": "以 EngineSpeed 为例，双击信号打开属性对话框，各页签分别展示信号定义、所属报文、接收节点、信号属性与值描述。"
+        },
+        {
+          "type": "h4",
+          "text": "Definition（信号定义）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-signal-engspeed-definition.png",
+          "alt": "EngineSpeed 信号 Definition 页签",
+          "caption": "Definition：Name=EngineSpeed，Length=15 bit，Byte Order=Intel，Value Type=Unsigned，Factor=1，Offset=0，Min=0，Max=5500，Unit=r.p.m。"
+        },
+        {
+          "type": "h4",
+          "text": "Messages（所属报文）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-signal-engspeed-messages.png",
+          "alt": "EngineSpeed 信号 Messages 页签",
+          "caption": "Messages：EngineSpeed 属于 EngineState（ID 0x150，CAN Standard，DLC 2）。"
+        },
+        {
+          "type": "h4",
+          "text": "Receivers（接收节点）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-signal-engspeed-receivers.png",
+          "alt": "EngineSpeed 信号 Receivers 页签",
+          "caption": "Receivers：Display（0x3）和 Door（0x2）两个节点会接收 EngineSpeed 信号。"
+        },
+        {
+          "type": "h4",
+          "text": "Attributes（信号属性）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-signal-engspeed-attributes.png",
+          "alt": "EngineSpeed 信号 Attributes 页签",
+          "caption": "Attributes：GenSigInactiveValue、GenSigSendType=Cyclic、GenSigStartValue、NWM-WakeupAllowed 等信号级属性。"
+        },
+        {
+          "type": "h4",
+          "text": "Value Descriptions（值描述）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-signal-engspeed-value-desc.png",
+          "alt": "EngineSpeed 信号 Value Descriptions 页签",
+          "caption": "Value Descriptions：0x0=Off，0x1=On（图中以简单开关为例；实际转速信号通常用连续物理值）。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-signals-add.png",
+          "alt": "在 Signal 选项卡 Add 将信号关联到报文 EngineState",
+          "caption": "信号必须显式关联到报文，否则它无处承载。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-signals-startbit.png",
+          "alt": "将 EngineSpeed 的 Startbit 设置为 0",
+          "caption": "起始位决定信号在报文数据场中的比特位置，填错会让解析值整体偏移。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 6 · 把信号映射到节点"
+        },
+        {
+          "type": "paragraph",
+          "text": "信号不会自动流动，必须挂到节点上。Network Nodes → 右击节点 → Edit Node：在 Mapped Rx Sig（接收）/ Mapped Tx Sig（发送）里 Add。本例三个节点的收发为：Display 接收 Door_L、Door_R、EngineSpeed、OnOff（无发送）；Door 发送 Door_L、Door_R（无接收）；Engine 发送 EngineSpeed、OnOff（无接收）。三个节点的收发齐备，仿真总线才能完整跑起来。只有被映射的信号，仿真节点才会自动收发。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-nodemapping.png",
+          "alt": "Network Nodes 编辑节点，配置 Mapped Rx / Tx Signals",
+          "caption": "信号必须映射到节点，仿真节点（或 IL）才会替该节点发出 / 接收它。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-nodes-mappedtx.png",
+          "alt": "Engine 节点的 Mapped Tx Sig：EngineSpeed、OnOff",
+          "caption": "发送侧映射决定节点「会发出哪些信号」，接收侧映射决定「能读到哪些信号」。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 7 · Environment Variable（环境变量）"
+        },
+        {
+          "type": "paragraph",
+          "text": "Environment Variable 是 ECU、面板、CAPL 三者之间的「桥梁变量」：面板控件绑 Env 变量，CAPL 读 / 写 Env 变量，从而实现「人操作面板 → CAPL 响应 → 报文变化」的闭环。右击 Environment Variables → New，创建如 EnvDoorState 的变量（见下一节 Panel 与 二、全仿真工程）。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-envvar.png",
+          "alt": "CANdb++ 中新建 Environment Variable",
+          "caption": "Env 变量是面板与 CAPL 解耦协作的关键，比直接耦合信号更灵活。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 8 · 设置报文发送属性（Attribute）"
+        },
+        {
+          "type": "paragraph",
+          "text": "双击 Messages 下的报文，切到 Attribute 选项卡：把 EngineState 的发送类型改为 Cyclic（周期），周期设为 100ms；DoorState 同样改 Cyclic，周期 200ms。周期决定了总线负载，需与真实 ECU 一致，否则仿真节奏和实际对不上。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-attr-cyclic.png",
+          "alt": "EngineState 报文 Attribute：发送类型 Cyclic，周期 100ms",
+          "caption": "周期报文是最常见的发送方式；周期值直接关系总线负载与实时性。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 9 · Value Table（数值表）"
+        },
+        {
+          "type": "paragraph",
+          "text": "Value Table 把「裸数字」文字化。工具栏单击 Value Tables → 右键 New：如建 VtSig_Eng_Status，Value Description 写 0x0:Off / 0x1:On，关联到信号 OnOff；再建 DoorState 的数值表，0x0:BothDoorClose / 0x1:LeftDoorOpen / 0x2:RightDoorOpen / 0x3:BothDoorOpen，关联到变量 EnvDoorState。配好后 Trace / Panel 里显示的是文字状态而非十六进制。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-valuetable.png",
+          "alt": "Value Tables 新建数值表，定义 OnOff 的 0=Off / 1=On",
+          "caption": "数值表让信号值可读；DoorState 的数值表同理把 0x0-0x3 映射为车门状态文字，未关联数值表的信号在 Trace 里只显示原始数字。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 10 · 把 DBC 导入 CANoe 工程"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/dbc-imported.png",
+          "alt": "导入完成后 Simulation Setup 显示 Display / Door / Engine 三个仿真节点",
+          "caption": "三个仿真节点就位，意味着 DBC 已被工程识别，可以开始仿真与测试。"
+        },
+        {
+          "type": "blockquote",
+          "style": "warning",
+          "text": "常见坑：① ID / DLC 与真实 ECU 不一致导致解析错位；② 信号起始位或字节序（Intel vs Motorola）填反，值完全不对；③ 报文漏设 Transmitters，仿真节点「发不出」该报文；④ 信号没映射到节点，仿真节点不发 / 收它；⑤ 改了 DBC 没重新导入工程，运行时还是旧定义；⑥ Attribute 周期与真实 ECU 不一致，总线负载与节奏对不上。"
+        }
+      ]
+    },
+    {
+      "title": "四、仿真面板设计（Panel）",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "Panel（面板）是 CANoe 总线仿真的人机界面：在面板上拖入控件，把控件绑定到信号 / 系统变量 / 环境变量，测试人员点一下开关、推一下滑块就能实时改变它们的值，并立刻在指示灯、量表上看到 ECU 反应。控件分两类——控制控件（可写值，关联信号 / 系统变量 / 环境变量）与显示控件（只读，展示信号、变量、诊断参数）。Tools → Panel Designer 打开设计器。"
+        },
+        {
+          "type": "h3",
+          "text": "Panel Designer 设计环境"
+        },
+        {
+          "type": "paragraph",
+          "text": "设计器由上方的功能区与下方的窗口组成。功能区随场景切换：File 菜单负责新建 / 保存面板，Home 提供常用操作，Panel 选项卡放设计相关命令；Properties 是动态功能区，选中不同控件时它显示的命令会自动变化。常用窗口有 Toolbox（控件箱）、Working Area（画布）、Symbol Explorer（浏览可绑定的信号 / 变量）、Properties（属性）、Output Window（实时报错 / 警告）。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-toolbox.png",
+          "alt": "Panel Designer 的 Toolbox 控件箱与可用控件列表",
+          "caption": "Toolbox 列出所有可用控件，按住左键拖拽或双击即可加入当前面板。"
+        },
+        {
+          "type": "h3",
+          "text": "常用控件"
+        },
+        {
+          "type": "paragraph",
+          "text": "面板里最常用六类控件：Switch/Indicator（开关 / 指示灯，最高频，支持 Image、Display Only 等属性改外观）、LED Control（两态显示，熄灭 / 点亮）、Input/Output Box（左边标签、右边文本框，做数值输入或显示）、Static Text（纯文本标签）、Group Box（分组框，把同类控件圈在一起管理）、Analog Gauge（模拟量表，关联车速 / 温度 / 油量等连续量）。控制类控件填好绑定的变量才会「活」，显示类控件绑定后即可实时刷新。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-switch.png",
+          "alt": "Switch/Indicator 控件属性",
+          "caption": "Switch/Indicator 是面板里最高频的控件，可设 Image、Display Only 等改变外观与行为。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-led.png",
+          "alt": "LED Control 控件，两态显示",
+          "caption": "LED Control 一般作显示控件，表示熄灭 / 点亮两种状态。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-gauge.png",
+          "alt": "Analog Gauge 模拟量表控件",
+          "caption": "Analog Gauge 适合关联车速、温度、油量等模拟物理量，是仿真面板最常用的显示控件之一。"
+        },
+        {
+          "type": "h3",
+          "text": "多帧图片（动态外观技巧）"
+        },
+        {
+          "type": "paragraph",
+          "text": "想让开关 / 指示灯随状态切换不同图标，可把控件的 Image 设成「多帧图片」——即把若干尺寸一致的图片拼成一张，用帧序号表示状态：值 0 显示第 2 帧、值 1 显示第 3 帧、值 2 显示第 4 帧……这样按钮 / 指示灯就能呈现三种及以上的动态外观，比单纯的点亮 / 熄灭更直观。配图素材需自备图片文件，按状态数拼接即可。"
+        },
+        {
+          "type": "h3",
+          "text": "控件绑什么：信号 / 系统变量 / 环境变量"
+        },
+        {
+          "type": "paragraph",
+          "text": "刚接触面板的人最容易卡在「这个控件到底绑什么」。先问一个问题：这个值要不要上总线？答案直接决定绑定对象。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "绑定对象",
+            "适用场景",
+            "典型例子",
+            "不推荐场景"
+          ],
+          "rows": [
+            [
+              "DBC 信号",
+              "值直接来自总线，或要发到总线；控件用于模拟 / 观测真实 ECU",
+              "车速、引擎转速、车门状态、灯光开关",
+              "仅面板与 CAPL 内部联动、不上总线的值"
+            ],
+            [
+              "系统变量 System Variable",
+              "面板与 CAPL / 脚本 / 测试模块之间的内部中间量，不上总线",
+              "EngineStateSwitch、EngineSpeedEntry、DoorLeftSwitch",
+              "值本身就是报文要携带的总线物理量"
+            ],
+            [
+              "环境变量 Environment Variable",
+              "遗留工程 / 旧版 CANoe 兼容接口",
+              "旧版 Panel / CAPL 接口仍要求使用",
+              "新工程——优先用系统变量，能力更强"
+            ]
+          ]
+        },
+        {
+          "type": "h4",
+          "text": "特殊情况：钥匙 / 点火开关"
+        },
+        {
+          "type": "paragraph",
+          "text": "像钥匙启动开关、引擎开关这类「操作类输入」最容易让人纠结：它表面上是要上总线的状态（BCM 会广播点火信号），但面板上点击的只是「人的操作」。推荐做法——面板上先用系统变量接住（如 EngineStateSwitch），再由 CAPL 用 on sysvar 响应并 output 出携带点火信号的报文：「面板侧用变量，总线侧才是信号」。只有当你手里真有对应 ECU、要面板直接忠实驱动已有总线信号时，才绕过变量直接绑信号。"
+        },
+        {
+          "type": "blockquote",
+          "style": "concept",
+          "text": "标注：钥匙 / 点火开关 = 典型「面板用系统变量 → CAPL 映射成 DBC 信号上总线」的链路，不要因为它「最终要上总线」就直接在面板上绑信号，否则面板会耦合总线编码、且缺少真实 ECU 时仿真跑不起来。"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "决策口诀：先问『这个值要不要上总线』——要上总线就绑信号；不上总线、只是面板 / CAPL / 测试脚本之间传值，就绑系统变量；只有 legacy 老工程才考虑环境变量。环境变量是旧时代的产物，新工程一律优先系统变量。"
+        },
+        {
+          "type": "h3",
+          "text": "控件绑定系统变量"
+        },
+        {
+          "type": "paragraph",
+          "text": "多数控件要关联 System Variable（系统变量）才能驱动逻辑。在 CANoe 主界面 Environment → System Variables 新建变量，本例建三个：EngineStateSwitch（引擎开关）、EngineSpeedDspMeter（车速显示）、EngineSpeedEntry（车速输入）。控件 Properties 里把控件绑到对应变量。闭环路径：面板操作 → 变量变化 → CAPL 用 on sysvar 响应 → output 对应报文（详见 二、全仿真工程 步骤 5）。命名建议带模块前缀，避免跨面板冲突。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-sysvar.png",
+          "alt": "Environment → System Variables 新建系统变量",
+          "caption": "系统变量是面板与 CAPL 解耦协作的枢纽，命名建议带模块前缀避免冲突。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-sysvar-overview.png",
+          "alt": "System Variables 配置总览：Engine 命名空间下三个变量已创建",
+          "caption": "三个变量建完后，在 System Variables Configuration 里应能看到 Engine 命名空间下的 EngineStateSwitch、EngineSpeedDspMeter、EngineSpeedEntry。"
+        },
+        {
+          "type": "h3",
+          "text": "实战 1：搭建 Control 面板（控制侧）"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 1：新建 Control 面板"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Panel Designer 中选择 File → New Panel，新建一个面板并命名为 Control，保存到工程目录（建议与后续 Display 面板放在同一工程子目录，方便 Desktop 聚合）。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-control-1.png",
+          "alt": "Control 面板：File → New Panel 新建并命名",
+          "caption": "新建并保存 Control 面板，作为控制侧操作入口。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 2：添加 Ignition 分组框"
+        },
+        {
+          "type": "paragraph",
+          "text": "从 Toolbox 拖入一个 Group Box，命名 Ignition（引擎控制区），在 Properties 中设置 Caption 与合适的边框/背景，作为引擎相关控件的容器。Group Box 只负责视觉分组，不绑定变量。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-control-2.png",
+          "alt": "Ignition Group Box 属性设置",
+          "caption": "用 Group Box 把同类控制归类，面板可读性立刻提升。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 3：添加 Key 分组框"
+        },
+        {
+          "type": "paragraph",
+          "text": "再拖入一个 Group Box，命名 Key（钥匙控制区），用于放置钥匙/点火使能相关控件。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-control-3.png",
+          "alt": "Key Group Box 属性设置",
+          "caption": "继续用 Group Box 分区，钥匙控制独立成区。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 4：添加 Speed 分组框"
+        },
+        {
+          "type": "paragraph",
+          "text": "再拖入一个 Group Box，命名 Speed（车速控制区），用于放置车速输入控件。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-control-4.png",
+          "alt": "Speed Group Box 属性设置",
+          "caption": "车速控制单独分区，便于后续放滑块。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 5：添加 Door 分组框"
+        },
+        {
+          "type": "paragraph",
+          "text": "再拖入一个 Group Box，命名 Door（车门控制区），用于放置左右车门开关。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-control-5.png",
+          "alt": "Door Group Box 属性设置",
+          "caption": "四个分区就绪：Ignition / Key / Speed / Door。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 6：Ignition 放引擎开关"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Ignition 框内放一个 Switch/Indicator，Caption 设为「引擎开关」；Properties 中把 Variable/Symbol 绑到 EngineStateSwitch。运行时点开关翻转变量，CAPL 用 on sysvar 响应后 output 报文。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-control-6.png",
+          "alt": "Ignition Switch/Indicator 绑定 EngineStateSwitch",
+          "caption": "控制控件绑定系统变量后才「活」，闭环：面板→变量→CAPL→报文。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 7：Speed 放车速滑动条"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Speed 框内拖入一个 Track Bar（车速滑动条），绑定 EngineSpeedEntry。Track Bar 适合快速扫值，若需精确输入可改用 Input/Output Box。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-control-7.png",
+          "alt": "Speed Track Bar 绑定 EngineSpeedEntry",
+          "caption": "Track Bar 用于快速扫值，绑定车速输入变量。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 8：Door 放左车门开关"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Door 框内放一个 Switch/Indicator，Caption 设为「左车门」；绑定 DoorLeftSwitch。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-control-8.png",
+          "alt": "左车门 Switch/Indicator 绑定 DoorLeftSwitch",
+          "caption": "左车门开关对应一个系统变量。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 9：Door 放右车门开关"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Door 框内再放一个 Switch/Indicator，Caption 设为「右车门」；绑定 DoorRightSwitch。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-control-9.png",
+          "alt": "右车门 Switch/Indicator 绑定 DoorRightSwitch",
+          "caption": "右车门开关独立绑定，左右互不干扰。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 10：Door 加说明文字并保存"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Door 框内添加两个 Static Text，分别标注「Left / 左」与「Right / 右」，说明左右车门开关的对应关系。确认 Output Window 无红色报错，保存面板为 Control.xvp。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-control-10.png",
+          "alt": "Door 区两个 Static Text 标注左右车门",
+          "caption": "StaticText 仅作说明不绑定变量；保存面板收尾。"
+        },
+        {
+          "type": "h3",
+          "text": "实战 2：搭建 Display 面板（显示侧）"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 1：新建 Display 面板"
+        },
+        {
+          "type": "paragraph",
+          "text": "同样 File → New Panel，命名为 Display。这个面板只读（Display Only），用来呈现引擎开关状态、车速、车门状态，让测试人员一眼看到被测系统的反馈。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-display-1.png",
+          "alt": "Display 面板：File → New Panel 新建并命名",
+          "caption": "Display 侧只做展示，不做写入。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 2：添加 Engine 分组框"
+        },
+        {
+          "type": "paragraph",
+          "text": "拖入一个 Group Box，命名 Engine（引擎状态控件区），作为引擎相关显示控件的容器。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-display-2.png",
+          "alt": "Engine Group Box 属性设置",
+          "caption": "Engine 显示区就绪。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 3：添加 Door 分组框"
+        },
+        {
+          "type": "paragraph",
+          "text": "再拖入一个 Group Box，命名 Door（车门状态控件区），用于放置车门状态指示灯。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-display-3.png",
+          "alt": "Door Group Box 属性设置",
+          "caption": "车门状态显示独立成区。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 4：Engine 放运行状态指示灯"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Engine 框内放一个 Switch/Indicator，Caption 设为「引擎运行状态」，绑定 EngineStateSwitch，Display Only 设为 True（只读显示）。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-display-4.png",
+          "alt": "Engine Switch/Indicator 绑定 EngineStateSwitch（Display Only）",
+          "caption": "显示控件只读绑定，运行时随变量实时刷新。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 5：Engine 放车速量表"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Engine 框内放一个 Analog Gauge（车速表），绑定 EngineSpeedDspMeter，并设置最小/最大值（如 0–240 km/h）。下图分别为属性设置与显示效果。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-display-5a.png",
+          "alt": "Engine Analog Gauge 属性设置",
+          "caption": "Gauge 绑定车速显示变量并设置量程。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-display-5b.png",
+          "alt": "Engine Analog Gauge 显示效果",
+          "caption": "运行时量表随 EngineSpeedDspMeter 实时摆动。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 6：Engine 加说明文字"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Engine 框内添加一个 Static Text，写「车速」或单位说明，辅助读数。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-display-6.png",
+          "alt": "Engine Static Text 说明文字",
+          "caption": "StaticText 辅助标注，让面板更易懂。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 7：Engine 放车速数值框"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Engine 框内添加一个 Input/Output Box，绑定 EngineSpeedDspMeter，Display Only 用于显示车速数值。下图分别为属性设置与显示效果。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-display-7a.png",
+          "alt": "Engine Input/Output Box 属性设置",
+          "caption": "数值框绑定车速显示变量。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-display-7b.png",
+          "alt": "Engine Input/Output Box 显示效果",
+          "caption": "运行时框内数字随变量刷新。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 8：Door 放车门状态指示灯"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Door 框内放一个 Switch/Indicator，Caption 设为「车门状态」，绑定车门状态聚合变量（如需分别看左右可放两个）。确认所有控件 Display Only 为 True，保存面板为 Display.xvp。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-display-8.png",
+          "alt": "Door Switch/Indicator 绑定车门状态变量",
+          "caption": "Display 面板收尾：保存为 Display.xvp。"
+        },
+        {
+          "type": "h3",
+          "text": "Desktop 把常用窗口聚拢"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 1：新建 Desktop"
+        },
+        {
+          "type": "paragraph",
+          "text": "回到 CANoe 主界面，点击底行空白处（窗口标签栏）新建一个名为 CAN 的 Desktop。Desktop 是布局容器，不修改任何报文逻辑。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-desktop-1.png",
+          "alt": "新建名为 CAN 的 Desktop",
+          "caption": "Desktop 作为统一布局容器。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 2：把面板加进 Desktop 并设为 MDI"
+        },
+        {
+          "type": "paragraph",
+          "text": "将已保存的 Control 面板和 Display 面板添加进 CAN Desktop，并把窗口模式设为 MDI Windows，所有子窗口以标签页形式集中在同一容器内，切换时不会满天飞。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-desktop-2.png",
+          "alt": "Desktop 内聚合 Control / Display 面板（MDI Windows 模式）",
+          "caption": "MDI 模式让子窗口集中在同一容器。"
+        },
+        {
+          "type": "paragraph",
+          "text": "最终呈现效果图如下——Control 控制面板与 Display 显示面板在 Desktop 内聚合，形成「操作 + 观测」的统一测试视角，回归测试时尤其好用。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/panel-desktop-3.png",
+          "alt": "Desktop 最终呈现效果图：Control 与 Display 聚合",
+          "caption": "Desktop 把「操作面板 + 分析窗口」组合成一个测试视角。"
+        },
+        {
+          "type": "blockquote",
+          "style": "concept",
+          "text": "Panel 不是必须的，但它是「全仿真联动」的精华——让人操作信号而非报文。新手建议先做一个最小面板（一个开关 + 一个指示灯）跑通「面板 → 系统变量 → CAPL → 报文」闭环，再逐步扩展成 Control / Display 双面板。"
+        }
+      ]
+    },
+    {
+      "title": "五、运行模式：在线（Online）与离线（Offline）",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "维度",
+            "Online（在线）",
+            "Offline（离线）"
+          ],
+          "rows": [
+            [
+              "数据来源",
+              "连接真实硬件；每条网络可独立选 Real Bus（收发真实报文）或 Simulated（仿真节点产生报文），两者可在不同网络共存",
+              "读取 .blf/.asc 日志，不接硬件"
+            ],
+            [
+              "典型用途",
+              "台架/实车联调、信号验证、实时仿真",
+              "问题复现、离线分析、异地协作、回归基线"
+            ],
+            [
+              "是否需要硬件",
+              "需要 CAN 接口卡（如 VN 系列）",
+              "无需硬件"
+            ],
+            [
+              "仿真节点行为",
+              "Real Bus 网络下节点默认「哑」；切到 Simulated 或激活节点后才会 output 报文",
+              "回放即重播日志，无实时仿真"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "Home 功能区的 **Online / Offline** 开关决定「连真实硬件在线」还是「回放日志离线」。新手最易混的是：Online 模式下每条网络还要单独选 **Real（真实总线）** 还是 **Simulated（仿真）**——在 Real Bus 网络下仿真节点是哑的，必须切到 Simulated 或激活节点，才能看到它 output 的报文。节点行为详见 [[09-CAPL脚本]]。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-measurement-setup-online.png",
+          "alt": "CANoe Measurement Setup 窗口：每条网络单独选 Real（真实总线）或 Simulated（仿真），配合 Online 模式",
+          "caption": "Measurement Setup 窗口：Online 模式下每条网络需单独指定 Real（真实总线）/ Simulated（仿真），这是新手最易踩的坑——选了 Real 的网仿真节点是哑的"
+        }
+      ]
+    },
+    {
+      "title": "六、核心窗口详解",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "Analysis 功能区的统一入口是 **Measurement Setup**：先在这里把要用的分析窗口（Statistics / Trace / Graphics / Write 等）和功能模块（Logging / Filter / Replay / Trigger）挂上去，再点开始测量，这些窗口才会真正采集数据。把它理解成「测量时你想开哪些仪表」的总开关。"
+        },
+        {
+          "type": "paragraph",
+          "text": "下面按使用频率，把 6 个核心分析窗口逐一讲清：Measurement Setup 怎么挂窗口、Write 看什么、Trace 怎么用、Graphics 画曲线、State Tracker 盯状态、Data 看当前值、Statistics 看总线健康度。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-guide-analysis.png",
+          "alt": "CANoe Analysis 功能区：Measurement Setup 与各分析窗口",
+          "caption": "Analysis 功能区：Measurement Setup 配置窗口，Statistics / Trace / Logging / Graphics / Write / Data 实时分析"
+        },
+        {
+          "type": "h3",
+          "text": "Measurement Setup：窗口挂载中枢"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Measurement Setup 面板上，**右键空白处 → Insert Analysis Window** 挂分析窗口（Trace / Graphics / Write / Data / State Tracker / Statistics）；**Insert Function** 挂功能模块（Logging 记录、Filter 过滤、Trigger 触发、Replay 回放）。挂上后窗口独立浮出，测量运行时持续刷新。Filter / Replay 等模块会在对应小节展开。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/measure-meassetup.png",
+          "alt": "Measurement Setup 窗口：图形化配置测量数据流",
+          "caption": "Measurement Setup 用连线把数据源、分析窗口、Logging 串起来，是测量的总入口。"
+        },
+        {
+          "type": "h4",
+          "text": "插入分析窗口或数据记录模块"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-meassetup-insert-analysis.png",
+          "alt": "Measurement Setup 中右击分支连线插入分析窗口或 Logging Block",
+          "caption": "右击 Measurement Setup 的分支连线，可插入 Statistics / Trace / Data / Graphics / State Tracker / Logging Block 等窗口或模块。"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Measurement Setup 窗口的分支连线上右击，选择 Insert Analysis Window，即可按需挂上 Statistics、Trace、Data、Graphics、State Tracker 等分析窗口，也可以挂上 Logging Block 把数据实时记录下来。挂上的窗口会独立浮出，测量开始后同步刷新。"
+        },
+        {
+          "type": "h4",
+          "text": "插入功能模块与断点"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-meassetup-insert-function.png",
+          "alt": "Measurement Setup 中在热点处插入 Function 模块或切换断点",
+          "caption": "在热点处右击插入 Function 模块；双击热点切换为断点，断点后模块变为灰色无效，再次双击恢复接通。"
+        },
+        {
+          "type": "paragraph",
+          "text": "在热点（小正方形）上右击可以插入 Function 模块，例如 Filter、Trigger、Replay 等；双击热点则能把它切换成断点。变成断点后，断点后面的所有模块和连线都会显示为灰色无效状态，再次双击可恢复为热点，数据流重新接通。"
+        },
+        {
+          "type": "h3",
+          "text": "Write 窗口：系统日志与 CAPL 输出"
+        },
+        {
+          "type": "paragraph",
+          "text": "Write 是测量过程的「控制台输出」：CANoe 自身的系统信息、编译结果、警告/错误，以及你在 CAPL 里用 `write()` / `writeEx()` 打印的提示都会汇总到这里。写 CAPL 报错、想知道某段逻辑有没有跑到，第一眼看 Write 窗口。"
+        },
+        {
+          "type": "blockquote",
+          "style": "核心理念",
+          "text": "调试口诀：CAPL 不按预期跑，先看 Write 窗口有没有报错堆栈；再在关键分支加 write() 打点，比单步快得多。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-write-window.png",
+          "alt": "Write 窗口：Source / System / CAPL / .NET / Test 五个页签显示系统信息与 CAPL 输出",
+          "caption": "Write 窗口用法：测量运行时，Source 页签看 CAPL `write()` 输出，System 页签看 CANoe 系统事件，CAPL 页签看脚本编译与运行日志；报错信息会按严重级别以不同颜色高亮显示。"
+        },
+        {
+          "type": "h3",
+          "text": "Trace 窗口（最常用）：报文追踪"
+        },
+        {
+          "type": "paragraph",
+          "text": "Trace 是 CANoe 的「示波器 + 逻辑分析仪」合一：按时间轴实时刷新总线上的所有报文、信号、环境变量、系统变量和诊断服务。可点列头排序、搜关键字、按 ID/通道过滤，是日常抓包分析的主战场。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-trace-row-detail.png",
+          "alt": "Trace 报文行展开显示内部信号的名称、值和单位",
+          "caption": "Trace 中报文行可点击展开（点行首 + 或双击行），查看内部每个信号的名称、物理值与单位；悬停信号名称还能看到中文释义（如「引擎转速信号」「引擎开关信号」），是逐信号查值的最快入口。"
+        },
+        {
+          "type": "h4",
+          "text": "Predefined Filter（预定义过滤器）"
+        },
+        {
+          "type": "paragraph",
+          "text": "一键套用 CANoe 内置的过滤模板：比如只看某节点发出的报文、只看信号、只看错误帧，快速把视野收敛到某一类对象，不必手动配规则。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-trace-menu/predefined-filter.png",
+          "alt": "Trace 窗口 Predefined Filter 面板：Measurement Setup Filters、Bus Systems、Variables、System Messages 等分类勾选过滤",
+          "caption": "Predefined Filter 用法：在 Trace 顶部工具栏打开 Measurement Setup Filters，勾选/取消勾选 Bus Systems（CAN events）、Variables、System Messages、Test Feature Set、CAPL、Internal 等类别，即可快速决定 Trace 里显示或隐藏哪些对象。"
+        },
+        {
+          "type": "h4",
+          "text": "Analysis Filter（分析过滤器）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/measure-trace.png",
+          "alt": "Trace 窗口与过滤器设置",
+          "caption": "Trace 记录所有活动（报文 / 错误帧 / 变量 / 诊断）；Predefined / Analysis Filter 帮你在海量数据里聚焦。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-analysis-filter-edit-condition.png",
+          "alt": "在 Pass filter 或 Stop filter 中右击条件选择 Edit Condition",
+          "caption": "把报文/信号/变量从 Symbol Explorer 或 Trace 列表拖到 Pass filter（白名单）或 Stop filter（黑名单）后，右击该条件选择 Edit Condition，可进一步限定通道、方向（Tx/Rx）、数据属性等。"
+        },
+        {
+          "type": "paragraph",
+          "text": "拖入规则只是第一步；真正精细的筛选靠右击条件 → Edit Condition。例如只放行 EngineState 的 Tx 方向，或只拦截某个 ID 的 Remote 帧，都在这里勾选/取消对应属性。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-analysis-filter-value-filter.png",
+          "alt": "对信号或变量配置 Value Filter",
+          "caption": "对信号或变量拖入 filter 后，右击选择 Configure Value Filter，可按数值范围、字符串匹配、通配符（? 单字符，* 任意串）等条件过滤，实现「只显示 EngineStateSwth == 1」这类精细规则。"
+        },
+        {
+          "type": "paragraph",
+          "text": "Value Filter 特别适合按信号物理值做过滤：比如只保留车门状态为打开、故障码等于某值、转速大于阈值的帧。注意它作用在你已经拖进 Pass / Stop filter 的那个信号/变量上，不是全局筛选。"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Predefined 基础上做更细的自定义：按报文 ID、通道、方向（Tx/Rx）、数据内容等组合条件，把无关帧筛掉，让 Trace 只留下你真正关心的流量。在 Filter Group 里通过 Stop filter（拖入要屏蔽的对象）和 Pass filter（拖入仅保留的对象）实现白名单/黑名单过滤。"
+        },
+        {
+          "type": "h4",
+          "text": "Activate / deactivate analysis filter"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-analysis-filter-activate.png",
+          "alt": "工具栏上的 Activate / deactivate analysis filter 按钮",
+          "caption": "Trace 工具栏左侧的 Filter Group 0 旁边有个漏斗形开关按钮（Activate / deactivate analysis filter）。按下时启用所有 filter 规则，Trace 只显示通过的帧；弹起时临时关闭过滤，恢复显示全部原始报文，方便对比「过滤前 vs 过滤后」。"
+        },
+        {
+          "type": "paragraph",
+          "text": "调试过滤器规则时，反复点这个按钮最省事：开——验证规则是否只保留了目标帧；关——确认没有误杀掉关键报文。它不影响 filter 配置本身，只是临时切换生效/失效状态。"
+        },
+        {
+          "type": "blockquote",
+          "style": "lab",
+          "text": "动手实验：先拖一个 EngineState 到 Pass filter，点 Activate 后 Trace 只显示 EngineState；再点 deactivate，其他 DoorState 等报文立刻恢复显示。通过这个切换确认你的过滤规则没有误伤。"
+        },
+        {
+          "type": "h4",
+          "text": "淡出无变化的数据（Fade）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-trace-fade.png",
+          "alt": "Trace 窗口淡出无变化的数据",
+          "caption": "开启 Fade 后，长期未变化的行逐渐变灰，只有正在变化的帧保持高亮，便于在海量数据中定位异常跳变。"
+        },
+        {
+          "type": "paragraph",
+          "text": "开启后，数值长期不变的报文会逐渐变灰，只有正在变化的帧保持高亮——海量数据里一眼抓住「正在动」的信号，找异常跳变特别好用。"
+        },
+        {
+          "type": "h4",
+          "text": "设定 Marker（标识）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-trace-marker.png",
+          "alt": "Trace 窗口设定 Marker 标识",
+          "caption": "在 Trace 时间轴上设定 Marker，会自动记录时间戳并同步到 Graphics、State Tracker 等其他窗口，方便联合分析。"
+        },
+        {
+          "type": "paragraph",
+          "text": "在某一时刻打一个标记并自动记录时间戳；Marker 会同步显示到 Graphics、State Tracker 等其他分析窗口，方便多窗口对齐同一事件做联合分析。"
+        },
+        {
+          "type": "list",
+          "items": [
+            "停止 / 暂停测量：New Marker 只在测量暂停或停止时可用；测量 Run 时菜单项置灰，这是最常踩的坑。",
+            "设标记：在目标报文行右键 → New Marker，行首出现小旗图标，底部 Marker bar 出现一个标记点。",
+            "查看：单行看行首小旗；全景看底部 Marker bar；跳转用工具栏 Go to Marker / Next Marker / Previous Marker。",
+            "删除：在 Marker bar 上右键该 marker → Delete，或右键行首小旗删除。删一个，其他窗口对应的竖直标线会一起消失（Marker 是跨窗口共享的）。"
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "lab",
+          "text": "动手实验：先 Stop / Pause 把测量停下来 → 在目标报文行右键 → New Marker，行首立即出现小旗、底部 Marker bar 多一个标记点。\n再给另一行设一个 Marker，用工具栏 Go to Marker → Next / Previous Marker 在两个标记间跳；打开 Graphics / State Tracker，会同步出现一条竖线落在同一时间戳。"
+        },
+        {
+          "type": "h4",
+          "text": "差异视图（Difference View）：量时间间隔的利器"
+        },
+        {
+          "type": "paragraph",
+          "text": "Marker 强项是「书签 + 跨窗口同步」，纯量时间差只是顺带。要单窗口内自动算出两个事件的差，用 Trace 的 Difference View（差异视图）更顺手：它和 Marker 共享同一套「时间点」思路，但把差值直接算给你看。"
+        },
+        {
+          "type": "list",
+          "items": [
+            "设参考：在一条报文行右键 → Set as Reference，该行行首变成红色信封图标，成为 Reference Event（起点）。",
+            "选当前事件：再点另一条报文，它成为 Current Event（终点）。",
+            "读结果：左侧 Difference View 自动算出 Time difference（两事件的时间差），并逐信号列出值差。",
+            "实战：量报文周期时把两点选在相邻两次出现处；量响应延迟时选「发请求」与「收响应」；量故障时长时选故障出现与消失。"
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "三种量时间/对齐工具怎么选：\n· Marker：跨窗口共享的「时间点书签」，设一次全窗口出现同时间戳竖线；量差需读两行时间戳相减（或 Go to Marker 跳），适合「以后常回来找这一刻 + 跨窗口对齐看」。\n· Difference View（Set as Reference + Current）：单窗口内自动算 Δt 与各信号值差，零配置，临时量一次最省事。\n· Measurement / Difference Cursor：仅本窗口内读「时间 + 数值」、量两点差（Graphics 里用）。"
+        },
+        {
+          "type": "h4",
+          "text": "显示统计数据（Statistics View）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-trace-statistics-view.png",
+          "alt": "Trace Statistics View 对选中报文行做局部统计",
+          "caption": "Trace 左侧的 Statistics View 对「当前选中的报文行」做局部统计：Count 是选中行数；各信号行列出 Min / Max / Average / Count；选中两条报文时还会显示 Time difference。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "维度",
+            "说明"
+          ],
+          "rows": [
+            [
+              "是什么",
+              "Statistics View 不是全局统计，而是「你选中哪些行，它就统计哪些行」。选中一行显示该行各信号的当前值；选中多行汇总每个信号的最大值、最小值、平均值与出现次数；选中两条报文时，Time difference 行自动给出两者时间戳之差。"
+            ],
+            [
+              "可以做什么",
+              "快速回答一组报文里某信号的极值、均值、出现次数，以及两个事件之间隔了多久。典型用法：判断信号是否超范围、看平均值是否异常、统计某段时间内某报文出现次数来辅助判断周期或丢帧、对比两种工况下的统计差异。"
+            ],
+            [
+              "怎么用",
+              "在 Trace 右侧列表中选中目标报文，左侧 Statistics View 自动刷新。按住 Ctrl 点选：适合挑不连续的几条做对比；Shift + 点击首尾：适合选中某段时间窗内的连续一批报文；先过滤再 Ctrl+A 全选：先用 Analysis / Predefined Filter 只显示目标报文，再全选统计全部样本。"
+            ],
+            [
+              "什么情况下用",
+              "判断信号是否超范围（Min / Max 是否越界）；看平均值是否异常；统计某段时间内某报文出现次数来辅助判断周期或丢帧；快速对比两种工况下的统计差异。注意：想看整段测量的全局指标，要在 Measurement Setup 里插入 Statistics Block。"
+            ]
+          ]
+        },
+        {
+          "type": "h4",
+          "text": "搜索（Find）"
+        },
+        {
+          "type": "paragraph",
+          "text": "按关键字、条件、模式或上下文在 Trace 里定位报文/信号/变量。支持大小写、全字匹配、子行搜索、Marker 文本关联等多种选项，是复杂日志里快速找目标帧的利器。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-find-search.png",
+          "alt": "Trace Find 搜索对话框",
+          "caption": "Trace 工具栏点击 <Search> 下拉或放大镜图标打开 Find 对话框。在 Search for this pattern 输入框填入关键字（如 EngineState），点 Search now 即可高亮并定位到匹配行。"
+        },
+        {
+          "type": "paragraph",
+          "text": "Find 支持多种匹配方式：Text search（文本关键字）、Condition search（按条件表达式）、Pattern search（模式/通配符）、Context search（上下文范围）。搜索方向可设向上/向下，Keep selection 决定是否保留当前选中行。"
+        },
+        {
+          "type": "list",
+          "items": [
+            "打开 Find：Trace 工具栏点击 <Search> 下拉 → 选择 Find，或点击搜索图标；",
+            "输入 pattern：在 Search for this pattern 框输入报文名、信号名或 ID；",
+            "选择模式：Text search 最常用，Condition search 可按信号值范围查找，Pattern search 支持 ?/* 通配符；",
+            "执行搜索：点 Search now，Trace 会跳到第一个匹配并高亮；",
+            "连续查找：使用 Next / Previous 在匹配项之间切换；",
+            "结束搜索：关闭对话框或清空 pattern。"
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "面试说：Find 和 Analysis Filter 的最大区别是——Find 只帮你「定位」到某一行，不改变列表显示；Analysis Filter 会「隐藏」不符合条件的行，只保留通过的帧。复杂排查时通常先用 Find 确认关键字，再转成 Analysis Filter 做长期观测。"
+        },
+        {
+          "type": "h4",
+          "text": "Global Trace configuration"
+        },
+        {
+          "type": "paragraph",
+          "text": "Trace 的全局显示配置入口，决定时间戳/浮点数小数位、字体、高亮规则、数据历史深度等。合理配置能让长时间录制下的 Trace 既清晰又不占过多内存。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-trace-menu/global-config.png",
+          "alt": "Trace 窗口 Global Trace configuration 菜单：Decimal Places、Font、Trace Highlighting、Data History、Other Trace Settings",
+          "caption": "Global Trace configuration 用法：点击 Trace 顶部菜单打开配置项，按需设置 Decimal Places Time/Float（小数位）、Font（字体）、Trace Highlighting（高亮规则）、Data History（历史数据保留深度）以及 Other Trace Settings（其他轨迹设置），让显示风格与项目需求一致。"
+        },
+        {
+          "type": "h3",
+          "text": "Graphics 窗口：把信号画成曲线"
+        },
+        {
+          "type": "paragraph",
+          "text": "X 轴时间、Y 轴信号值，把选中的信号画成实时曲线。适合观察转速爬升、电压跌落、占空比变化等「随时间连续变化」的量——这是 Trace 表格做不到的。也可在 Graphics 里直接拖动信号值下发（写访问），做交互式标定。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-signals-example.png",
+          "caption": "Graphics 窗口示例：多条信号（EngineSpeed、Door 等）以时间为 X 轴绘制成曲线，Marker Bar 显示已设标记的位置。"
+        },
+        {
+          "type": "h4",
+          "text": "Activate / deactivate measurement cursor（激活/取消激活测量光标）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-measurement-cursor.png",
+          "caption": "Graphics 工具栏点击「Activate/deactivate measurement cursor」按钮（快捷键 Ctrl+.），绘图区会出现一条可拖动的竖直测量光标，左下角实时显示当前时间 t。"
+        },
+        {
+          "type": "paragraph",
+          "text": "测量光标是在 Graphics 曲线区添加的一条竖直参考线，用来精确定位某一时刻，并读出该时刻各条信号的物理值。点击工具栏的「Activate/deactivate measurement cursor」按钮（或按 Ctrl+.）即可开启；再次点击则关闭。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-measurement-cursor-on-graph.png",
+          "caption": "测量光标在曲线区的效果：竖直参考线落在 EngineSpeed 跳变沿，左下角状态栏显示 t=172.058753s、EngineSpeed=2600 r.p.m.，可精确读取该时刻的信号物理值。"
+        },
+        {
+          "type": "list",
+          "items": [
+            "拖动光标：在曲线区按住鼠标左键左右拖动，可把时间参考线移到任意位置。",
+            "读数值：左下角状态栏会显示当前光标时间 t；信号列表中各信号行会同步显示该时刻的物理值。",
+            "关闭光标：再次点击同一按钮或按 Ctrl+.，竖线消失，避免遮挡后续观察。"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "使用场景：需要精确对比多个信号在同一时刻的取值；查看异常跳变点发生的确切时间；配合 Marker 或测量栏做定量分析时，先用光标锁定时间轴位置。"
+        },
+        {
+          "type": "h4",
+          "text": "Activate / deactivate difference cursor（激活/取消差异光标）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-difference-cursor.png",
+          "caption": "Graphics 工具栏点击「Activate/deactivate difference cursor」按钮后，绘图区出现两条竖直光标；左下角自动显示 t0、t1 与 Δt，便于直接量取时间间隔。"
+        },
+        {
+          "type": "paragraph",
+          "text": "差异光标是在 Graphics 曲线区同时显示两条竖直参考线，用来量取两个时间点之间的时间差 Δt，并读出两个时刻信号值的变化量 Δy。点击工具栏「Activate/deactivate difference cursor」按钮开启；再次点击关闭。"
+        },
+        {
+          "type": "list",
+          "items": [
+            "拖动光标：用鼠标分别拖动两条竖线到目标起始时刻 t0 和结束时刻 t1。",
+            "读取差值：左下角自动显示 t0、t1 与 Δt；信号列表中「dy」列显示各信号在 t1 与 t0 时刻的物理值之差。",
+            "关闭光标：再次点击同一按钮，两条竖线同时消失。"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "使用场景：量取加速踏板从 0% 踩到 100% 的响应时间；计算发动机转速从怠速升到目标转速的爬升时长；对比同一信号在两个事件点之间的变化量；替代 Trace 的 Difference View 做图形化时间测量。"
+        },
+        {
+          "type": "h4",
+          "text": "Marked signals bold（标记信号加粗显示）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-marked-signals-bold.png",
+          "caption": "Graphics 工具栏点击「Marked signals bold」按钮（快捷键 Ctrl+B），信号列表中被标记（Name 列左侧小方框打勾）的信号会加粗显示，便于在曲线图中快速辨认。"
+        },
+        {
+          "type": "paragraph",
+          "text": "Marked signals bold 是 Graphics 里的一个视觉辅助开关：开启后，所有在信号列表中被「标记」选中的信号，其名称和曲线都会以加粗方式显示；未标记信号则保持常规线宽。点击工具栏该按钮或按 Ctrl+B 即可切换。"
+        },
+        {
+          "type": "list",
+          "items": [
+            "标记信号：在信号列表 Name 列左侧的小方框里勾选需要重点关注的信号。",
+            "开启加粗：点击工具栏「Marked signals bold」按钮或按 Ctrl+B，被选中的信号名称和曲线加粗。",
+            "取消加粗：再次点击同一按钮或按 Ctrl+B，恢复所有信号统一线宽。"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "使用场景：同时观察 8 条以上信号时，把重点关注的几条（如 EngineSpeed、VehicleSpeed）标记并加粗，避免曲线密集时看不清目标；演示或截图时突出关键信号；快速区分主要被测信号与辅助参考信号。"
+        },
+        {
+          "type": "h4",
+          "text": "Select display mode（选择显示模式）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-display-mode.png",
+          "alt": "Graphics 工具栏选择显示模式按钮的下拉",
+          "caption": "Graphics 工具栏「选择显示模式」按钮的下拉，含 Show All Signals With Colors / Gray Unmarked Signals / Show Only Marked Signals 三个模式。"
+        },
+        {
+          "type": "paragraph",
+          "text": "Graphics 工具栏上的「选择显示模式」按钮决定曲线的可见性，共三种模式：Show All Signals With Colors（默认，显示所有带颜色的信号）、Gray Unmarked Signals（快捷键 Ctrl+Shift+-，未在 Marker 附近的曲线变灰）、Show Only Marked Signals（快捷键 Ctrl+-，仅保留 Marker 附近的曲线，其他全隐藏）。使用场景：测量时段长、曲线密集需要聚焦关键跳变时——灰显未标可一眼看到正在变化的信号；仅显示已标可把视野收敛到已关注的少数曲线，排查异常跳变特别高效。用法：点工具栏按钮在下拉中切换，或直接用快捷键 Ctrl+Shift+- / Ctrl+- 在模式间快速切换。"
+        },
+        {
+          "type": "h4",
+          "text": "模式一：Show All Signals With Colors（默认，显示所有带颜色的信号）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-display-mode-show-all.png",
+          "caption": "Show All Signals With Colors：所有已勾选信号按各自颜色正常显示，是默认视图。"
+        },
+        {
+          "type": "paragraph",
+          "text": "这是 Graphics 的默认显示模式。所有在信号列表中被勾选的信号，都会以各自分配的颜色完整显示在曲线区。适合总览阶段：一次性观察多个信号的时序关系、找异常区间，或在演示前确认所有被测对象都在视野内。"
+        },
+        {
+          "type": "h4",
+          "text": "模式二：Gray Unmarked Signals（快捷键 Ctrl+Shift+-，未标记信号变灰）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-display-mode-gray-unmarked.png",
+          "caption": "Gray Unmarked Signals：未在信号列表中标记（Name 列左侧未勾选）的信号以灰色显示，已标记信号保持彩色。"
+        },
+        {
+          "type": "paragraph",
+          "text": "开启后，未标记（未勾选）的信号曲线和图例会变灰，只有被标记的信号保持原有颜色。它不会隐藏信号，而是降低非重点信号的视觉权重。适合重点信号已经明确、但还需要保留周边信号作为参考的场景，比如排查 EngineSpeed 异常时，把 EngineSpeed 标记，其他辅助信号变灰做背景。"
+        },
+        {
+          "type": "h4",
+          "text": "模式三：Show Only Marked Signals（快捷键 Ctrl+-，仅显示标记信号）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-display-mode-only-marked.png",
+          "caption": "Show Only Marked Signals：仅保留已标记信号的曲线，其余信号完全隐藏。"
+        },
+        {
+          "type": "paragraph",
+          "text": "这是最聚焦的模式：只保留被标记信号的曲线，其他信号直接从绘图区移除。适合信号数量多、曲线严重重叠时的深度分析；或只需要向他人展示某一条关键信号变化趋势时，避免无关曲线干扰。"
+        },
+        {
+          "type": "table",
+          "rows": [
+            [
+              "模式",
+              "快捷键",
+              "效果",
+              "适用场景"
+            ],
+            [
+              "Show All Signals With Colors",
+              "默认",
+              "所有勾选信号按原色显示",
+              "总览、对比多信号、初筛异常"
+            ],
+            [
+              "Gray Unmarked Signals",
+              "Ctrl+Shift+-",
+              "未标记信号变灰，标记信号保持彩色",
+              "已有关键信号，但需保留背景参考"
+            ],
+            [
+              "Show Only Marked Signals",
+              "Ctrl+-",
+              "仅保留标记信号，其余隐藏",
+              "密集曲线中聚焦分析、演示关键信号"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "核心区别：Show All 不区分重点；Gray 用颜色强弱区分重点与非重点，信息不丢失；Only 直接裁剪视野，只留标记信号。三者可结合 Marked signals bold 一起用——先标记关键信号，再切换到 Show Only Marked Signals，画面最干净。"
+        },
+        {
+          "type": "h4",
+          "text": "Select mode（选择模式）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-select-mode.png",
+          "alt": "Graphics 工具栏选择模式按钮的下拉",
+          "caption": "Graphics 工具栏「选择模式」按钮的下拉，含 Single Signal / Multiple Signals / Open 三个选项。"
+        },
+        {
+          "type": "paragraph",
+          "text": "Graphics 工具栏的「选择模式」按钮控制图形区对鼠标操作（点选、缩放、拖动）的响应粒度：Single Signal（快捷键 Ctrl+Shift+O，单个信号）：图形区只显示并响应一条信号，适合对单一变量做毛刺、爬坡、迟滞等精细分析；Multiple Signals（快捷键 Ctrl+Shift+A，多个信号）：同时显示并操作多条信号，便于横向对比；Open：打开已保存的 .grb / .xml 图形配置文件，套用历史测试的图形布局。使用场景：单条信号做毛刺 / 爬坡 / 滤波评估用 Single Signal；多信号联合对比（如油门-转速、制动-减速度、电池电压-电机电流）用 Multiple Signals；复用历史测试的图形配置用 Open，省去重新拖信号的步骤。用法：点工具栏按钮在下拉中切换，或用快捷键 Ctrl+Shift+O / Ctrl+Shift+A。"
+        },
+        {
+          "type": "h4",
+          "text": "Select scaling mode（调整方向模式）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-scaling-mode.png",
+          "alt": "Graphics 工具栏调整方向模式按钮的下拉",
+          "caption": "Graphics 工具栏「调整方向模式」按钮的下拉，含 Adjust X-Axis / Adjust Y-Axis / Adjust All Directions 三个选项。"
+        },
+        {
+          "type": "paragraph",
+          "text": "Graphics 工具栏的「调整方向模式」按钮决定鼠标滚轮缩放与拖动平移影响哪个轴：Adjust X-Axis（快捷键 Ctrl+Shift+X，调整 X 轴）：只缩放/平移时间轴，数值轴保持不变；Adjust Y-Axis（快捷键 Ctrl+Shift+Y，调整 Y 轴）：只缩放/平移数值轴，时间轴保持不变；Adjust All Directions（快捷键 Ctrl+Shift+Z，调整所有方向）：X / Y 同步缩放/平移。使用场景：精确定位某一时刻用 Adjust X-Axis；精确读取某一数值的跳变点用 Adjust Y-Axis；整体浏览查看曲线全貌与趋势用 Adjust All Directions。用法：先在工具栏选定缩放方向，再在图形区用鼠标滚轮缩放、拖动平移；快捷键可一键切换方向，组合滚轮即可在 X、Y、两轴之间快速聚焦。"
+        },
+        {
+          "type": "h4",
+          "text": "Get Scalings（获取缩放比例）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-get-scalings.png",
+          "caption": "Graphics 缩放菜单下拉：Fit All Signals / Fit X / Get Scalings / Store Scalings 等命令，用于统一窗口缩放比例。"
+        },
+        {
+          "type": "paragraph",
+          "text": "Get Scalings（快捷键 Ctrl+H）用于获取当前 Graphics 窗口的 X/Y 轴缩放比例参数。它通常和 Store Scalings（Ctrl+K）成对使用：先把当前视图调到一个合适的缩放比例，Get Scalings 读取参数，Store Scalings 保存，后续即可一键复用同一套比例。"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Fit All Signals（Ctrl+W）**：同时自动调整 X 轴（时间）和 Y 轴（数值）的显示范围，使所有已勾选信号都能完整出现在绘图区。适用于刚加载工程或刚添加多条信号时，一键把跑飞的视图拉回到合理区间。",
+            "**Fit All Signals Y（Ctrl+Shift+W）**：只自动调整 Y 轴范围，X 轴时间范围保持不变。适用于你已经定位到某个时间区间（比如故障发生的 5 秒窗口），只想让纵向幅度自适应，不改变当前时间焦点。",
+            "**Fit X（Ctrl+Shift+T）**：只自动调整 X 轴（时间轴）范围，Y 轴数值范围保持不变。适用于你想看整条报文的时间跨度，但又不想破坏已经调好的各信号纵向比例。",
+            "**Fit All Signals to a Special Line（Ctrl+L）**：以某条特殊参考线（如 Marker、测量光标或自定义参考线）为基准，把所有信号对齐到该线。适用于需要以某个事件时刻为基准，统一对比所有信号在该点的取值。",
+            "**Fit All Signals to a Special Line Y（Ctrl+Shift+L）**：只在 Y 轴方向以特殊参考线为基准对齐所有信号。适用于以某个固定数值为基准（如 0V、怠速转速），让多条曲线纵向对齐比较。",
+            "**Fit Marked Signals（Ctrl+J）**：仅对信号列表中被标记（Name 列左侧勾选）的信号做整体自适应缩放，其他信号保持原状。适用于只关注关键信号，又不想让辅助信号干扰视图范围。",
+            "**Fit Marked Signals Y（Ctrl+Shift+J）**：仅对标记信号做 Y 轴方向自适应，时间轴不变。适用于时间区间已锁定，只想让关键信号的纵向幅度最合适。",
+            "**Fit Time Interval Until No Compression（无默认快捷键）**：不断缩小时间间隔，直到曲线上的每个采样点都能被区分、不再被压缩成一段。适用于需要查看信号跳变细节，避免因为时间范围太大导致关键抖动被平均掉。",
+            "**Default Scaling All Y（无默认快捷键）**：把所有信号的 Y 轴缩放恢复为工程默认设置。适用于手动缩放、平移后视图搞乱，想一键回到初始比例。",
+            "**Get Scalings（Ctrl+H）**：读取当前 Graphics 窗口的 X/Y 轴缩放比例参数。它本身不改视图，只是「拍照」记录当前比例，通常作为 Store Scalings 的前置步骤。",
+            "**Store Scalings（Ctrl+K）**：把 Get Scalings 读取到的比例保存下来，供当前工程或其他 Graphics 窗口复用。适用于需要统一多个窗口视图比例，或下次打开工程时直接恢复熟悉的观察尺度。"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "使用场景与区别：Fit 系列解决「看不全」的问题，一键让曲线或坐标轴回到合适范围；Get/Store 解决「复用」的问题，把调好的比例保存下来，下次打开同一工程或切换到另一个 Graphics 窗口时直接套用；Default Scaling All Y 则是「重置」按钮，适合在手动缩放导致视图混乱时快速还原。"
+        },
+        {
+          "type": "h4",
+          "text": "Select y-axis view（选择 Y 轴视图）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-select-yaxis-view.png",
+          "caption": "Graphics 工具栏「Select y-axis view」下拉菜单，提供三种 Y 轴显示方式：Show Y-Axis of Selected Signal、Show All Y-Axis、Show Signals in Separate Diagrams。"
+        },
+        {
+          "type": "paragraph",
+          "text": "Select y-axis view 决定 Graphics 窗口如何排列和显示信号的 Y 轴。不同信号的物理值范围可能相差很大（例如 EngineSpeed 0~3000 rpm，Door 状态 0/1），选择合适的 Y 轴视图能避免曲线被压平或互相遮挡。"
+        },
+        {
+          "type": "h4",
+          "text": "模式一：Show Y-Axis of Selected Signal（仅显示选中信号的 Y 轴）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-yaxis-selected-signal.png",
+          "caption": "Show Y-Axis of Selected Signal：当前选中信号 Door_R 的 Y 轴显示在左侧，其他信号共享同一纵向比例。"
+        },
+        {
+          "type": "paragraph",
+          "text": "只显示当前在信号列表中选中的那条信号的 Y 轴刻度和单位，其他信号仍按同一比例绘制，但不再单独标注 Y 轴。使用场景：重点观察单个信号的精确数值变化，不希望其他 Y 轴刻度干扰视线；例如只关注 Door_R 的开关跳变或 EngineSpeed 的转速波动。"
+        },
+        {
+          "type": "h4",
+          "text": "模式二：Show All Y-Axis（显示所有 Y 轴）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-yaxis-all.png",
+          "caption": "Show All Y-Axis：左侧同时显示所有已勾选信号（OnOff、EngineSpeed、Door_R、Door_L）的 Y 轴刻度，各自独立。"
+        },
+        {
+          "type": "paragraph",
+          "text": "在同一绘图区左侧（或左右两侧）并排显示所有已勾选信号的 Y 轴，每个信号保留自己的刻度和单位，但所有曲线仍画在同一坐标系里。使用场景：同时监控多个物理量（转速、开关、温度、电压），需要分别读取各自真实数值；例如 EngineSpeed 与 VehicleSpeed 同屏对比时，各自按自己的 RPM 与 km/h 刻度读取。"
+        },
+        {
+          "type": "h4",
+          "text": "模式三：Show Signals in Separate Diagrams（分图显示信号）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-yaxis-separate-diagrams.png",
+          "caption": "Show Signals in Separate Diagrams：每条信号占用一个独立的水平子图，Y 轴各自独立，时间轴上下对齐。"
+        },
+        {
+          "type": "paragraph",
+          "text": "把每条已勾选信号放到独立的水平子图（subplot）中显示，所有子图共享同一时间轴，但 Y 轴完全独立。使用场景：信号量纲差异极大（例如 0~3000 rpm 与 0/1 布尔量混排），或者需要为报告、截图生成清晰分离的波形；也适合演示时避免多条曲线互相遮挡。"
+        },
+        {
+          "type": "table",
+          "rows": [
+            [
+              "模式",
+              "Y 轴数量",
+              "曲线关系",
+              "最适用场景"
+            ],
+            [
+              "Show Y-Axis of Selected Signal",
+              "1 条（选中信号）",
+              "所有信号共用同一绘图区",
+              "只关注单个信号的精确数值"
+            ],
+            [
+              "Show All Y-Axis",
+              "多条并排",
+              "所有信号仍在同一绘图区",
+              "同时读取多条信号的真实数值"
+            ],
+            [
+              "Show Signals in Separate Diagrams",
+              "每条信号独立",
+              "拆分为多个子图",
+              "信号量纲差异大、需要清晰分离"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "核心区别：Show Y-Axis of Selected Signal 只保留选中信号的刻度，适合单信号精读；Show All Y-Axis 保留所有刻度但仍在同一画面，适合多信号数值对比；Show Signals in Separate Diagrams 直接拆分画布，适合信号差异大或需要截图汇报的场景。三种模式可随时切换，不影响底层数据，只改变显示方式。"
+        },
+        {
+          "type": "h4",
+          "text": "选择其他选项（Graphics 窗口附加工具菜单）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-other-options-menu.png",
+          "caption": "Graphics 窗口工具栏下拉菜单中的「其他选项」，包含 Toggle Grid、Toggle Samples、Toggle Y-Axis、Signal Logging Configuration、Go to X、Reset Height of Y-Axis 等辅助功能。"
+        },
+        {
+          "type": "paragraph",
+          "text": "除了信号右键菜单和坐标轴视图外，Graphics 窗口工具栏右侧的下拉菜单还集中了一些全局辅助功能。这些功能不针对单条信号，而是控制整个绘图区的网格、采样点、Y 轴显示、日志记录、跳转和轴高度重置，常用于视图整理、数据记录和快速定位。"
+        },
+        {
+          "type": "h4",
+          "text": "Toggle Grid（切换网格，Ctrl+Shift+G）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-toggle-grid.png",
+          "caption": "Toggle Grid 关闭后，绘图区不再显示虚线网格，只保留坐标轴和曲线。"
+        },
+        {
+          "type": "paragraph",
+          "text": "Toggle Grid 用于显示或隐藏 Graphics 绘图区的背景网格线。开启时，水平和垂直虚线网格帮助对齐时间和数值；关闭后画面更简洁，适合截图或演示。使用场景：需要把波形图贴到报告里时关闭网格，画面更干净；精细读数时打开网格，辅助对齐。"
+        },
+        {
+          "type": "h4",
+          "text": "Toggle Samples（切换采样，Ctrl+Shift+M）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-toggle-samples.png",
+          "caption": "Toggle Samples 关闭后，曲线只显示线段而不显示每个原始采样点。"
+        },
+        {
+          "type": "paragraph",
+          "text": "Toggle Samples 用于显示或隐藏信号曲线上的原始采样点标记。开启时，每个采样点以小点或方块显示，便于观察离散数据；关闭后只显示连续线段，画面更平滑。使用场景：检查采样率是否足够、确认离散事件时打开采样点；观察整体趋势或截图时关闭，避免点密集干扰。"
+        },
+        {
+          "type": "h4",
+          "text": "Toggle Y-Axis（切换 Y 轴，Ctrl+Shift+V）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-toggle-yaxis.png",
+          "caption": "Toggle Y-Axis 关闭后，绘图区左侧和右侧的 Y 轴刻度全部隐藏。"
+        },
+        {
+          "type": "paragraph",
+          "text": "Toggle Y-Axis 用于显示或隐藏所有信号的 Y 轴刻度条。开启时，可以精确读取各信号数值；关闭后，绘图区只保留时间轴和曲线，横向空间更大。使用场景：信号数量多、Y 轴标签占用太多画面时临时隐藏；需要读数时再打开。"
+        },
+        {
+          "type": "h4",
+          "text": "Signal Logging Configuration（信号日志配置）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-signal-logging-config.png",
+          "caption": "Signal Logging Configuration 对话框，可设置日志文件的保存目录、文件名（支持字段代码）、文件格式（如 MDF）及高级选项。"
+        },
+        {
+          "type": "paragraph",
+          "text": "Signal Logging Configuration 用于配置 Graphics 窗口中信号的记录参数，包括目标文件夹、文件名、文件格式（通常为 MDF）以及是否覆盖保护等。配置好后，再点击 Start Logging 即可把当前窗口显示的信号写入文件。使用场景：长时间路试或台架测试中，把关键信号录制下来用于离线分析；生成可复现的测试证据文件。"
+        },
+        {
+          "type": "h4",
+          "text": "Go to X（跳转，Ctrl+G）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-go-to-x.png",
+          "caption": "Go to X 对话框，可跳转到最旧/最新测量值、指定时间点、某段时间区间或某个 Marker 位置。"
+        },
+        {
+          "type": "paragraph",
+          "text": "Go to X 用于快速跳转到 Graphics 时间轴上的指定位置。支持跳转到最旧/最新测量值、输入具体时间戳、选择时间区间，或跳转到已设置的 Marker。使用场景：测量记录很长时快速定位到故障发生时刻；配合 Marker 做分段检查；从 Trace 窗口拿到时间点后，在 Graphics 中同步跳转查看波形。"
+        },
+        {
+          "type": "h4",
+          "text": "Reset Height of Y-Axis（重置 Y 轴高度）"
+        },
+        {
+          "type": "paragraph",
+          "text": "Reset Height of Y-Axis 用于恢复各信号/子图在垂直方向上的默认高度分配。当手动拖动分割线导致某些信号被压扁、某些信号过高时，点击该命令可一键恢复均衡布局。使用场景：调整子图高度后想回到初始比例；分图模式下信号数量变化后重新均匀排布。"
+        },
+        {
+          "type": "table",
+          "rows": [
+            [
+              "选项",
+              "快捷键",
+              "控制对象",
+              "主要用途"
+            ],
+            [
+              "Toggle Grid",
+              "Ctrl+Shift+G",
+              "背景网格线",
+              "开关网格，简化或辅助读图"
+            ],
+            [
+              "Toggle Samples",
+              "Ctrl+Shift+M",
+              "采样点标记",
+              "显示/隐藏原始采样点"
+            ],
+            [
+              "Toggle Y-Axis",
+              "Ctrl+Shift+V",
+              "Y 轴刻度条",
+              "释放横向空间或恢复读数"
+            ],
+            [
+              "Signal Logging Configuration",
+              "-",
+              "日志文件参数",
+              "配置录制路径、格式、命名"
+            ],
+            [
+              "Go to X",
+              "Ctrl+G",
+              "时间轴游标",
+              "快速跳转到指定时间或 Marker"
+            ],
+            [
+              "Reset Height of Y-Axis",
+              "-",
+              "子图/信号高度",
+              "恢复默认垂直布局"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "核心区别：Toggle Grid / Toggle Samples / Toggle Y-Axis 是「显示开关」，只改变视图外观，不影响数据；Signal Logging Configuration 是「数据输出配置」，决定信号是否被记录到文件；Go to X 是「导航工具」，帮你快速移动时间焦点；Reset Height of Y-Axis 是「布局重置」，解决手动调整后的排版混乱。它们都不改变底层测量数据，只影响观察方式或数据导出行为。"
+        },
+        {
+          "type": "h4",
+          "text": "信号测量的设置（信号鼠标右击展开）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-signal-context-menu.png",
+          "caption": "在 Graphics 窗口信号列表的某条信号上点击鼠标右键，弹出信号测量设置菜单，可对信号进行添加、配置、采样、显示、坐标轴等操作。"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Graphics 窗口左侧信号列表的任意信号名称上点击鼠标右键，会弹出信号测量的上下文菜单。该菜单集中了信号添加、变量绑定、数值修改、采样与显示配置、坐标轴设置等常用功能，是调整单条信号表现和坐标轴关系的主要入口。"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Add Signals...（Ctrl+I）**：打开信号选择对话框，从当前测量配置的数据库中新增总线信号到 Graphics 窗口。使用场景：分析过程中发现还需要观察另一条信号，直接在此添加，不用重新打开工程。",
+            "**Add Variables...（Ctrl+E）**：添加系统变量、环境变量或诊断变量到当前窗口。使用场景：需要同时观察总线信号与 ECU 内部变量（如系统状态、标定参数）的变化关系。",
+            "**User Defined Signals**：创建并管理用户自定义信号，可将现有信号通过数学运算或逻辑组合生成新信号。使用场景：原始总线信号不够直观，例如把 EngineSpeed 与 VehicleSpeed 做比值生成新的传动比信号。",
+            "**Change Value...**：在测量运行或仿真模式下，手动修改当前信号的数值。使用场景：搭建 HIL/SIL 仿真环境时，强制把某个信号设为特定值，验证被测 ECU 的响应逻辑。",
+            "**Configuration...（Ctrl+T）**：打开该信号的显示配置对话框，可调整颜色、线型、线宽、小数位、单位、显示名称等。使用场景：演示或截图前统一信号配色；多条信号颜色接近时改成易区分的样式。",
+            "**Connection Type**：设置信号的连接/获取方式，例如选择从真实总线、回放文件或仿真通道获取数据。使用场景：同一工程需要在实车、台架、离线回放三种模式之间切换时。",
+            "**Samples**：设置信号的采样与显示模式，包括原始点、插值、步进等显示方式。使用场景：观察数字开关量时选择步进显示，避免插值造成虚假斜线；查看模拟量时选择插值使曲线更平滑。",
+            "**Display**：设置信号的数值显示格式与辅助选项，例如是否显示数值点、标签、网格等。使用场景：需要在曲线上直接读出关键点的物理值，或隐藏多余元素让画面更干净。",
+            "**Cut（Ctrl+X）**：将当前信号从窗口中剪切到剪贴板，可用于移动到其他位置或窗口。使用场景：整理信号列表顺序，把相关信号集中到一起。",
+            "**Copy（Ctrl+C）**：复制当前信号的配置引用，便于快速复用。使用场景：在另一个 Graphics 窗口或同一窗口的其他位置快速建立同一信号的副本。",
+            "**Paste（Ctrl+V）**：将剪切或复制的信号粘贴到当前窗口。使用场景：把已经在其他窗口配置好的信号直接拿过来用，省去重新添加和配色的步骤。",
+            "**Remove（Del）**：从当前 Graphics 窗口移除该信号，不影响数据库或原始测量数据。使用场景：信号过多导致画面拥挤，清理不再关注的辅助信号。",
+            "**Create Common Axis**：将多条信号合并到同一个 Y 轴刻度上。使用场景：多条信号量纲相同（如左右轮速、前后轴温度），希望统一刻度进行直接对比。",
+            "**Y-Axis Left/Right**：将当前信号的 Y 轴显示切换到绘图区左侧或右侧。使用场景：窗口中信号较多、左右两侧都需要放 Y 轴时，把核心信号放左侧、参考信号放右侧，减少互相遮挡。",
+            "**Use as X-Axis**：将当前信号用作 X 轴来源，切换到 X/Y 显示模式。使用场景：分析两个信号之间的函数关系，例如油门开度与发动机转速的相关性曲线。"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "使用场景与区别：Add/Remove 用于管理窗口里的信号清单；Change Value / Configuration / Display 用于调整单个信号的数值或外观；Connection Type / Samples 决定数据如何采集和呈现；Create Common Axis / Y-Axis Left/Right / Use as X-Axis 则专注于坐标轴布局。高频操作是 Add Signals 添加信号、Configuration 改颜色/线型、以及 Create Common Axis 统一刻度；Use as X-Axis 则是在 X/Y 模式下把某条信号横过来做相关性分析。"
+        },
+        {
+          "type": "h4",
+          "text": "显示测量栏"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-measurebar2.png",
+          "alt": "Graphics 窗口显示测量栏",
+          "caption": "启用测量栏后，鼠标悬停在曲线上即可读取该点的物理值与对应时间戳。"
+        },
+        {
+          "type": "paragraph",
+          "text": "启用测量栏后，鼠标悬停在曲线上会实时显示该点的物理值与对应时间戳。使用场景：需要精确读取某一时刻的转速、电压、温度等数值，而不必再回 Trace 里逐帧查找。"
+        },
+        {
+          "type": "h4",
+          "text": "显示数据统计"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-datastats1.png",
+          "alt": "Graphics 窗口显示数据统计",
+          "caption": "Graphics 自动统计信号的最小值、最大值、平均值与标准偏差，判断信号是否漂移或越界。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-datastats2.png",
+          "alt": "Graphics 窗口数据统计另一视图",
+          "caption": "数据统计的另一视图，便于同时对比多条信号的统计指标。"
+        },
+        {
+          "type": "paragraph",
+          "text": "自动给出信号的全局与局部最小值、最大值、平均值和标准偏差。使用场景：判断信号是否长期漂移、是否超出设计范围，或对比同一类型信号在不同工况下的统计差异。"
+        },
+        {
+          "type": "h4",
+          "text": "X/Y mode"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-graphics-xy-mode.png",
+          "alt": "Graphics 窗口 X/Y mode",
+          "caption": "在信号列表中右键把某条信号设为 X 轴，即可观察两条信号的相关性，例如油门开度与发动机转速。"
+        },
+        {
+          "type": "paragraph",
+          "text": "在信号列表中右键把某条信号设为 X 轴，另一条信号作为 Y 轴，观察二者相关性。使用场景：分析油门踏板开度与发动机转速、制动压力与减速度、电池电压与负载电流等成对物理量的耦合关系。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/measure-graphics.png",
+          "alt": "Graphics 窗口：信号随时间变化的曲线",
+          "caption": "Graphics 以时间为 X 轴绘信号曲线，Marker、测量栏、统计、X/Y 模式共同构成完整的信号趋势分析工具集。"
+        },
+        {
+          "type": "h3",
+          "text": "State Tracker 窗口：盯状态与状态转换"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-state-tracker.png",
+          "alt": "State Tracker 窗口显示比特与状态值",
+          "caption": "State Tracker 把比特值和状态值以时间线方式展开，状态跳变一目了然，适合分析挡位、点火、车门等开关量。"
+        },
+        {
+          "type": "paragraph",
+          "text": "State Tracker 专门显示比特值和状态值，特别适合数字输入/输出量、开关量、状态机信号。它把「0/1 状态」和「状态之间的转换」直观地画出来——分析挡位、点火状态、车门状态等状态跳变时，比 Trace 更直观。"
+        },
+        {
+          "type": "h3",
+          "text": "Data 窗口：以数值 / 单位看信号与变量"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-data-window.png",
+          "alt": "Data 窗口显示信号/变量/诊断参数的数值与单位",
+          "caption": "Data 窗口以表格形式展示信号、系统变量、诊断参数的数值、单位与原始值，是盯当前值的利器。"
+        },
+        {
+          "type": "paragraph",
+          "text": "Data 窗口以表格形式展示信号、系统变量、诊断参数的数值和单位，并支持多种显示方式（数值、条形、仪表等）。适合测量时盯一组关键量的「当前值」，比 Trace 更聚焦、比 Graphics 更适合看离散量。"
+        },
+        {
+          "type": "h3",
+          "text": "Statistics / Logging 窗口"
+        },
+        {
+          "type": "paragraph",
+          "text": "Statistics 给出错误帧数、总线负载（Bus Load %）、收发报文计数等聚合指标，是判断网络健康度的仪表盘。Logging 负责把 Trace 全程录成 .blf（二进制，体积小、含时间戳与通道信息，推荐）或 .asc（文本，可读但占空间），供 Replay 离线回放。"
+        },
+        {
+          "type": "blockquote",
+          "style": "核心理念",
+          "text": "四个窗口的分工：Trace 看「离散事件」（每一帧），Graphics 看「连续趋势」（曲线），Statistics 看「聚合健康度」（负载/错误），Write 看「运行日志」。State Tracker / Data 则是盯状态和盯当前值的补充视角。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/measure-statistics.png",
+          "alt": "Statistics 窗口：总线负载 / 错误帧统计",
+          "caption": "Statistics 给出 Bus load、收发计数、ErrorFrame 等全局统计，快速判断总线健康。"
+        },
+        {
+          "type": "h3",
+          "text": "附：常见窗口 / 功能发音对照（音标）"
+        },
+        {
+          "type": "paragraph",
+          "text": "下面这些窗口与功能名在正文里高频出现，读不顺会卡口播与记忆。音标采用美式通用发音（General American）仅供朗读参考；Diagnostics 在英式里读作 /ˌdaɪəɡˈnɒstɪks/，其余基本一致。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "名称",
+            "音标（美式）",
+            "中文含义",
+            "所在功能区"
+          ],
+          "rows": [
+            [
+              "Measurement Setup",
+              "/ˈmeʒərmənt ˈsetʌp/",
+              "测量配置（分析窗口总入口）",
+              "Analysis"
+            ],
+            [
+              "System Variables",
+              "/ˈsɪstəm ˈveriəbəlz/",
+              "系统变量（面板/CAPL/测试交互中枢）",
+              "Environment"
+            ],
+            [
+              "Interactive Generator",
+              "/ˌɪntərˈæktɪv ˈdʒenəreɪtər/",
+              "交互式报文发生器（手动补帧）",
+              "Simulation"
+            ],
+            [
+              "State Tracker",
+              "/steɪt ˈtrækər/",
+              "状态跟踪器（状态机跳转）",
+              "Analysis"
+            ],
+            [
+              "Statistics",
+              "/stəˈtɪstɪks/",
+              "统计窗口（总线负载/错误帧）",
+              "Analysis"
+            ],
+            [
+              "Graphics",
+              "/ˈɡræfɪks/",
+              "图形/曲线窗口（信号趋势）",
+              "Analysis"
+            ],
+            [
+              "Diagnostics",
+              "/ˌdaɪəɡˈnɑːstɪks/",
+              "诊断（UDS/CDD/ODX）",
+              "Diagnostics & XCP"
+            ],
+            [
+              "Simulation",
+              "/ˌsɪmjuˈleɪʃn/",
+              "仿真（节点/网络配置）",
+              "Simulation"
+            ],
+            [
+              "Analysis",
+              "/əˈnæləsɪs/",
+              "分析（功能区/测量入口）",
+              "Analysis"
+            ],
+            [
+              "Environment",
+              "/ɪnˈvaɪrənmənt/",
+              "环境（变量/映射/起始值中枢）",
+              "Environment"
+            ],
+            [
+              "Real Bus",
+              "/riːəl bʌs/",
+              "真实总线（联真实 ECU）",
+              "Home（Online 模式）"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "七、Filter（过滤器）",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "总线一跑起来，Trace 里可能每秒几百帧，肉眼根本抓不住目标。Filter 按报文 ID、通道、节点、方向等维度筛掉噪声，只留你关心的帧。Measurement Setup 里也能对整条总线配置「只记录特定报文」，从源头减少日志体积。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "过滤维度",
+            "示例",
+            "适用场景"
+          ],
+          "rows": [
+            [
+              "报文 ID",
+              "0x100, 0x18DAF1",
+              "只看某 ECU 的几条关键帧"
+            ],
+            [
+              "通道",
+              "CAN1",
+              "多总线并行时只看某一路"
+            ],
+            [
+              "节点/方向",
+              "NodeA + Rx",
+              "确认某节点是否真的在收/发"
+            ],
+            [
+              "错误帧",
+              "Error Frame only",
+              "专项排查总线错误"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/measure-filter.png",
+          "alt": "Channel Filter：红绿线控制各通道通过/阻止",
+          "caption": "Filter 在 Measurement Setup 热点处添加：Channel Filter 用红绿线控制各通道通过/阻止，Variables/Event Filter 进一步按变量与事件过滤。"
+        }
+      ]
+    },
+    {
+      "title": "八、离线回放（Replay）",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "把录制的 .blf/.asc 拖进 Replay 块，CANoe 能按原始时间戳把报文「重放」到总线上。价值在于：实车上偶发的故障，你不可能天天蹲在车里复现，但可以把日志带回去在实验室无限回放、发给异地同事、或作为回归测试基线。"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "「请描述一次你用 CANoe 排查问题的完整链路」是高频题。标准答法：Logging 录日志 → 用 Filter/Statistics 定位异常报文 → Replay 复现 → 结合 DBC 解析信号值 → 比对预期，给出根因。这套闭环体现你是「会用工具的人」而非「会点按钮的人」。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/measure-replay.png",
+          "alt": "Replay Block 回放已保存的测量数据",
+          "caption": "Replay Block 回放已录制的 asc/blf：回放前需禁用文件中已包含的仿真节点，避免网络上数据冲突。"
+        }
+      ]
+    },
+    {
+      "title": "九、CAPL 脚本快速入门",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "CAPL（CAN Access Programming Language）是类 C 的事件驱动语言，挂在某个仿真节点上运行。它让 CANoe 从「观察员」变成「演员」：你可以模拟一个还没做出来 ECU 的行为，或自动发送测试激励。事件类型包括 on key（按键）、on timer（定时器）、on message（收到报文）、on sysvar（系统变量变化）等。"
+        },
+        {
+          "type": "code",
+          "language": "capl",
+          "filename": "Door.can",
+          "code": "// 半仿真：用键盘模拟车门状态周期上报\nvariables {\n  msTimer doorTimer;\n}\n\non key 's' {\n  setTimer(doorTimer, 1000);   // 按 s 启动 1s 周期定时器\n}\n\non timer doorTimer {\n  message DoorState doormsg;\n  doormsg.Door_L = 1;           // 左门开\n  doormsg.Door_R = 1;           // 右门开\n  output(doormsg);              // 发送到总线\n  setTimer(doorTimer, 1000);    // 必须复位定时器才能循环\n}"
+        },
+        {
+          "type": "paragraph",
+          "text": "上面是「半仿真」：节点靠 CAPL 主动 output 报文。一个完整的全仿真工程怎么从零搭起来（导入 DBC、建仿真节点、挂 CAPL、连 Panel、Channel Mapping），见本章前文「二、全仿真与半仿真工程」。更完整的「全仿真」会用 on sysvar 响应面板控件、用 $信号 读写 DBC 信号、用 @系统变量 联动显示——这部分与面板（Panel）和测试模块深度绑定，详见 [[09-CAPL脚本]] 与 [[23-CANoe-TestModule]]。"
+        },
+        {
+          "type": "hr"
+        }
+      ]
+    },
+    {
+      "title": "十、自动化测试框架",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "Test Module（测试模块）"
+        },
+        {
+          "type": "paragraph",
+          "text": "Test Setup 里双击即可加入 Test Module，里面用 CAPL/.NET/XML 编排测试用例。一个 Test Module 由若干 Test Case 组成，每个 Case 由 Test Step 构成，并调用 Test Feature Set（TFS）函数给出 pass/fail 判定，最终汇总成结构化测试报告。"
+        },
+        {
+          "type": "code",
+          "language": "capl",
+          "filename": "CheckEngineSpeed.can",
+          "code": "testcase CheckEngineSpeedRange() {\n  TestCaseDescription(\"引擎转速应在 0~8000 rpm 内\");\n  @Engine::EngineSpeedEntry = 6500;\n  testWaitForTimeout(200);              // 等待信号稳定\n  if (@Engine::EngineSpeedDspMeter > 8000)\n    TestStepFail(\"转速超上限\");\n  else\n    TestStepPass(\"转速在合理范围\");\n}"
+        },
+        {
+          "type": "h3",
+          "text": "测试报告生成"
+        },
+        {
+          "type": "paragraph",
+          "text": "TFS 提供完整的报告函数族：TestCaseDescription/TestStepPass/TestStepFail 写入判定，TestReportAddSetupInfo/TestReportAddSUTInfo 记录测试环境与样品信息，TestGroupBegin/End 做分组。报告可直接导出 HTML/XML，对接 ASPICE 与存档要求（见 [[45-ASPICE汽车软件过程改进]]）。"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-guide-test.png",
+          "alt": "CANoe Test Setup：Test Module 文件夹结构",
+          "caption": "Test Setup：以文件夹结构组织 Test Module（CAPL/.NET/XML），承载自动化用例"
+        }
+      ]
+    },
+    {
+      "title": "十一、硬件接口选型",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "硬件",
+            "通道",
+            "定位",
+            "典型场景"
+          ],
+          "rows": [
+            [
+              "VN1630/VN1640",
+              "2~4 路 CAN/LIN",
+              "紧凑型接口卡",
+              "台架单/双总线联调"
+            ],
+            [
+              "VN5610",
+              "多路 + 以太网",
+              "车载以太网网关卡",
+              "SOME/IP、DoIP 诊断"
+            ],
+            [
+              "VT 系统",
+              "集成 I/O 与负载",
+              "硬件在环板卡",
+              "HIL 台架、故障注入"
+            ],
+            [
+              "CANcaseXL",
+              "1~2 路",
+              "入门/便携",
+              "教学、外出排查"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "warning",
+          "text": "Channel Mapping 是「逻辑通道 → 物理接口」的桥梁。常见翻车点：硬件插上后忘了在 Hardware → Channel Mapping 里分配通道，或总线类型/波特率设错（如该 500k 设成 250k），结果 Trace 全是错误帧。接线后先用 Statistics 看 Bus Load 是否非零、有无错误帧，再开始正式测试。"
+        },
+        {
+          "type": "paragraph",
+          "text": "多数 Vector 硬件尾部还带一个 DB9 的 **CANoe I/O** 接口（数字输入/输出、模拟输入），CANoe 提供内置系统变量可直接读写这些物理 I/O，用于触发或采集台架信号。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-guide-hardware.png",
+          "alt": "CANoe Hardware 功能区：Channel Mapping 与网络硬件配置",
+          "caption": "Channel Mapping：逻辑通道 → 物理硬件接口（如 VN1630），设总线类型与波特率"
+        }
+      ]
+    },
+    {
+      "title": "十二、常用操作速查",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "操作",
+            "路径/快捷键"
+          ],
+          "rows": [
+            [
+              "开始/停止测量",
+              "Home → Start/Stop Measurement（或工具栏）"
+            ],
+            [
+              "在线/离线切换",
+              "Home → Online / Offline（联网 / 回放日志）"
+            ],
+            [
+              "网络选 Real/Simulated",
+              "Simulation Setup 中右键网络 → 设为 Simulated / Real Bus"
+            ],
+            [
+              "打开 Write 窗口",
+              "Home → Write（CAPL write() 输出到此）"
+            ],
+            [
+              "编辑 DBC",
+              "Tools → CANdb++ Editor"
+            ],
+            [
+              "加载诊断文件",
+              "Diagnostics → Diagnostic ISO TP → 加载 CDD/ODX"
+            ],
+            [
+              "通道映射",
+              "Hardware → Channel Mapping"
+            ],
+            [
+              "记录日志",
+              "Analysis → Logging（选 .blf）"
+            ],
+            [
+              "日志格式转换",
+              "Tools → Logging File Conversion（.blf ↔ .asc）"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-guide-tools.png",
+          "alt": "CANoe Tools 功能区：CANdb++ Editor / CAPL Browser / Panel Designer / Logging File Conversion",
+          "caption": "Tools：CANdb++ Editor 编辑 DBC/CDD、CAPL Browser 编译脚本、Panel Designer 设计面板、Logging File Conversion 转格式"
+        }
+      ]
+    },
+    {
+      "title": "十三、面试高频考点",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "必会基础"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "要点"
+          ],
+          "rows": [
+            [
+              "CANoe 是干什么的",
+              "整车网络仿真+测试平台，收发报文、写CAPL、自动化、出报告"
+            ],
+            [
+              ".cfg 是什么",
+              "工程文件，打包数据库/拓扑/节点/测试/硬件映射"
+            ],
+            [
+              "Online 下 Real 与 Simulated 网络",
+              "Online 模式下每条网络可独立选 Real Bus（连真实硬件）或 Simulated（仿真节点产生报文），可共存"
+            ],
+            [
+              "Trace 与 Graphics 区别",
+              "离散事件 vs 连续趋势"
+            ],
+            [
+              ".blf 与 .asc 区别",
+              "二进制高效 vs 文本可读"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "进阶加分"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "要点"
+          ],
+          "rows": [
+            [
+              "CAPL 事件类型",
+              "on key/timer/message/sysvar，事件驱动"
+            ],
+            [
+              "Test Module 怎么出报告",
+              "TFS 的 TestStepPass/Fail + 报告函数族"
+            ],
+            [
+              "Channel Mapping 错了会怎样",
+              "总线无通信/全错误帧"
+            ],
+            [
+              "如何用 CANoe 做回归测试",
+              "Replay 日志 + 自动化 Test Module 比对"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "附：常见面试题截图（图文）"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/interview-config.png",
+          "alt": "CANoe 配置题：File → New Configuration 并配置通道",
+          "caption": "面试常问「CANoe 怎么配置」：新建工程 + Options 里选通道与波特率。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/interview-bench.png",
+          "alt": "台架测试题：搭建台架环境并用 CANoe 仿真工程联调",
+          "caption": "台架测试流程：搭环境（台架+CAN盒+PC）→ 建仿真工程（DBC/面板/CAPL）→ 运行分析。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/interview-var.png",
+          "alt": "变量创建题：系统变量 / 环境变量新建与复用",
+          "caption": "变量创建：定义名称、类型、最大最小值，可导出复用；环境变量在 CANdb++ 里建。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/interview-logging.png",
+          "alt": "Logging 录制题：配置日志文件并录制 BLF",
+          "caption": "看 CAN 数据：Measurement Setup 加 Logging Block，格式建议 BLF，运行录制。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/interview-errframe.png",
+          "alt": "错误帧题：Trace / Statistics 中定位错误帧",
+          "caption": "错误帧出现位置：Trace 实时显示错误帧详情，Statistics 统计 ErrorFrame 计数。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/interview-trace.png",
+          "alt": "Trace 参数题：ID / NAME / DLC / DATA 含义",
+          "caption": "Trace 主要参数：ID、NAME、DLC、DATA，凭此解析每条报文内容。"
+        }
+      ]
+    },
+    {
+      "title": "十四、测试实战关联",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "仪表 / 中控测试"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "用 Simulation Setup 模拟网关/车身节点，向仪表灌车速、转速、油量信号",
+            "用 Panel 做交互控件，联调大屏 UI 与信号映射的正确性",
+            "结合 [[27-台架搭建与HIL]] 的真实台架做电源上下电与信号注入"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "诊断测试"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "加载 CDD/ODX 后用 Diagnostic Console 发 UDS 请求（10/22/2E/19 等服务）",
+            "诊断会话/安全访问/读写 DID 的自动化放 Test Module 里跑",
+            "协议细节见 [[06-UDS诊断]]"
+          ]
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-guide-diag.png",
+          "alt": "CANoe Diagnostics 功能区：加载 CDD/ODX 与诊断控制台",
+          "caption": "Diagnostics：加载 CDD/ODX 后用 Diagnostic Console 发 UDS 请求（10/22/2E/19 等服务）"
+        },
+        {
+          "type": "h3",
+          "text": "ADAS 台架测试"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "多路总线（CAN/FlexRay/以太网）并行，靠通道区分",
+            "传感器数据可用 CAPL 仿真节点注入，验证域控逻辑",
+            "故障注入依赖 VT 硬件，见 [[28-ISO26262功能安全]] 的故障注入思路"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "十五、典型测试场景实操步骤",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "前面各节讲清了「每个功能是什么」，这一节把最常用的几个实战场景串成可照做的操作步骤。每个场景先说目标，再分步给出在 CANoe 里的具体点击路径与注意点。以下步骤为文字版流程，每一步对应的界面截图将在后续补充——届时截图会以图片块插入到对应步骤之间，不影响当前阅读。"
+        },
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "建议照着顺序练：先打通「连硬件联调」（场景一），再学「抓包定位」（场景二）、「录日志复现」（场景三），最后才是「诊断」（场景四）和「自动化」（场景五）。每一步跑通再进下一步，基础才稳。"
+        },
+        {
+          "type": "h3",
+          "text": "场景一：打开工程并接入硬件，进入 Online 联调"
+        },
+        {
+          "type": "paragraph",
+          "text": "目标：把 CANoe 连到真实总线，确认能收发 ECU 报文，链路是通的。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 1：打开/选择工程"
+        },
+        {
+          "type": "paragraph",
+          "text": "双击安装目录 Examples 下的 Sample Configuration，或直接打开你的 .cfg 工程。不要从零新建，汽车行业封闭、资料少，从示例改最稳，能避免大量配置遗漏。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 2：通道映射"
+        },
+        {
+          "type": "paragraph",
+          "text": "进入 Hardware → Channel Mapping，把逻辑通道（如 CAN1）拖到物理接口（如 VN1630 的 Channel 1）。这是「逻辑通道 → 物理接口」的桥梁，漏了这步 Trace 全空。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 3：配置网络硬件"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Network Hardware 里双击对应网络，设总线类型与波特率（如 CAN 500 kbps），必须与实车/台架一致，设错会满屏错误帧。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 4：处理仿真节点"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Simulation Setup 中，把暂不参与的仿真节点设为 Simulated 或禁用。Real Bus 网络下节点默认是「哑」的，切到 Simulated 或激活后才会 output 报文，避免与真实 ECU 抢总线。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 5：进入 Online 并启动"
+        },
+        {
+          "type": "paragraph",
+          "text": "回到 Home，确认 Online Mode 为 Online（联网模式），点击 Start（闪电图标）开始测量。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 6：验证通信"
+        },
+        {
+          "type": "paragraph",
+          "text": "打开 Analysis → Trace 看真实报文是否流动；切到 Statistics 确认 Bus Load 非零、错误帧为 0，说明链路已通。"
+        },
+        {
+          "type": "h3",
+          "text": "场景二：用 Trace 实时抓包，配合 Filter 定位目标报文"
+        },
+        {
+          "type": "paragraph",
+          "text": "目标：在每秒几百帧的总线里，快速找到某 ECU 的关键帧并看懂它的数据。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 1：打开 Trace"
+        },
+        {
+          "type": "paragraph",
+          "text": "Start 测量后，Analysis → Trace 打开报文时间轴窗口。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 2：快速定位"
+        },
+        {
+          "type": "paragraph",
+          "text": "用表头点击排序，或在搜索框输入目标报文 ID（如 0x100）/信号名，第一时间锁定目标帧。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 3：加 Filter 降噪"
+        },
+        {
+          "type": "paragraph",
+          "text": "若噪声太多，进入 Measurement Setup 给对应总线加 Filter，按 ID / 通道 / 节点筛选，只保留关心的帧，日志体积也更小。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 4：展开看数据"
+        },
+        {
+          "type": "paragraph",
+          "text": "点击某条报文展开，看 Data 字节；已加载 DBC 时直接显示解析后的信号名与物理量（如 EngineSpeed=1500 rpm）。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 5：多总线区分"
+        },
+        {
+          "type": "paragraph",
+          "text": "用 Channel 列区分 CAN1/CAN2，用 Dir 列区分 Rx/Tx，确认目标 ECU 是否真的在收/发该帧。"
+        },
+        {
+          "type": "h3",
+          "text": "场景三：录制日志（Logging）并用 Replay 离线复现偶发故障"
+        },
+        {
+          "type": "paragraph",
+          "text": "目标：把实车上偶发的故障「带回实验室」无限回放，或发给异地同事、作为回归基线。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 1：加 Logging Block"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Measurement Setup 中添加 Logging Block，设文件名（推荐 .blf，体积小含时间戳与通道）与触发条件（全录或错误帧触发）。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 2：录制"
+        },
+        {
+          "type": "paragraph",
+          "text": "点击 Start 录制，复现场景后 Stop，得到一份 .blf 日志。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 3：切 Offline 回放"
+        },
+        {
+          "type": "paragraph",
+          "text": "Home → Offline Mode，选择该 .blf，再 Start 回放，报文按原始时间戳重播。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 4：离线定位"
+        },
+        {
+          "type": "paragraph",
+          "text": "用 Trace / Filter / Statistics 离线定位异常报文，结合 DBC 解析信号值，比对预期找根因。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 5：复用与回归"
+        },
+        {
+          "type": "paragraph",
+          "text": "日志可发给异地同事复现，或下次修复后用 Replay 复跑，验证问题是否消失（回归基线）。"
+        },
+        {
+          "type": "h3",
+          "text": "场景四：加载诊断文件（CDD/ODX）用 Diagnostic Console 读/清 DTC"
+        },
+        {
+          "type": "paragraph",
+          "text": "目标：手动读取并清除 ECU 故障码，做诊断功能冒烟与验证。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 1：加载诊断文件"
+        },
+        {
+          "type": "paragraph",
+          "text": "Diagnostics → Diagnostic ISO TP，加载 ECU 的 CDD 或 ODX 文件；先配好请求/响应 ID 与物理/功能寻址。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 2：设诊断时序"
+        },
+        {
+          "type": "paragraph",
+          "text": "在 Diagnostic Parameters 按规范填 P2/P2*/S3 超时；不匹配会频繁收到否定响应（NRC），误判为故障。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 3：切会话/解锁"
+        },
+        {
+          "type": "paragraph",
+          "text": "打开 Diagnostic Console，先用 Session Control 切到扩展会话（$10 03）；刷写或敏感服务前用 $27 安全访问解锁。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 4：读 DTC"
+        },
+        {
+          "type": "paragraph",
+          "text": "选择 Read DTC（如 $19 02）发送，查看返回的 DTC 列表与状态字节（当前/历史）。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 5：清 DTC 验证"
+        },
+        {
+          "type": "paragraph",
+          "text": "确认故障处理完后发 Clear DTC（$14）清除，再读一次确认 DTC 已清空。"
+        },
+        {
+          "type": "h3",
+          "text": "场景五：用 Test Module 跑自动化用例并导出报告"
+        },
+        {
+          "type": "paragraph",
+          "text": "目标：把手工验证变成可重复、可归档的自动化测试，对接 ASPICE 与质量交付。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 1：建 Test Module"
+        },
+        {
+          "type": "paragraph",
+          "text": "Test → Test Setup，右键添加 Test Module，新建或选择 CAPL .can 测试文件。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 2：写用例与判定"
+        },
+        {
+          "type": "paragraph",
+          "text": "CAPL 中用 testcase 组织用例，TestCaseDescription 写清预期，用 TestStepPass / TestStepFail 给出每步判定。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 3：设运行参数"
+        },
+        {
+          "type": "paragraph",
+          "text": "Test Configuration 里设迭代次数、失败是否停止等运行参数。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 4：运行并观察"
+        },
+        {
+          "type": "paragraph",
+          "text": "点击 Run，看 Test Trace 实时步骤；全部跑完 CANoe 汇总 pass/fail。"
+        },
+        {
+          "type": "h4",
+          "text": "步骤 5：出报告归档"
+        },
+        {
+          "type": "paragraph",
+          "text": "用 Test Report 函数族（TestReportAddSetupInfo 等）生成 HTML/XML 报告，归档留痕。"
+        },
+        {
+          "type": "blockquote",
+          "style": "warning",
+          "text": "以上五个场景覆盖了 CANoe 日常 80% 的操作。截图为后续补充，插好图后建议对照「零、界面与功能区总览」的按钮表一起看，按钮名称与这里的点击路径能一一对应。"
+        }
+      ]
+    }
+  ],
+  "summary": "CANoe 是 Vector 的整车网络仿真测试旗舰平台：以 .cfg 工程打包数据库、拓扑、节点、测试与硬件映射；分 Real Bus（接真实 ECU）、Simulation（仿真节点）、Offline（日志回放）三种运行模式。核心窗口 Trace 看离散报文、Graphics 看连续趋势、Statistics 看总线健康。CAPL 事件驱动脚本让节点能主动发帧与响应，Test Module 配合 Test Feature Set 输出 pass/fail 报告。硬件侧靠 Channel Mapping 把逻辑通道绑到 VN 系列接口卡，波特率/总线类型错了会导致全错误帧。掌握「录日志→过滤定位→离线回放→出报告」的闭环，是车载测试工程师的基本功。",
+  "prev_chapter": 7,
+  "next_chapter": 9
+}

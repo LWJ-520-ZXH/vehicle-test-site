@@ -1,0 +1,994 @@
+[
+  {
+    "id": "Q-23-00-01",
+    "chapterNum": 23,
+    "sectionIndex": 0,
+    "sectionTitle": "一、自动化测试体系总览",
+    "module": "B",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "TFS",
+      "Test Feature Set",
+      "体系总览"
+    ],
+    "stem": "关于 Test Feature Set（TFS），下列描述正确的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "它不是独立组件，而是 CANoe 内置的一族测试函数，用来支撑整套自动化测试体系"
+      },
+      {
+        "key": "B",
+        "text": "它是 Vector 单独售卖的插件，需要额外 License 才能在 CANoe 中启用"
+      },
+      {
+        "key": "C",
+        "text": "它是一门独立于 CAPL 的脚本语言，语法接近 Python"
+      },
+      {
+        "key": "D",
+        "text": "它是 CANoe 的报文数据库格式，作用与 DBC 相同"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节总览段与面试考点表两处都强调了同一句话：TFS「不是独立组件，而是 CANoe 内置的一族测试函数」。理解这点很重要——你不需要去找哪里安装 TFS，它就在 CANoe 里，你写 CAPL 时直接调用 TestGroupBegin、TestStepPass 这些函数，用的就是 TFS。B 是最常见的误解（把它当成要单独买的模块）；C 说反了，TFS 的执行语言恰恰就是 CAPL，不是另一门语言；D 混淆了测试函数族与信号矩阵，DBC 描述报文与信号，与测试判定无关。",
+    "keyPoints": [
+      "TFS = CANoe 内置测试函数族，非独立组件、无需单独安装",
+      "TFS 的执行语言是 CAPL",
+      "面试常考的一句话：内置函数族，不是插件也不是新语言"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "一、自动化测试体系总览·说明段"
+    },
+    "relatedTerms": [
+      "CAPL",
+      "Test Module",
+      "CANoe"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-23-00-02",
+    "chapterNum": 23,
+    "sectionIndex": 0,
+    "sectionTitle": "一、自动化测试体系总览",
+    "module": "B",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "自动化测试",
+      "人眼审查",
+      "机器判定"
+    ],
+    "stem": "判断：章节认为，只要测试工程师足够细心，在 Trace 窗口里逐帧盯着报文核对，同样可以达到与 Test Module 一致的可复现性和规模化能力。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误。章节开篇就把这个态度否掉了：「手动在 Trace 里盯着报文『看对不对』，是不可复现、不可规模化的。CANoe 把测试从『人眼审查』升级为『机器判定』：你用 Test Module 描述『预期是什么』，工具自动比对实际并给出 pass/fail。」这里的关键不是「人够不够细心」，而是方法本身的两个固有缺陷：一是不可复现——同一个人两次看的判据可能不同，换个人更不一致，出了争议无从追溯；二是不可规模化——几百条用例、每晚回归一次，靠人眼根本跑不动。自动化的本质是把判据从人的脑子里搬到代码里，让它变成可执行、可重复、可审计的东西。",
+    "keyPoints": [
+      "人眼审查的缺陷是不可复现、不可规模化，与细心无关",
+      "Test Module 的价值：描述预期，由工具自动比对给出 pass/fail",
+      "自动化本质是把判据从人脑搬进代码"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "一、自动化测试体系总览·说明段"
+    },
+    "relatedTerms": [
+      "Trace",
+      "pass/fail",
+      "可复现"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-23-00-03",
+    "chapterNum": 23,
+    "sectionIndex": 0,
+    "sectionTitle": "一、自动化测试体系总览",
+    "module": "B",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "CAPL",
+      "Test Module",
+      "承上启下"
+    ],
+    "stem": "章节「承上」提示：Test Module 里的 CAPL 与平时写的零散 CAPL 有什么区别？",
+    "options": [
+      {
+        "key": "A",
+        "text": "零散 CAPL 只「做事」，Test Module 里的 CAPL 还要「下判定、写报告」"
+      },
+      {
+        "key": "B",
+        "text": "Test Module 里必须改用 .NET 编写，不能再用 CAPL"
+      },
+      {
+        "key": "C",
+        "text": "Test Module 里的 CAPL 不支持事件驱动，只能顺序执行"
+      },
+      {
+        "key": "D",
+        "text": "两者完全一样，只是文件后缀名不同"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "承上段原文：「Test Module 的执行语言就是 CAPL。区别在于：零散 CAPL 只『做事』，Test Module 里的 CAPL 还要『下判定、写报告』。所以学 Test Module 的前提是先把 CAPL 事件与 $/@ 语法吃透。」这句话点明了两者的能力叠加关系——发帧、改变量、等超时这些「做事」的能力一样不少，额外多出的是 TestStepPass/Fail 这类判定函数和 TestReportAddSetupInfo 这类报告函数。B 只对了一半：Test Unit 形式确实支持 .NET，但经典 Test Module 用的就是 CAPL；C 与 CAPL 的事件驱动本质矛盾；D 忽略了判定与报告这层实质差异。",
+    "keyPoints": [
+      "Test Module 的执行语言仍是 CAPL",
+      "能力叠加：做事 + 下判定 + 写报告",
+      "前置要求：吃透 CAPL 事件与 $/@ 语法"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "一、自动化测试体系总览·承上（Test Module 与 CAPL 的关系）"
+    },
+    "relatedTerms": [
+      "$信号",
+      "@系统变量",
+      "事件驱动"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-23-01-01",
+    "chapterNum": 23,
+    "sectionIndex": 1,
+    "sectionTitle": "二、Test Setup 结构",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Test Setup",
+      "Test Module",
+      "承载形式"
+    ],
+    "stem": "在 CANoe 的 Test 功能区双击 Test Setup 后，加入的测试模块有三种承载形式。其中「经典形式、单机/单工程内运行、最常用」的是哪一种，用什么语言编写？",
+    "options": [
+      {
+        "key": "A",
+        "text": "Test Module，用 CAPL 编写"
+      },
+      {
+        "key": "B",
+        "text": "Test Unit，用 XML 编写"
+      },
+      {
+        "key": "C",
+        "text": "XML/Test Sequence，用 CAPL 编写"
+      },
+      {
+        "key": "D",
+        "text": "Test Module，用 .NET 编写"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "表格三行分别是：Test Module / CAPL / 「经典形式，单机/单工程内运行，最常用」；Test Unit / CAPL、.NET / 「更偏向 vTESTstudio 工程化、跨模块组织」；XML/Test Sequence / XML / 「由 vTESTstudio 等工具生成」。题干的三个定语完全指向第一行。B、C 都把语言与形式的对应关系错配了：Test Unit 支持 CAPL/.NET 而非 XML，XML/Test Sequence 用的才是 XML。D 的形式对但语言错。记忆锚点：日常项目里说「写个 Test Module」，默认就是 CAPL 写、在本工程里跑。",
+    "keyPoints": [
+      "Test Module = CAPL，经典且最常用，单机单工程内运行",
+      "Test Unit = CAPL/.NET，偏 vTESTstudio 工程化与跨模块组织",
+      "XML/Test Sequence = XML，由 vTESTstudio 等工具生成"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "二、Test Setup 结构·测试模块承载形式表"
+    },
+    "relatedTerms": [
+      "vTESTstudio",
+      "Test Unit",
+      "CAPL"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-23-01-02",
+    "chapterNum": 23,
+    "sectionIndex": 1,
+    "sectionTitle": "二、Test Setup 结构",
+    "module": "B",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "Test Setup",
+      "vTESTstudio",
+      "报告结构"
+    ],
+    "stem": "关于 Test Setup 及其承载形式，下列说法正确的有哪些？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "在 Test 功能区双击 Test Setup 会出现「Test Setup for Test Modules」，是一个文件夹式的测试环境，往里加测试模块即可"
+      },
+      {
+        "key": "B",
+        "text": "Test Unit 可用 CAPL 或 .NET 编写，更偏向 vTESTstudio 工程化、跨模块组织"
+      },
+      {
+        "key": "C",
+        "text": "XML/Test Sequence 形式的测试内容通常由 vTESTstudio 等工具生成"
+      },
+      {
+        "key": "D",
+        "text": "Test Setup 树的层级（Module→Group→Case→Step）与右侧测试报告一一对应"
+      },
+      {
+        "key": "E",
+        "text": "一个 Test Setup 中只能挂载一个测试模块，多模块必须建多个工程"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "explanation": "A 出自本节首段的操作描述；B、C 出自承载形式表的第二、三行；D 出自配图说明「Test Setup 树（Module→Group→Case→Step）与右侧测试报告一一对应」——这条尤其值得记住，它意味着你在代码里怎么分组、怎么写用例描述，报告里就长成什么样，报告的可读性是在写脚本时就决定的，而不是事后排版出来的。E 与首段「一个文件夹式的测试环境，往里加测试模块即可」直接矛盾：既然是文件夹式结构，自然可以组织多个模块，这正是它便于按功能域归类用例的原因。",
+    "keyPoints": [
+      "Test Setup 是文件夹式测试环境，可组织多个测试模块",
+      "三种承载形式对应不同语言与工程化程度",
+      "Setup 树 Module→Group→Case→Step 与报告结构一一对应"
+    ],
+    "sourceRef": {
+      "kind": "image",
+      "label": "二、Test Setup 结构·配图（Test Setup 树与测试报告对应）"
+    },
+    "relatedTerms": [
+      "Test Setup for Test Modules",
+      "vTESTstudio",
+      "测试报告"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-23-02-01",
+    "chapterNum": 23,
+    "sectionIndex": 2,
+    "sectionTitle": "三、测试架构：Group → Case → Step",
+    "module": "B",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "三层结构",
+      "Group",
+      "Case",
+      "Step"
+    ],
+    "stem": "一个 Test Module 从外到内分为三层，与之配套的函数对应关系正确的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Test Group（TestGroupBegin/End 框定一类场景）→ Test Case（TestCaseDescription 写描述，测试核心单元）→ Test Step（TestStepPass/Fail 给出该步判定）"
+      },
+      {
+        "key": "B",
+        "text": "Test Case（最外层分组）→ Test Group（中间层用例）→ Test Step（最小块）"
+      },
+      {
+        "key": "C",
+        "text": "Test Step（外层步骤）→ Test Group（中层分组）→ Test Case（内层断言）"
+      },
+      {
+        "key": "D",
+        "text": "三层是并列关系，可以任意嵌套，没有固定的从外到内顺序"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节列表逐层给出定义：Test Group（测试分组）用 TestGroupBegin/TestGroupEnd 框定一类场景，如「上下电测试组」；Test Case（测试用例）是测试的核心单元、含完整测试活动，由 TestCaseDescription 写描述；Test Step（测试步骤）是 Case 内的最小块，用 TestStepPass/TestStepFail 给出该步判定。顺序记忆法：Group 是章、Case 是节、Step 是句。B、C 都把层级顺序打乱了；D 否定了固定层级，与「对应报告的三级结构」的说法矛盾——正因为层级固定，报告才能稳定地呈现三级目录。面试考点表把这条压缩成五个字：Group→Case→Step。",
+    "keyPoints": [
+      "从外到内：Group（场景分组）→ Case（核心单元）→ Step（最小块）",
+      "对应函数：TestGroupBegin/End、TestCaseDescription、TestStepPass/Fail",
+      "三层结构直接映射为报告的三级目录"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "三、测试架构：Group → Case → Step·三层定义列表"
+    },
+    "relatedTerms": [
+      "TestGroupBegin",
+      "TestCaseDescription",
+      "TestStepPass"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-23-02-02",
+    "chapterNum": 23,
+    "sectionIndex": 2,
+    "sectionTitle": "三、测试架构：Group → Case → Step",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "PowerOnTest",
+      "testWaitForTimeout",
+      "系统变量"
+    ],
+    "stem": "在 PowerOnTest.can 示例中，`@Power::KL15 = 1;` 之后紧跟 `testWaitForTimeout(300);`，这一句的作用是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "在测试用例中等待 300 毫秒，给被测 ECU 上电初始化与信号刷新留出时间，之后再做判定"
+      },
+      {
+        "key": "B",
+        "text": "设置该测试步骤的超时上限，超过 300ms 未通过则自动判 Fail"
+      },
+      {
+        "key": "C",
+        "text": "把 KL15 信号的发送周期设置为 300ms"
+      },
+      {
+        "key": "D",
+        "text": "让整个 Test Module 暂停，等待测试员手动点击继续"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "看代码的执行顺序就清楚了：先 TestStep(\"发送 KL15 上电\") 记录步骤、`@Power::KL15 = 1` 通过系统变量拉高 KL15（模拟点火），然后 testWaitForTimeout(300) 等待，最后才 `if ($EngineState::EngineSpeed == 0)` 判定转速。如果不等这 300ms 直接判定，ECU 可能还没完成上电初始化、总线上也还没刷新出新的 EngineSpeed 值，读到的是上一轮的残留值，测试结果就完全不可信——这类「判定过早」是自动化用例里最隐蔽的假通过/假失败来源。B 把它误解成超时断言函数；C 混淆了系统变量赋值与报文周期配置；D 是交互式暂停，与自动化背道而驰。",
+    "keyPoints": [
+      "testWaitForTimeout(300) = 用例内等待 300ms",
+      "先施加激励、再等待、后判定，顺序不能省",
+      "判定过早会读到残留值，造成假通过或假失败"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "三、测试架构·PowerOnTest.can 示例代码"
+    },
+    "relatedTerms": [
+      "KL15",
+      "@系统变量",
+      "$信号"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-23-02-03",
+    "chapterNum": 23,
+    "sectionIndex": 2,
+    "sectionTitle": "三、测试架构：Group → Case → Step",
+    "module": "B",
+    "type": "short",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "MainTest",
+      "代码解读",
+      "上下电测试"
+    ],
+    "stem": "请逐句解读 PowerOnTest.can 中 MainTest() 的实现：每个函数分别起什么作用？这段代码体现了自动化用例怎样的标准写法？",
+    "options": [],
+    "answer": [],
+    "explanation": "本题把三层结构、系统变量与信号访问、等待与判定这几个知识点串在一段真实代码上考查，是本章从「记函数名」走向「会写用例」的关键一题。",
+    "keyPoints": [
+      "TestGroupBegin/End 框定场景分组并携带描述",
+      "TestCaseDescription 写清预期，TestStep 记录动作步骤",
+      "@ 访问系统变量施加激励，$ 访问总线信号读取实际值",
+      "标准范式：施加激励 → 等待稳定 → 比对判定 → Pass/Fail 二选一"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "三、测试架构·PowerOnTest.can 示例代码"
+    },
+    "relatedTerms": [
+      "TestStepPass",
+      "TestStepFail",
+      "testWaitForTimeout"
+    ],
+    "refAnswer": "【逐句解读】\n① `void MainTest()`：Test Module 的入口函数。CAPL 平时是事件驱动、没有 main，但测试模块需要一条确定的执行主线，MainTest 就是这条主线的起点，测试启动后由它顺序往下跑。\n② `TestGroupBegin(\"上下电测试组\", \"验证 KL15 上电后信号初始化\")`：开启一个测试分组，两个参数分别是组名与组描述。它把同一类场景的用例框在一起，报告里会呈现为一个可折叠的分组节点，便于按场景查看结果。\n③ `TestCaseDescription(\"上电后 EngineSpeed 应为 0\")`：声明本条用例的预期。这句不是注释——它会写进报告，是「预期是什么」的正式记录，也是日后追溯时判断「当初到底测了什么」的依据。\n④ `TestStep(\"发送 KL15 上电\")`：登记一个测试步骤，把接下来的动作写进报告的步骤流水。它只记录不判定，让报告读者能还原操作序列。\n⑤ `@Power::KL15 = 1;`：用 @ 前缀访问 CANoe 内部的系统变量，把 KL15（点火电源）置 1，相当于模拟拧钥匙上电。这里体现了 CAPL 的 @ 语义——面向仿真环境与面板的内部变量。\n⑥ `testWaitForTimeout(300);`：等待 300 毫秒，给 ECU 留出上电初始化和总线信号刷新的时间。这一步不能省，否则读到的可能是上电前的残留值。\n⑦ `if ($EngineState::EngineSpeed == 0)`：用 $ 前缀读取 DBC 中定义的总线信号 EngineSpeed 的当前值，与预期值 0 比对。$ 与 @ 的分工在这里一目了然：@ 施加内部激励，$ 读取总线上的真实表现。\n⑧ `TestStepPass(\"上电初始转速为 0，符合预期\")` / `TestStepFail(\"上电初始转速非 0，异常\")`：按比对结果给出该步判定。两个分支都带说明文字，无论通过还是失败，报告里都能看到人话结论，而不是一个孤零零的红绿标记。\n⑨ `TestGroupEnd();`：闭合分组，与 TestGroupBegin 成对出现。漏写会导致报告层级错乱。\n【体现的标准写法】这段短代码其实是一套可复用的范式，可以概括为四步：先分组与声明预期（Group + CaseDescription，解决「测什么」）→ 施加激励（TestStep 记录 + @ 变量或发帧，解决「怎么做」）→ 等待系统稳定（testWaitForTimeout，解决「什么时候看」）→ 比对并二选一判定（if 比较 + TestStepPass/TestStepFail，解决「算不算过」）。四步缺一不可：缺描述则报告没有可追溯性；缺等待会判定过早；缺 else 分支的 Fail 会让异常悄悄溜过去，报告里显示「无判定」，这是自动化用例最危险的写法——测试跑绿了但其实什么都没验证。此外还有两个良好习惯：判定函数的文字要写清「实际值不符合预期」而不是简单写 fail，方便定位；Begin/End 严格配对，用缩进对齐以便肉眼检查。"
+  },
+  {
+    "id": "Q-23-03-01",
+    "chapterNum": 23,
+    "sectionIndex": 3,
+    "sectionTitle": "四、判定函数（Verdict）",
+    "module": "B",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Verdict",
+      "TestStepInconclusive",
+      "判定函数"
+    ],
+    "stem": "测试过程中某项前置条件未满足，既不能判通过也不能判失败。按判定函数表，此时应使用：",
+    "options": [
+      {
+        "key": "A",
+        "text": "TestStepInconclusive"
+      },
+      {
+        "key": "B",
+        "text": "TestStepWarning"
+      },
+      {
+        "key": "C",
+        "text": "TestStepFail"
+      },
+      {
+        "key": "D",
+        "text": "TestCaseFail"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "判定函数表逐条给出语义：TestStepPass/TestStepFail 是单步通过/失败（最常用）；TestStepWarning 是「警示但不判失败」；TestStepInconclusive 是「无法判定通过或失败」；TestCaseFail 整条用例判 fail；TestSetVerdict/TestGetVerdictModule 设定/读取模块级判定；TestGetVerdictLastTestCase 读取上一条用例判定。题干描述的正是「无法判定」这一状态，选 Inconclusive。这个区分在工程上很有价值：把「条件不具备导致没测成」和「测了但不合格」分开统计，才能看清一轮回归里到底有多少是真缺陷、多少是环境问题。若图省事一律判 Fail，会淹没真实缺陷、制造大量无效排查。",
+    "keyPoints": [
+      "Inconclusive = 无法判定通过或失败（如前置条件不满足）",
+      "Warning = 警示但不判失败",
+      "把环境问题与真实缺陷分开统计，回归结果才可用"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "四、判定函数（Verdict）·函数作用表"
+    },
+    "relatedTerms": [
+      "Verdict",
+      "TestStepPass",
+      "回归统计"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-23-03-02",
+    "chapterNum": 23,
+    "sectionIndex": 3,
+    "sectionTitle": "四、判定函数（Verdict）",
+    "module": "B",
+    "type": "multi",
+    "cat": "参数记忆",
+    "difficulty": "进阶",
+    "direction": "反向",
+    "tags": [
+      "判定函数",
+      "模块级判定",
+      "Verdict层级"
+    ],
+    "stem": "根据判定函数表，下列函数与作用的对应关系正确的有哪些？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "TestStepPass / TestStepFail —— 单步通过/失败，最常用"
+      },
+      {
+        "key": "B",
+        "text": "TestCaseFail —— 整条用例判 fail"
+      },
+      {
+        "key": "C",
+        "text": "TestSetVerdict / TestGetVerdictModule —— 设定/读取模块级判定"
+      },
+      {
+        "key": "D",
+        "text": "TestGetVerdictLastTestCase —— 读取上一条用例的判定结果"
+      },
+      {
+        "key": "E",
+        "text": "TestStepWarning —— 记录警示并立即将该用例判为 fail"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "explanation": "A~D 与表格四行原文一致。E 篡改了 TestStepWarning 的语义——表中写的是「警示但不判失败」，恰恰相反。这个区分在实践中很关键：比如某信号值虽在容差边缘但仍合规、或者某次响应偏慢但未超时，用 Warning 标出来提醒关注，既不放过隐患也不误伤合格品；如果全按 Fail 处理，回归报告会红成一片，团队很快就会对红色麻木，真正的缺陷反而被淹没。整体上判定函数分三个层级：Step 级（Pass/Fail/Warning/Inconclusive）、Case 级（TestCaseFail）、Module 级（TestSetVerdict / TestGetVerdictModule），层级越高影响面越大。",
+    "keyPoints": [
+      "三个判定层级：Step 级、Case 级、Module 级",
+      "TestStepWarning 是警示不判失败，别与 Fail 混用",
+      "TestGetVerdictLastTestCase 可读上一条用例结果，用于链式控制"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "四、判定函数（Verdict）·函数作用表"
+    },
+    "relatedTerms": [
+      "TestSetVerdict",
+      "TestCaseFail",
+      "Inconclusive"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-23-03-03",
+    "chapterNum": 23,
+    "sectionIndex": 3,
+    "sectionTitle": "四、判定函数（Verdict）",
+    "module": "B",
+    "type": "judge",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "TestStepWarning",
+      "判定语义",
+      "Verdict"
+    ],
+    "stem": "判断：按判定函数表，TestStepWarning 的作用是给出警示但不判失败。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "T"
+    ],
+    "explanation": "正确。判定函数表中 TestStepWarning 一行的作用栏原文就是「警示但不判失败」。它填补了 Pass 与 Fail 之间的灰色地带：结果合规但接近边界、或者出现了不影响结论的异常现象时，用 Warning 留痕，报告里会显示为警示项而不影响该用例的最终裁决。与之相邻的 TestStepInconclusive 则表示「无法判定通过或失败」，两者容易混淆——一个是「过了但要留意」，一个是「压根没法下结论」。用对这两个函数，回归报告的信噪比会明显提升。",
+    "keyPoints": [
+      "TestStepWarning：警示但不判失败，不影响用例裁决",
+      "与 Inconclusive 区分：过了但需留意 vs 无法下结论",
+      "合理使用可提升回归报告的信噪比"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "四、判定函数（Verdict）·函数作用表（TestStepWarning 行）"
+    },
+    "relatedTerms": [
+      "TestStepInconclusive",
+      "裁决",
+      "边界值"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-23-04-01",
+    "chapterNum": 23,
+    "sectionIndex": 4,
+    "sectionTitle": "五、报告函数族",
+    "module": "B",
+    "type": "single",
+    "cat": "标准合规",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "报告元信息",
+      "可追溯性",
+      "ASPICE"
+    ],
+    "stem": "章节 warning 强调「没有元信息的报告等于废纸」，要求 TestReportAddSetupInfo / TestReportAddSUTInfo 必须填写哪四项？",
+    "options": [
+      {
+        "key": "A",
+        "text": "硬件版本、软件版本、DBC 版本、样品 SN"
+      },
+      {
+        "key": "B",
+        "text": "测试日期、测试地点、天气、气温"
+      },
+      {
+        "key": "C",
+        "text": "用例总数、通过数、失败数、通过率"
+      },
+      {
+        "key": "D",
+        "text": "项目名称、客户名称、报价、交付周期"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "warning 原文：「真实项目里，TestReportAddSetupInfo/TestReportAddSUTInfo 必须填：硬件版本、软件版本、DBC 版本、样品 SN。否则三个月后没人能说清『这份 pass 报告是在什么环境下跑的』。」这四项的共同点是能唯一定位「在什么东西上、用什么配置测的」，这正是可追溯性的核心。C 项虽然也会出现在报告里，但那是测试结果而非环境元信息——结果回答「测得怎么样」，元信息回答「在什么条件下测的」，缺了后者，前者就无法复现也无法被审计。章节还点明这正是 ASPICE 对测试可追溯性的要求。",
+    "keyPoints": [
+      "四项必填元信息：硬件版本、软件版本、DBC 版本、样品 SN",
+      "元信息回答「在什么条件下测的」，结果回答「测得怎么样」",
+      "可追溯性是 ASPICE 对测试活动的明确要求"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "五、报告函数族·warning（没有元信息的报告等于废纸）"
+    },
+    "relatedTerms": [
+      "ASPICE",
+      "可追溯性",
+      "SUT"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-23-04-02",
+    "chapterNum": 23,
+    "sectionIndex": 4,
+    "sectionTitle": "五、报告函数族",
+    "module": "B",
+    "type": "multi",
+    "cat": "标准合规",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "报告函数",
+      "架构类",
+      "报告类"
+    ],
+    "stem": "按章节对报告函数族的分类说明，下列对应关系正确的有哪些？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "TestReportAddSetupInfo —— 记录测试环境"
+      },
+      {
+        "key": "B",
+        "text": "TestReportAddSUTInfo —— 记录被测样品信息"
+      },
+      {
+        "key": "C",
+        "text": "TestInfoTable / TestInfoTableRow —— 建结构化表格"
+      },
+      {
+        "key": "D",
+        "text": "TestReportAddEngineerInfo —— 记录测试员；TestReportAddExtendedInfo —— 嵌入 HTML/XML"
+      },
+      {
+        "key": "E",
+        "text": "TestCaseComment —— 用于给某个测试步骤下 pass/fail 判定"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "explanation": "章节把报告函数分成两类：架构类包含 TestReportAddSetupInfo（记测试环境）、TestReportAddSUTInfo（记样品信息）、TestCaseComment（加备注）、TestInfoTable/Row（建结构化表格）；报告类包含 TestReportAddEngineerInfo（记测试员）、TestReportAddExtendedInfo（嵌 HTML/XML）。A~D 均与原文吻合。E 错在职责错配——TestCaseComment 只是加备注，属于报告函数；下 pass/fail 判定是判定函数族（TestStepPass/TestStepFail）的事。这条边界要划清楚：报告函数负责「让产出可读、可审计」，判定函数负责「给出结论」，两者共同作用才能产出一份能直接归档的报告。",
+    "keyPoints": [
+      "架构类：AddSetupInfo / AddSUTInfo / TestCaseComment / TestInfoTable+Row",
+      "报告类：AddEngineerInfo / AddExtendedInfo（可嵌 HTML/XML）",
+      "报告函数管可读可审计，判定函数才给结论，职责不可混"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "五、报告函数族·架构类与报告类说明段"
+    },
+    "relatedTerms": [
+      "TestCaseComment",
+      "归档",
+      "结构化表格"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-23-05-01",
+    "chapterNum": 23,
+    "sectionIndex": 5,
+    "sectionTitle": "六、检测函数（Check Descriptions）",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "检测函数",
+      "Message Evaluation",
+      "报文丢失"
+    ],
+    "stem": "要自动校验「某报文是否丢失、周期是否正常、DLC 是否正确、有无错误帧」，应使用哪一类检测函数？",
+    "options": [
+      {
+        "key": "A",
+        "text": "Message Evaluation"
+      },
+      {
+        "key": "B",
+        "text": "Signal Evaluation"
+      },
+      {
+        "key": "C",
+        "text": "Time Evaluation"
+      },
+      {
+        "key": "D",
+        "text": "Verdict Evaluation"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "检测函数表三行分工明确：Signal Evaluation 覆盖「信号数值有效性、周期、稳定性」；Message Evaluation 覆盖「报文丢失、周期、DLC、错误帧」；Time Evaluation 覆盖「连续帧间隔、超时」。题干四项全部落在 Message Evaluation。D 是虚构类别，Verdict 是判定函数不是检测函数。记忆口径可以按对象分：Signal 盯的是「信号值」，Message 盯的是「帧本身」，Time 盯的是「时间关系」。选对类别的意义在于——用错类别往往能跑但校验不到点上，比如想查报文丢失却用了 Signal Evaluation，信号值在缓存里没变化，反而查不出丢帧。",
+    "keyPoints": [
+      "Message Evaluation：报文丢失、周期、DLC、错误帧",
+      "Signal Evaluation：信号数值有效性、周期、稳定性",
+      "Time Evaluation：连续帧间隔、超时"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "六、检测函数（Check Descriptions）·检测类覆盖内容表"
+    },
+    "relatedTerms": [
+      "DLC",
+      "错误帧",
+      "Check Descriptions"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-23-05-02",
+    "chapterNum": 23,
+    "sectionIndex": 5,
+    "sectionTitle": "六、检测函数（Check Descriptions）",
+    "module": "B",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "检测函数",
+      "断言",
+      "容差"
+    ],
+    "stem": "关于检测函数（Check Descriptions），下列说法正确的有哪些？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "Signal Evaluation 覆盖信号数值有效性、周期与稳定性"
+      },
+      {
+        "key": "B",
+        "text": "Time Evaluation 覆盖连续帧间隔与超时"
+      },
+      {
+        "key": "C",
+        "text": "它们把「人工对比预期」变成「一句断言」，无需自己写定时器算时间差"
+      },
+      {
+        "key": "D",
+        "text": "检测函数内部已处理采样与容差"
+      },
+      {
+        "key": "E",
+        "text": "使用检测函数前必须先用 CAPL 手工实现一遍对应算法作为交叉验证"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "explanation": "A、B 来自检测类覆盖表；C、D 来自其后的说明段：「这些检测函数把『人工对比预期』变成『一句断言』。例如检查某信号周期是否稳定，不用自己写定时器计时间差，直接调 Signal Evaluation 即可，它内部已处理采样与容差。」E 是编造的流程负担，与本节要传达的价值完全相反——检测函数存在的意义就是免去手写这类基础算法。自己用 CAPL 写定时器测周期，不仅代码量大，还容易在采样时机、容差处理、边界抖动上出错，工具内建实现比手写更可靠也更统一。",
+    "keyPoints": [
+      "三类检测覆盖信号、报文、时间三个维度",
+      "价值：把人工对比变成一句断言",
+      "内部已处理采样与容差，无需手写定时器"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "六、检测函数（Check Descriptions）·说明段"
+    },
+    "relatedTerms": [
+      "断言",
+      "采样",
+      "容差"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-23-06-01",
+    "chapterNum": 23,
+    "sectionIndex": 6,
+    "sectionTitle": "七、与持续集成（CI）",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "CI",
+      "命令行",
+      "无界面运行"
+    ],
+    "stem": "章节指出，CANoe 支持无界面运行是接入 CI 的关键。对应的命令行形式是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "canoe.exe -r 工程 -t 测试配置"
+      },
+      {
+        "key": "B",
+        "text": "canoe.exe --build 工程 --report html"
+      },
+      {
+        "key": "C",
+        "text": "capl.exe -compile 测试模块 -run"
+      },
+      {
+        "key": "D",
+        "text": "CANoe 只能图形界面操作，接入 CI 必须依赖第三方按键录制工具"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节原文：「CANoe 支持命令行（canoe.exe -r 工程 -t 测试配置）无界面运行，是自动化的关键。」为什么说它是关键？因为 CI 的执行环境没有人坐在前面点鼠标，任何需要图形交互的步骤都会让流水线卡住。有了命令行入口，Jenkins 就能在一条 shell/bat 步骤里拉起测试、等待结束、收集报告。D 的说法是老旧误解，而且用按键录制去驱动 GUI 极不稳定，分辨率一变、弹窗一出就全盘失败，工程上不可取。B、C 的命令形式在章节中并不存在。",
+    "keyPoints": [
+      "命令行：canoe.exe -r 工程 -t 测试配置",
+      "无界面运行是接入 CI 的前提，避免图形交互卡住流水线",
+      "GUI 按键录制方案不稳定，不应作为自动化手段"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "七、与持续集成（CI）·说明段"
+    },
+    "relatedTerms": [
+      "Jenkins",
+      "无界面运行",
+      "流水线"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-23-06-02",
+    "chapterNum": 23,
+    "sectionIndex": 6,
+    "sectionTitle": "七、与持续集成（CI）",
+    "module": "B",
+    "type": "short",
+    "cat": "工具操作",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "CI",
+      "夜间回归",
+      "Replay"
+    ],
+    "stem": "请说明如何把 CANoe Test Module 接入 Jenkins 实现「夜间自动跑回归、早上看红绿」，并说明回归时可以怎样配合 Replay 做对比。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题串起 CI 一节的三个要点——报告可导出 XML/HTML、命令行无界面运行、配合 Replay 做基线对比，并要求给出可落地的流水线设计，是本章工程化落地的收口题。",
+    "keyPoints": [
+      "命令行 canoe.exe -r 工程 -t 测试配置 实现无界面运行",
+      "报告导出 XML/HTML 供 CI 解析与展示",
+      "Jenkins 定时触发夜间回归，早上看红绿",
+      "Replay 把基线日志与当前结果做对比，定位回归差异"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "七、与持续集成（CI）·说明段"
+    },
+    "relatedTerms": [
+      "Replay",
+      "基线日志",
+      "夜间回归"
+    ],
+    "refAnswer": "【一、整体思路】CI 化要解决三件事：无人值守地跑起来、结果能被机器读懂、异常能被快速定位。章节给的三块拼图正好对应——命令行无界面运行解决「跑起来」，XML/HTML 报告导出解决「读得懂」，Replay 基线对比解决「定位」。\n【二、流水线怎么搭】①准备阶段：Jenkins 任务从版本库拉取 CANoe 工程、Test Module 脚本、DBC 与被测软件包；把 DBC 版本、软件版本一并记录，后面要写进报告元信息。②刷写阶段：调用刷写工具把待测软件下到台架 ECU 上，确认刷写成功再往下走，否则直接标记本轮为环境失败，不要让后续用例产生一堆无意义的 Fail。③执行阶段：用命令行 `canoe.exe -r 工程 -t 测试配置` 启动无界面运行。这是最关键的一步——CI 机器上没有人点鼠标，任何弹窗或图形交互都会让任务挂死，所以还要提前关掉 CANoe 的交互式提示、把硬件配置固化进工程。④收集阶段：Test Module 结束后导出 XML/HTML 报告，Jenkins 归档 HTML 供人查看，解析 XML 得到用例级 pass/fail 用于判定本次构建的红绿，并驱动趋势图。⑤通知阶段：结果推送到邮件或群里，失败时附上失败用例名与报告链接。⑥调度：用定时触发（如每晚 23:00）跑全量回归，代码提交时触发小规模冒烟集，做到「代码/标定一更新，夜间自动跑回归、早上看红绿」。\n【三、必须处理的工程细节】①台架硬件是独占资源，多个任务并发会抢卡抢 ECU，要用 Jenkins 的节点标签或 lock 机制串行化。②必须设置整体超时并在超时后强制结束 CANoe 进程，否则一次挂死会阻塞后面所有夜间任务。③每轮开始前把台架复位到已知初态（下电再上电、清 DTC），否则上一轮的残留状态会污染本轮结果。④报告里的元信息不能省——用 TestReportAddSetupInfo/TestReportAddSUTInfo 写清硬件版本、软件版本、DBC 版本、样品 SN，否则三个月后没人说得清这份 pass 是在什么环境下跑出来的，这也是 ASPICE 对可追溯性的要求。\n【四、怎么配合 Replay 做对比】Replay 是把一段录好的总线日志重新播放到工程里。它在回归中有两种典型用法：一是作为稳定激励源——用一段基线日志代替真实的上游节点，保证每轮回归的输入完全一致，这样结果差异就只可能来自被测件本身，排除了「输入不同导致结果不同」的干扰；二是作为对比基准——保存上一版本通过时的日志作为基线，本轮跑完后把当前记录与基线在关键信号的时序、周期、取值上做比对，一旦出现偏差就能立刻圈定是哪个信号、在哪个时间点开始变化，比只看一个 Fail 结论定位快得多。实践中建议把基线日志与对应的软件版本一起纳入版本管理，否则时间一长就说不清某份基线属于哪一版。\n【五、收口】这套体系跑通后，测试就从「人工点、人工看、人工写结论」变成「定时触发、机器判定、自动归档」，回归成本趋近于零，人力可以集中到设计新场景和分析异常上——这正是 Test Module 相对零散 CAPL 的根本价值。"
+  },
+  {
+    "id": "Q-23-07-01",
+    "chapterNum": 23,
+    "sectionIndex": 7,
+    "sectionTitle": "八、面试高频考点",
+    "module": "B",
+    "type": "multi",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "面试考点",
+      "三层结构",
+      "TFS"
+    ],
+    "stem": "按章节「面试高频考点」表，下列问题与要点的对应正确的有哪些？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "Test Module 三层结构 —— Group→Case→Step"
+      },
+      {
+        "key": "B",
+        "text": "怎么给判定 —— TestStepPass/Fail，模块级 TestSetVerdict"
+      },
+      {
+        "key": "C",
+        "text": "报告和可追溯性 —— AddSetupInfo/AddSUTInfo 记环境样品"
+      },
+      {
+        "key": "D",
+        "text": "怎么接入 CI —— 命令行无界面跑 + 报告导出 + 流水线"
+      },
+      {
+        "key": "E",
+        "text": "TFS 是什么 —— Vector 单独授权的第三方测试插件"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "explanation": "A~D 与考点表四行原文一致。E 与表格最后一行直接冲突——原文是「TFS 是什么：CANoe 内置测试函数族，非独立组件」，本章开篇也重申了这一点。这张表其实是整章的索引：三层结构对应第三节、判定对应第四节、报告可追溯性对应第五节、CI 对应第七节、TFS 定义对应第一节。复习时可以倒过来用——先看这五个问题能否脱稿答出，答不上的再回到对应章节补。",
+    "keyPoints": [
+      "五大考点：三层结构、判定方式、报告可追溯、CI 接入、TFS 定义",
+      "TFS 是内置函数族，不是第三方插件",
+      "考点表可当作全章索引来做复习自检"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "八、面试高频考点·问题与要点表"
+    },
+    "relatedTerms": [
+      "TestSetVerdict",
+      "可追溯性",
+      "TFS"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-23-07-02",
+    "chapterNum": 23,
+    "sectionIndex": 7,
+    "sectionTitle": "八、面试高频考点",
+    "module": "B",
+    "type": "short",
+    "cat": "概念辨析",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "面试综合",
+      "Test Module",
+      "可追溯性"
+    ],
+    "stem": "面试官连问：「Test Module 的三层结构是什么？」「怎么给判定？」「报告怎么保证可追溯性？」「怎么接入 CI？」「TFS 到底是什么？」请给出一段完整、有条理的回答。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题把面试考点表的五条要点串成一段可直接使用的完整回答，覆盖结构、判定、报告、工程化、概念定义五个层次，是本章的收口题。",
+    "keyPoints": [
+      "结构层 Group→Case→Step 与报告三级一一对应",
+      "判定层三级：Step 级 Pass/Fail、Case 级 TestCaseFail、Module 级 TestSetVerdict",
+      "报告层 AddSetupInfo/AddSUTInfo 记环境与样品，满足 ASPICE 可追溯",
+      "工程层命令行无界面运行 + 报告导出 + Jenkins；TFS 是内置函数族非独立组件"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "八、面试高频考点·问题与要点表（五条汇总）"
+    },
+    "relatedTerms": [
+      "ASPICE",
+      "Jenkins",
+      "CAPL"
+    ],
+    "refAnswer": "【第一问：Test Module 的三层结构】从外到内是 Test Group → Test Case → Test Step，报告也是这三级结构，一一对应。Test Group 用 TestGroupBegin/TestGroupEnd 框定一类场景，比如「上下电测试组」，两个参数分别是组名和描述；Test Case 是测试的核心单元，包含一次完整的测试活动，用 TestCaseDescription 写清预期；Test Step 是 Case 内的最小块，用 TestStepPass/TestStepFail 给出该步判定。这个结构的价值在于，你在脚本里怎么分层，报告里就长成什么样——报告的可读性是写代码时决定的，不是事后排版出来的。\n【第二问：怎么给判定】判定分三个层级。Step 级最常用：TestStepPass/TestStepFail 判定单步，另有 TestStepWarning（警示但不判失败）和 TestStepInconclusive（无法判定通过或失败），后两个用来区分「过了但要留意」和「条件不具备没测成」，把环境问题和真实缺陷分开统计，回归结果才有意义。Case 级用 TestCaseFail 把整条用例判 fail。Module 级用 TestSetVerdict 直接设定模块裁决，TestGetVerdictModule 读取模块判定，TestGetVerdictLastTestCase 可以读上一条用例的结果做链式控制。写用例时有个铁律：if 的两个分支都要有判定，不能只写 Pass 不写 Fail，否则异常会悄悄溜过去，报告显示无判定——测试跑绿了但其实什么都没验证，这是最危险的写法。\n【第三问：报告与可追溯性】判定之外还要让产出可读、可审计，这靠报告函数族。架构类有 TestReportAddSetupInfo 记测试环境、TestReportAddSUTInfo 记被测样品、TestCaseComment 加备注、TestInfoTable/TestInfoTableRow 建结构化表格；报告类有 TestReportAddEngineerInfo 记测试员、TestReportAddExtendedInfo 嵌入 HTML/XML。这里最关键的一条经验是：没有元信息的报告等于废纸。真实项目里 AddSetupInfo/AddSUTInfo 必须填硬件版本、软件版本、DBC 版本、样品 SN，否则三个月后没人能说清这份 pass 报告是在什么环境下跑的，出了问题也无从追溯。这正是 ASPICE 对测试可追溯性的要求。另外，检测函数（Check Descriptions）也值得一提：Signal Evaluation 查信号数值有效性/周期/稳定性，Message Evaluation 查报文丢失/周期/DLC/错误帧，Time Evaluation 查连续帧间隔与超时，它们内部已处理采样与容差，把人工对比变成一句断言，不用自己写定时器算时间差。\n【第四问：怎么接入 CI】三步。第一步，CANoe 支持命令行无界面运行：canoe.exe -r 工程 -t 测试配置，这是自动化的关键，因为 CI 机器上没人点鼠标，任何图形交互都会让流水线卡死。第二步，Test Module 产出的报告导出为 XML/HTML，HTML 给人看、XML 给机器解析判定红绿并画趋势图。第三步，接入 Jenkins 等流水线，定时触发夜间全量回归，代码提交触发冒烟集，实现「代码/标定一更新，夜间自动跑回归、早上看红绿」。回归时可以配合 CANoe 的 Replay 功能，把基线日志作为稳定激励源保证每轮输入一致，或者把基线日志与当前结果做对比，快速圈定是哪个信号从什么时刻开始偏离。工程上还要注意台架硬件是独占资源需要串行化调度、必须设整体超时防止挂死阻塞后续任务、每轮开始前把台架复位到已知初态。\n【第五问：TFS 是什么】Test Feature Set，是 CANoe 内置的一族测试函数，不是独立组件、不需要单独安装或授权。它的执行语言就是 CAPL——所以学 Test Module 的前提是先把 CAPL 的事件机制和 $（总线信号）/@（系统与环境变量）语法吃透。零散 CAPL 只「做事」，Test Module 里的 CAPL 还要「下判定、写报告」，这就是两者的本质区别，也是把测试从人眼审查升级为机器判定的那一步。"
+  }
+]

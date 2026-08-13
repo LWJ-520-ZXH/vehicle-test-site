@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+(function () {
+  const saved = localStorage.getItem('avt-theme') || 'system'
+  let t = 'light'
+  if (saved === 'dark') t = 'dark'
+  else if (saved === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark'
+  document.documentElement.setAttribute('data-theme', t)
+  document.documentElement.style.background = t === 'dark' ? '#0a0f1e' : '#f4f7fb'
+})()
+</script>
+<title>术语表 · 车载测试学堂</title>
+<meta name="description" content="车载测试专业术语速查：ECU/CAN/LIN/车载以太网/UDS/BMS/ASIL/功能安全… 中英文全称 + 白话释义，点击卡片即可复制。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232563eb'/><text x='16' y='22' text-anchor='middle' fill='white' font-size='18' font-family='sans-serif' font-weight='bold'>VT</text></svg>">
+<link rel="stylesheet" href="assets/css/main.css?v=20260813225913">
+<link rel="stylesheet" href="assets/css/glossary.css?v=20260813225913">
+<script>
+(function(){
+  var V='20260813225913';
+  function check(){
+    fetch('assets/version.json?t='+Date.now(),{cache:'no-store'})
+      .then(function(r){return r.json();})
+      .then(function(j){ if(j&&j.version&&j.version!==V){location.reload(true);} })
+      .catch(function(){});
+  }
+  check();
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible'){ setTimeout(check,800); }
+  });
+})();
+</script>
+</head>
+<body>
+
+<!-- ====== 顶部导航 ====== -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">
+          <path d="M5 12h3l2-5 4 10 2-5h3"/>
+          <circle cx="12" cy="12" r="1.5" fill="#fff"/>
+        </svg>
+      </div>
+      车载测试学堂
+    </a>
+    <nav class="nav">
+      <a href="index.html">首页</a>
+      <div class="nav-item-dropdown">
+        <a href="chapters.html">知识库</a>
+        <div class="nav-dropdown" id="kb-dropdown"><!-- JS填充 --></div>
+      </div>
+      <a href="glossary.html" class="active" title="专业术语速查与释义">术语表</a>
+      <a href="quiz.html" title="知识点自测题库">题库中心</a>
+    </nav>
+    <div class="header-right">
+      <div class="hdr-search">
+        <input id="hdr-search" type="search" placeholder="搜索章节 / 知识点…" aria-label="站内搜索">
+        <button type="button" id="hdr-search-btn" aria-label="搜索"><svg class="ui-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
+      </div>
+      <button class="theme-btn" id="theme-btn" aria-label="切换主题">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42 1.42"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="gl-wrap">
+  <div class="gl-header">
+    <div class="gl-title"><svg class="ui-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-1.8-1.2-4-1.8-7-1.8C3 4.2 2 5.4 2 7v12c0 1.5 1 2.5 3 2.5 2.8 0 5-1 7-2.2 2 1.2 4.2 2.2 7 2.2 2 0 3-1 3-2.5V7c0-1.6-1-2.8-3-2.8-3 0-5.2.6-7 1.8z"/><path d="M12 6v13.5"/></svg> 术语表 Glossary</div>
+    <p class="gl-sub">车载测试高频专业术语，中英文全称 + 白话释义。点击任意卡片即可复制术语；正文里的术语鼠标悬停也能看释义。</p>
+    <div class="gl-controls">
+      <div class="gl-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="gl-search" type="search" placeholder="搜术语 / 释义…" aria-label="术语搜索">
+      </div>
+      <span class="gl-count" id="gl-count"></span>
+    </div>
+    <div class="gl-cats" id="gl-cats"><!-- JS渲染 --></div>
+  </div>
+  <div class="gl-grid" id="glossary-root"><!-- JS渲染 --></div>
+</main>
+
+<!-- ====== 页脚 ====== -->
+<footer class="site-footer">
+  <b>车载测试学堂</b> · 基于真实项目面试题库打造 · <span data-chapter-count>51</span> 章覆盖 CAN/LIN/FlexRay/以太网/UDS → CANoe/CAPL → 五大域测试<br>
+  纯原生 JS + SVG · 科技写实风 · 亮/暗双主题
+</footer>
+
+<script src="assets/js/data-bundle.js?v=20260813225913" defer></script>
+<script src="assets/js/app.js?v=20260813225913" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const data = (window.__SITE_DATA__ && window.__SITE_DATA__.glossary) || []
+  const root = document.getElementById('glossary-root')
+  const catsEl = document.getElementById('gl-cats')
+  const search = document.getElementById('gl-search')
+  const countEl = document.getElementById('gl-count')
+  if (!root) return
+  const esc = (s) => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const cats = []
+  data.forEach(t => { if (cats.indexOf(t.cat) < 0) cats.push(t.cat) })
+  let activeCat = 'all'
+  let query = ''
+
+  function renderCats() {
+    let html = '<button class="gl-cat-chip' + (activeCat === 'all' ? ' active' : '') + '" data-cat="all" type="button">全部</button>'
+    html += cats.map(c => '<button class="gl-cat-chip' + (activeCat === c ? ' active' : '') + '" data-cat="' + esc(c) + '" type="button">' + esc(c) + '</button>').join('')
+    catsEl.innerHTML = html
+  }
+  function match(t) {
+    if (activeCat !== 'all' && t.cat !== activeCat) return false
+    if (!query) return true
+    const q = query.toLowerCase()
+    return (t.term + ' ' + (t.full || '') + ' ' + (t.def || '')).toLowerCase().includes(q)
+  }
+  function render() {
+    const items = data.filter(match)
+    countEl.textContent = '共 ' + items.length + ' 条'
+    if (!items.length) { root.innerHTML = '<div class="gl-empty">没有匹配的术语，换个关键词或分类试试</div>'; return }
+    root.innerHTML = items.map(t => {
+      const term = esc(t.term), full = esc(t.full || ''), def = esc(t.def || ''), cat = esc(t.cat || '')
+      return '<div class="gl-card" data-term="' + term + '" tabindex="0" role="button" aria-label="复制术语 ' + term + '">'
+        + '<span class="gl-cat-tag">' + cat + '</span>'
+        + '<div class="gl-term">' + term + (full ? '<span class="gl-full">' + full + '</span>' : '') + '</div>'
+        + '<div class="gl-def">' + def + '</div>'
+        + '<div class="gl-copy-hint">点击复制术语</div>'
+        + '</div>'
+    }).join('')
+  }
+  function done(card) {
+    card.classList.add('copied')
+    const hint = card.querySelector('.gl-copy-hint')
+    if (hint) hint.textContent = '已复制'
+    setTimeout(() => { card.classList.remove('copied'); if (hint) hint.textContent = '点击复制术语' }, 1600)
+  }
+  function fallbackCopy(text, card) {
+    try {
+      const ta = document.createElement('textarea'); ta.value = text
+      ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta)
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(card)
+    } catch (e) {}
+  }
+  function copy(card) {
+    const term = card.getAttribute('data-term') || ''
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(term).then(() => done(card)).catch(() => fallbackCopy(term, card))
+    else fallbackCopy(term, card)
+  }
+  root.addEventListener('click', (e) => { const card = e.target.closest('.gl-card'); if (card) copy(card) })
+  root.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { const card = e.target.closest('.gl-card'); if (card) { e.preventDefault(); copy(card) } } })
+  catsEl.addEventListener('click', (e) => { const chip = e.target.closest('.gl-cat-chip'); if (!chip) return; activeCat = chip.getAttribute('data-cat'); renderCats(); render() })
+  if (search) search.addEventListener('input', () => { query = search.value.trim(); render() })
+  renderCats()
+  render()
+})
+</script>
+</body>
+</html>

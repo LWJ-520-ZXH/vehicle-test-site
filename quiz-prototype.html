@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+(function () {
+  const saved = localStorage.getItem('avt-theme') || 'system'
+  let t = 'light'
+  if (saved === 'dark') t = 'dark'
+  else if (saved === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark'
+  document.documentElement.setAttribute('data-theme', t)
+  document.documentElement.style.background = t === 'dark' ? '#0a0f1e' : '#f4f7fb'
+})()
+</script>
+<title>题库中心 · 原型 v0.1 · 车载测试学堂</title>
+<meta name="description" content="题库中心原型 v0.1：顶部统计条 + 筛选 + 长列表自测，作答即揭示、思路解析、已掌握/再看标记。无分数、无进度、无打卡。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232563eb'/><text x='16' y='22' text-anchor='middle' fill='white' font-size='18' font-family='sans-serif' font-weight='bold'>VT</text></svg>">
+<style>
+/* ============================================================
+   题库中心原型 v0.1 · 自包含 · 第一版设计
+   结构：站点头 + 4 块页头 + 工具条(toggle) + 4 行筛选 + 长列表卡片
+   产品红线不变：无分数 / 无正确率 / 无百分比 / 无进度条 / 无打卡
+   落地时拆分为 quiz.html + assets/css/quiz.css + assets/js/quiz.js
+   ============================================================ */
+
+/* ---------- SITE TOKENS（摘自 main.css，落地时删除） ---------- */
+:root {
+  --font-sans: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+  --brand: #2563eb; --brand-2: #06b6d4; --accent: #f59e0b;
+  --bg: #f4f7fb; --bg-soft: #ffffff; --bg-glass: rgba(255,255,255,.72);
+  --card: #ffffff; --card-border: rgba(15,42,80,.08);
+  --text: #0e1b2c; --text-2: #4a5a70; --text-3: #8593a8;
+  --shadow: 0 4px 20px rgba(24,144,255,.06);
+  --shadow-hover: 0 12px 40px rgba(24,144,255,.12);
+  --chip: rgba(37,99,235,.08);
+  --radius-sm: 12px; --radius-md: 16px; --radius-lg: 20px;
+  --surface: #ffffff; --border: #e4ebf3; --hairline: rgba(15,42,80,.1);
+  --fs-h1: 28px; --fs-h2: 23px; --fs-h3: 18.5px; --fs-lead: 16.5px;
+  --fs-body: 15px; --fs-sm: 13.5px; --fs-xs: 12px;
+  --fw-bold: 800; --fw-semi: 700; --fw-med: 600; --fw-reg: 500;
+  --lh-tight: 1.25; --lh-base: 1.6;
+  --ok: #10b981; --no: #ef4444;
+  --ease: cubic-bezier(.16,1,.3,1);
+}
+html[data-theme="dark"] {
+  --bg: #0a0f1e; --bg-soft: #0f1626; --bg-glass: rgba(18,26,46,.72);
+  --card: #131b2e; --card-border: rgba(255,255,255,.1);
+  --text: #e8effb; --text-2: #9fb2cf; --text-3: #7c8eac;
+  --shadow: 0 8px 30px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.03);
+  --shadow-hover: 0 18px 50px rgba(37,99,235,.3), 0 0 0 1px rgba(96,165,250,.18);
+  --chip: rgba(96,165,250,.12);
+  --surface: #18223a; --border: rgba(255,255,255,.1); --hairline: rgba(255,255,255,.1);
+  --ok: #34d399; --no: #f87171;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: var(--font-sans); background: var(--bg); color: var(--text);
+  line-height: var(--lh-base); font-size: var(--fs-body);
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  transition: background .35s ease, color .35s ease;
+}
+.ui-ic { width:1em; height:1em; flex:none; display:inline-block; vertical-align:-.15em; }
+
+/* ---------- HEADER（摘自 main.css，落地时删除） ---------- */
+.site-header {
+  position: sticky; top:0; z-index:100;
+  backdrop-filter: blur(18px) saturate(180%); -webkit-backdrop-filter: blur(18px) saturate(180%);
+  background: var(--bg-glass); border-bottom: 1px solid var(--card-border);
+}
+.header-inner { max-width:1180px; margin:0 auto; padding:0 28px; height:64px; display:flex; align-items:center; gap:28px; }
+.logo { display:flex; align-items:center; gap:10px; font-weight:800; font-size:18px; letter-spacing:.5px; text-decoration:none; color:var(--text); white-space:nowrap; }
+.logo-badge { width:34px; height:34px; border-radius:10px; display:grid; place-items:center; background:linear-gradient(135deg,var(--brand),var(--brand-2)); box-shadow:0 6px 16px rgba(37,99,235,.35); }
+.logo-badge svg { width:20px; height:20px; }
+.nav { display:flex; gap:4px; margin-left:8px; }
+.nav a { padding:8px 14px; border-radius:10px; text-decoration:none; color:var(--text-2); font-size:14.5px; font-weight:600; transition:all .25s var(--ease); }
+.nav a:hover { background:var(--chip); color:var(--brand); }
+.nav a.active { background:var(--chip); color:var(--brand); }
+.header-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
+.hdr-search { display:flex; align-items:center; gap:6px; background:var(--card); border:1px solid var(--card-border); border-radius:999px; padding:5px 6px 5px 14px; }
+.hdr-search input { border:0; outline:0; background:transparent; color:var(--text); font-size:13.5px; width:170px; font-family:inherit; }
+.hdr-search button { border:0; background:transparent; color:var(--text-3); cursor:pointer; display:grid; place-items:center; padding:4px; }
+.hdr-search button .ui-ic { width:18px; height:18px; vertical-align:middle; }
+.theme-btn { width:36px; height:36px; border-radius:10px; border:1px solid var(--card-border); background:var(--card); color:var(--text-2); cursor:pointer; display:grid; place-items:center; transition:all .25s var(--ease); }
+.theme-btn:hover { color:var(--brand); border-color:var(--brand); }
+.theme-btn svg { width:18px; height:18px; }
+.site-footer { text-align:center; padding:34px 20px 46px; color:var(--text-3); font-size:var(--fs-sm); line-height:1.9; border-top:1px solid var(--card-border); margin-top:40px; }
+
+/* ============================================================
+   题库 v0.1：4 块页头 + 工具条 + 筛选 + 长列表
+   ============================================================ */
+.qz-wrap { max-width:1180px; margin:0 auto; padding:30px 24px 12px; }
+
+/* ---------- 简化页头：仅标题 + 副标题（题量） ---------- */
+.qz-head { margin-bottom:16px; }
+.qz-h-top { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:0; }
+.qz-h-title { display:flex; align-items:center; gap:9px; font-size:var(--fs-h1); font-weight:var(--fw-bold); color:var(--text); letter-spacing:.5px; }
+.qz-h-title .ui-ic { color:var(--brand); font-size:26px; }
+.qz-h-sub { color:var(--text-2); font-size:var(--fs-lead); }
+.qz-h-sub b { color:var(--brand); font-family:var(--font-mono); }
+
+/* ---------- 工具条：搜索 + 3 个 toggle + 结果计数 ---------- */
+.qz-toolbar { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:14px 16px; background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius-md); box-shadow:var(--shadow); margin-bottom:16px; }
+.qz-search { display:flex; align-items:center; gap:8px; background:var(--bg-soft); border:1px solid var(--card-border); border-radius:999px; padding:8px 14px; flex:1; min-width:200px; }
+.qz-search .ui-ic { color:var(--text-3); width:16px; height:16px; flex:none; }
+.qz-search input { border:0; outline:0; background:transparent; color:var(--text); font-size:var(--fs-sm); width:100%; font-family:inherit; }
+.qz-toggles { display:flex; gap:8px; flex-wrap:wrap; }
+.qz-toggle { padding:8px 14px; border-radius:999px; cursor:pointer; border:1px solid var(--card-border); background:var(--bg-soft); color:var(--text-2); font-size:var(--fs-sm); font-weight:var(--fw-med); font-family:inherit; transition:all .25s var(--ease); display:inline-flex; align-items:center; gap:7px; }
+.qz-toggle:hover { border-color:var(--brand); color:var(--brand); }
+.qz-toggle.on { background:var(--brand); border-color:var(--brand); color:#fff; box-shadow:0 4px 14px rgba(37,99,235,.3); }
+.qz-result { font-size:var(--fs-sm); color:var(--text-3); white-space:nowrap; }
+.qz-result b { color:var(--brand); font-family:var(--font-mono); font-size:15px; }
+
+/* ---------- 4 行筛选 ---------- */
+.qz-filters { padding:16px 16px 4px; background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius-md); box-shadow:var(--shadow); margin-bottom:20px; }
+.qz-filter-row { display:flex; align-items:flex-start; gap:14px; padding:9px 0; }
+.qz-filter-row + .qz-filter-row { border-top:1px dashed var(--hairline); }
+.qz-fl { flex:none; width:52px; padding-top:7px; font-size:var(--fs-sm); font-weight:var(--fw-semi); color:var(--text-2); }
+.qz-chips { display:flex; flex-wrap:wrap; gap:8px; }
+
+/* 模块卡片式选择器（v0.3 设计，模块轴全量展示 7 模块） */
+.qz-mods { display:flex; flex-wrap:wrap; gap:10px; }
+.qz-mod {
+  --mod-c: var(--brand);
+  display:inline-flex; align-items:center; gap:9px; padding:9px 14px; cursor:pointer;
+  border:1px solid var(--card-border); background:var(--bg-soft); border-radius:13px;
+  font-family:inherit; font-size:var(--fs-sm); font-weight:var(--fw-semi); color:var(--text-2);
+  transition:all .25s var(--ease); line-height:1.1;
+}
+.qz-mod:hover:not(:disabled):not(.on) { border-color:var(--mod-c); color:var(--mod-c); transform:translateY(-2px); }
+.qz-mod-badge { width:24px; height:24px; border-radius:7px; flex:none; display:grid; place-items:center; background:color-mix(in srgb, var(--mod-c) 14%, transparent); color:var(--mod-c); font-family:var(--font-mono); font-weight:var(--fw-bold); font-size:13px; }
+.qz-mod-name { white-space:nowrap; }
+.qz-mod-count { font-family:var(--font-mono); font-size:11px; opacity:.65; background:var(--chip); padding:1px 7px; border-radius:999px; transition:all .25s var(--ease); }
+.qz-mod.on { border-color:var(--mod-c); background:color-mix(in srgb, var(--mod-c) 9%, var(--bg-soft)); color:var(--text); box-shadow:0 6px 18px color-mix(in srgb, var(--mod-c) 18%, transparent); }
+.qz-mod.on .qz-mod-badge { background:var(--mod-c); color:#fff; }
+.qz-mod.on .qz-mod-count { background:color-mix(in srgb, var(--mod-c) 16%, transparent); color:var(--mod-c); opacity:1; }
+.qz-mod:disabled { opacity:.38; cursor:not-allowed; }
+
+.chip { padding:7px 15px; border-radius:999px; cursor:pointer; border:1px solid var(--card-border); background:var(--bg-soft); color:var(--text-2); font-size:var(--fs-sm); font-weight:var(--fw-med); font-family:inherit; transition:all .25s var(--ease); display:inline-flex; align-items:center; gap:7px; }
+.chip .c-dot { width:8px; height:8px; border-radius:50%; background:var(--mod-c, var(--text-3)); }
+.chip .c-count { font-family:var(--font-mono); font-size:11px; opacity:.7; }
+.chip:hover:not(:disabled):not(.active) { transform:translateY(-2px); border-color:var(--brand); color:var(--brand); }
+.chip.active { background:linear-gradient(135deg,var(--brand),var(--brand-2)); color:#fff; border-color:transparent; box-shadow:0 4px 16px rgba(37,99,235,.3); cursor:default; }
+.chip.active .c-dot { background:#fff; }
+.chip:disabled { opacity:.38; cursor:not-allowed; }
+.chip-mod.active { background:var(--mod-c); box-shadow:0 4px 16px color-mix(in srgb, var(--mod-c) 40%, transparent); }
+
+/* ---------- 长列表 + 题卡 ---------- */
+.qz-list { display:flex; flex-direction:column; gap:18px; }
+.qz-card { position:relative; overflow:hidden; padding:22px 24px 20px; background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius-lg); box-shadow:var(--shadow); transition:box-shadow .35s ease, border-color .35s ease; }
+.qz-card::before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--mod-c, var(--brand)); }
+.qz-card:hover { box-shadow:var(--shadow-hover); }
+.qz-card-badges { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-bottom:14px; }
+.qz-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:6px; font-size:var(--fs-xs); font-weight:var(--fw-semi); letter-spacing:.2px; }
+.qz-badge-mod { background:color-mix(in srgb, var(--mod-c) 13%, transparent); color:var(--mod-c); }
+.qz-badge-type { background:color-mix(in srgb, var(--brand) 11%, transparent); color:var(--brand); }
+.qz-badge-diff { background:color-mix(in srgb, var(--df-c) 13%, transparent); color:var(--df-c); }
+.qz-badge-cat { background:var(--chip); color:var(--text-2); }
+.qz-badge-dir { background:color-mix(in srgb, var(--accent) 16%, transparent); color:var(--accent); }
+.qz-badge-num { background:var(--border); color:var(--text-3); font-family:var(--font-mono); }
+
+.qz-stem { font-size:17.5px; font-weight:var(--fw-semi); line-height:1.7; color:var(--text); margin-bottom:16px; letter-spacing:.2px; }
+.qz-stem .qz-multi-hint { font-weight:var(--fw-reg); font-size:var(--fs-sm); color:var(--text-3); margin-left:8px; }
+
+.qz-options { display:flex; flex-direction:column; gap:10px; }
+.qz-opt {
+  display:flex; align-items:flex-start; gap:12px; padding:12px 15px; width:100%; text-align:left;
+  border:1px solid var(--card-border); background:var(--bg-soft); border-radius:12px;
+  color:var(--text); font-size:var(--fs-body); font-family:inherit; line-height:1.55; cursor:pointer;
+  transition:border-color .25s var(--ease), background .25s var(--ease), transform .25s var(--ease);
+}
+.qz-opt:hover:not(:disabled) { border-color:var(--brand); background:color-mix(in srgb, var(--brand) 5%, var(--bg-soft)); transform:translateX(2px); }
+.qz-opt-key { flex:none; width:26px; height:26px; border-radius:7px; display:grid; place-items:center; background:var(--chip); color:var(--text-2); font-size:13px; font-weight:var(--fw-bold); font-family:var(--font-mono); margin-top:1px; transition:all .25s var(--ease); }
+.qz-opt-text { flex:1; }
+.qz-opt-ic { flex:none; width:18px; margin-top:4px; opacity:0; transition:opacity .25s var(--ease); }
+.qz-opt.picked { border-color:var(--brand); background:color-mix(in srgb, var(--brand) 8%, var(--bg-soft)); }
+.qz-opt.picked .qz-opt-key { background:var(--brand); color:#fff; }
+.qz-opt.correct { border-color:var(--ok); background:color-mix(in srgb, var(--ok) 10%, var(--bg-soft)); }
+.qz-opt.correct .qz-opt-key { background:var(--ok); color:#fff; }
+.qz-opt.correct .qz-opt-ic { opacity:1; color:var(--ok); }
+.qz-opt.wrong { border-color:var(--no); background:color-mix(in srgb, var(--no) 9%, var(--bg-soft)); }
+.qz-opt.wrong .qz-opt-key { background:var(--no); color:#fff; }
+.qz-opt.wrong .qz-opt-ic { opacity:1; color:var(--no); }
+.qz-opt:disabled { cursor:default; }
+.qz-opt.dim { opacity:.58; }
+
+/* 键盘焦点环 */
+.chip:focus-visible, .qz-toggle:focus-visible, .qz-opt:focus-visible,
+.qz-btn:focus-visible, .qz-more:focus-visible, .qz-src:focus-visible, .qz-mod:focus-visible {
+  outline:2px solid var(--brand); outline-offset:2px;
+}
+
+/* 动作条 */
+.qz-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:18px; padding-top:16px; border-top:1px dashed var(--hairline); }
+.qz-btn { display:inline-flex; align-items:center; gap:7px; padding:9px 15px; border-radius:10px; border:1px solid var(--card-border); background:var(--bg-soft); color:var(--text-2); font-size:var(--fs-sm); font-weight:var(--fw-med); cursor:pointer; font-family:inherit; transition:all .25s var(--ease); }
+.qz-btn:hover { border-color:var(--brand); color:var(--brand); }
+.qz-btn-primary { background:var(--brand); border-color:var(--brand); color:#fff; }
+.qz-btn-primary:hover { background:#1d4ed8; border-color:#1d4ed8; color:#fff; }
+.qz-btn-primary:disabled { opacity:.45; cursor:not-allowed; background:var(--brand); border-color:var(--brand); }
+.qz-btn-known.on { background:color-mix(in srgb, var(--ok) 13%, transparent); border-color:var(--ok); color:var(--ok); }
+.qz-btn-review.on { background:color-mix(in srgb, var(--accent) 14%, transparent); border-color:var(--accent); color:var(--accent); }
+.qz-src { margin-left:auto; display:inline-flex; align-items:center; gap:6px; font-size:var(--fs-sm); color:var(--text-3); text-decoration:none; transition:color .25s var(--ease); max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.qz-src:hover { color:var(--brand); }
+.qz-src .ui-ic { width:15px; height:15px; }
+
+/* 揭示区（v0.1：4 盒） */
+.qz-reveal { margin-top:16px; display:block; animation:qzIn .35s var(--ease); }
+@keyframes qzIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:none; } }
+.qz-toggle-expl { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:9px; border:1px solid var(--card-border); background:var(--bg-soft); color:var(--text-2); font-size:var(--fs-sm); font-weight:var(--fw-med); cursor:pointer; font-family:inherit; transition:all .25s var(--ease); margin-bottom:12px; }
+.qz-toggle-expl:hover { border-color:var(--brand); color:var(--brand); }
+.qz-toggle-expl .ui-ic { width:15px; height:15px; transition:transform .25s var(--ease); }
+.qz-toggle-expl.on .ui-ic { transform:rotate(180deg); }
+.qz-answer { display:inline-flex; align-items:center; gap:7px; padding:8px 15px; border-radius:10px; background:color-mix(in srgb, var(--ok) 13%, transparent); color:var(--ok); font-size:var(--fs-body); font-weight:var(--fw-semi); margin-bottom:12px; }
+.qz-answer .ui-ic { width:17px; height:17px; }
+.qz-expl { padding:14px 16px; border-radius:12px; background:color-mix(in srgb, var(--mod-c) 5%, var(--bg-soft)); border:1px solid var(--card-border); margin-bottom:12px; }
+.qz-expl-body { font-size:var(--fs-body); color:var(--text-2); line-height:1.78; }
+.qz-refans { font-size:var(--fs-body); color:var(--text); line-height:1.8; padding-bottom:11px; margin-bottom:11px; border-bottom:1px dashed var(--hairline); }
+.qz-keypoints { margin-top:12px; padding-top:11px; border-top:1px dashed var(--hairline); }
+.qz-keypoints-h { font-size:var(--fs-xs); font-weight:var(--fw-semi); color:var(--text-3); letter-spacing:.6px; margin-bottom:7px; }
+.qz-keypoints ul { list-style:none; display:flex; flex-direction:column; gap:6px; }
+.qz-keypoints li { position:relative; padding-left:17px; font-size:var(--fs-sm); color:var(--text-2); line-height:1.65; }
+.qz-keypoints li::before { content:""; position:absolute; left:3px; top:.62em; width:5px; height:5px; border-radius:50%; background:var(--mod-c); }
+.qz-source { font-size:var(--fs-xs); color:var(--text-3); padding:9px 13px; border-radius:9px; background:var(--border); display:flex; align-items:center; gap:7px; }
+.qz-source .ui-ic { width:14px; height:14px; opacity:.7; }
+
+/* 加载更多 / 空态 */
+.qz-more { align-self:center; margin-top:6px; padding:11px 30px; border-radius:999px; border:1px solid var(--card-border); background:var(--card); color:var(--brand); font-size:var(--fs-sm); font-weight:var(--fw-semi); cursor:pointer; font-family:inherit; transition:all .25s var(--ease); }
+.qz-more:hover { border-color:var(--brand); box-shadow:var(--shadow-hover); }
+.qz-empty { text-align:center; padding:60px 24px; color:var(--text-3); background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius-lg); }
+.qz-empty .ui-ic { width:40px; height:40px; opacity:.5; margin-bottom:12px; }
+.qz-empty-t { font-size:var(--fs-lead); font-weight:var(--fw-semi); color:var(--text-2); margin-bottom:6px; }
+
+/* 原型说明（落地时删除） */
+.proto-note { max-width:1180px; margin:34px auto 0; padding:20px 24px; border-radius:var(--radius-md); background:color-mix(in srgb, var(--accent) 7%, var(--card)); border:1px dashed color-mix(in srgb, var(--accent) 45%, transparent); }
+.proto-note h3 { display:flex; align-items:center; gap:8px; font-size:var(--fs-h3); margin-bottom:10px; color:var(--text); }
+.proto-note h3 .ui-ic { color:var(--accent); }
+.proto-note ul { list-style:none; display:grid; grid-template-columns:1fr 1fr; gap:7px 22px; }
+.proto-note li { position:relative; padding-left:16px; font-size:var(--fs-sm); color:var(--text-2); line-height:1.7; }
+.proto-note li::before { content:""; position:absolute; left:2px; top:.66em; width:5px; height:5px; border-radius:50%; background:var(--accent); }
+.proto-note li b { color:var(--text); }
+
+@media (max-width: 960px) {
+  .header-inner { padding:0 16px; gap:14px; }
+  .hdr-search { display:none; }
+  .qz-wrap { padding:20px 16px 8px; }
+  .qz-fl { width:auto; padding-top:0; }
+  .qz-filter-row { flex-direction:column; gap:8px; }
+  .qz-search { min-width:100%; order:-1; }
+  .qz-toggles { width:100%; }
+  .qz-toggle { flex:1; justify-content:center; }
+  .qz-stem { font-size:16px; }
+  .qz-src { margin-left:0; width:100%; max-width:none; }
+  .proto-note ul { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">
+          <path d="M5 12h3l2-5 4 10 2-5h3"/><circle cx="12" cy="12" r="1.5" fill="#fff"/>
+        </svg>
+      </div>
+      车载测试学堂
+    </a>
+    <nav class="nav">
+      <a href="index.html">首页</a>
+      <a href="chapters.html">知识库</a>
+      <a href="glossary.html">术语表</a>
+      <a href="quiz-prototype.html" class="active">题库中心</a>
+    </nav>
+    <div class="header-right">
+      <div class="hdr-search">
+        <input type="search" placeholder="搜索章节 / 知识点…" aria-label="站内搜索">
+        <button type="button" aria-label="搜索"><svg class="ui-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
+      </div>
+      <button class="theme-btn" id="theme-btn" aria-label="切换主题">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42 1.42"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="qz-wrap">
+  <!-- 简化页头：仅标题 + 副标题(题量) -->
+  <section class="qz-head">
+    <div class="qz-h-top">
+      <div class="qz-h-title">题库中心</div>
+      <div class="qz-h-sub">轻量自测 · 从 <b>18</b> 个试点章节抽题 · 当前示例 <b>12</b> 题</div>
+    </div>
+  </section>
+
+  <!-- 工具条：搜索 + 3 toggle + 结果计数 -->
+  <div class="qz-toolbar">
+    <div class="qz-search">
+      <svg class="ui-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="qz-q" type="search" placeholder="搜题干 / 标签 / 章节…" aria-label="题目搜索">
+    </div>
+    <div class="qz-toggles">
+      <button type="button" class="qz-toggle" data-tg="shuffle">打乱顺序</button>
+      <button type="button" class="qz-toggle" data-tg="hideKnown">隐藏已掌握</button>
+      <button type="button" class="qz-toggle" data-tg="reviewOnly">只看再看</button>
+    </div>
+    <div class="qz-result" id="qz-result">匹配 <b>12</b> 题</div>
+  </div>
+
+  <!-- 4 行筛选（平铺，章节不分组） -->
+  <div class="qz-filters" id="qz-filters"></div>
+
+  <!-- 长列表 -->
+  <div class="qz-list" id="qz-list"></div>
+</div>
+
+<section class="proto-note">
+  <h3 id="proto-h"></h3>
+  <ul id="proto-list"></ul>
+</section>
+
+<footer class="site-footer">
+  <b>车载测试学堂</b> · 题库中心原型 v0.1 · 轻量自测，无分数 / 无进度 / 无打卡<br>
+  纯原生 JS + SVG · 科技写实风 · 亮/暗双主题
+</footer>
+
+<script>
+/* ============================================================
+   ICON —— 与 app.js 的 ICON() 同规格（fill=none / stroke=currentColor / 0 0 24 24）
+   v0.1 落地需并入 app.js 的新图标：quiz / cross / bookmark / chevronDown
+   （check 已在 app.js 中；search 头搜复用）
+   ============================================================ */
+const ICON = (function () {
+  const P = {
+    quiz: '<path d="M9 11l2 2 4-4"/><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/>',
+    check: '<path d="M20 6L9 17l-5-5"/>',
+    cross: '<path d="M18 6L6 18M6 6l12 12"/>',
+    bookmark: '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
+    link: '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
+    chevronDown: '<path d="M6 9l6 6 6-6"/>',
+    search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+    alert: '<path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>'
+  }
+  return function (n, cls) {
+    const d = P[n] || ''
+    return '<svg class="ui-ic' + (cls ? ' ' + cls : '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>'
+  }
+})()
+
+const MODULE_COLORS = { A: '#2563eb', B: '#06b6d4', C: '#8b5cf6', D: '#f59e0b', E: '#10b981', F: '#ef4444', R: '#ec4899' }
+const MODULE_NAMES = { A: '网络与协议', B: '工具链', C: '流程与方法', D: '域测试专项', E: '座舱功能测试', F: '标准与进阶', R: '学习路径' }
+const DIFF_COLORS = { '基础': '#10b981', '进阶': '#f59e0b', '挑战': '#ef4444' }
+const TYPE_NAMES = { single: '单选题', multiple: '多选题', judge: '判断题', short: '简答题' }
+
+/* ============================================================
+   QUIZ META —— 落地为 data/quiz-meta.json
+   ============================================================ */
+const QUIZ_META = {
+  pilotChapters: [
+    { num: 1, module: 'A', title: '车载网络架构' },
+    { num: 2, module: 'A', title: 'CAN 总线' },
+    { num: 3, module: 'A', title: 'LIN 总线' },
+    { num: 4, module: 'A', title: 'FlexRay' },
+    { num: 5, module: 'A', title: '车载以太网' },
+    { num: 6, module: 'A', title: 'UDS 诊断' },
+    { num: 7, module: 'A', title: 'OBD-II 车载自动诊断' },
+    { num: 8, module: 'B', title: 'CANoe 工具' },
+    { num: 9, module: 'B', title: 'CAPL 脚本' },
+    { num: 10, module: 'B', title: 'Python + CAN' },
+    { num: 11, module: 'B', title: 'ZCANpro 周立功 CAN 工具' },
+    { num: 23, module: 'B', title: 'CANoe Test Module 自动化测试' },
+    { num: 24, module: 'B', title: 'DBC 文件设计详解' },
+    { num: 39, module: 'A', title: '整车电子架构 10 分钟入门' },
+    { num: 40, module: 'A', title: '车载测试工程师的一天' },
+    { num: 41, module: 'A', title: '工具准备与免费替代方案' },
+    { num: 50, module: 'A', title: '第一次打开 CANoe' },
+    { num: 51, module: 'A', title: '如何看懂一份 DBC' }
+  ],
+  types: ['single', 'multiple', 'judge', 'short'],
+  difficulties: ['基础', '进阶', '挑战'],
+  cats: ['概念辨析', '参数记忆', '协议流程', '工具操作', '故障定位', '标准合规'],
+  targetTotal: 280,
+  targetKp: 159
+}
+
+/* ============================================================
+   QUESTIONS —— 原型示例 12 题，全部取自真实章节内容
+   落地为 data/quiz/NN.json，字段与此完全一致
+   ============================================================ */
+const QUESTIONS = [
+  {
+    id: 'Q-02-01-01', chapterNum: 2, sectionIndex: 1, sectionTitle: '一、物理层：两根线的世界',
+    module: 'A', type: 'single', cat: '参数记忆', difficulty: '基础', direction: '正向',
+    tags: ['CAN', '差分信号', '电平'],
+    stem: 'CAN 总线处于显性状态（逻辑 0）时，CAN_H 与 CAN_L 的典型电平分别是多少？',
+    options: [
+      { key: 'A', text: 'CAN_H ≈ 2.5V，CAN_L ≈ 2.5V' },
+      { key: 'B', text: 'CAN_H ≈ 3.5V，CAN_L ≈ 1.5V' },
+      { key: 'C', text: 'CAN_H ≈ 1.5V，CAN_L ≈ 3.5V' },
+      { key: 'D', text: 'CAN_H ≈ 5V，CAN_L ≈ 0V' }
+    ],
+    answer: ['B'],
+    explanation: '显性位靠"拉开差分电压"来表达：CAN_H 被抬到约 3.5V、CAN_L 被拉到约 1.5V，差分电压约 2V，收发器判为逻辑 0。隐性位则是两线都回到约 2.5V、差分约 0V，判为逻辑 1。选项 C 把高低线搞反，是最常见的记忆错误；差分电压的极性是有方向的，不能对调。',
+    keyPoints: ['隐性 2.5 对 2.5，差分 ≈ 0V，逻辑 1', '显性 3.5 对 1.5，差分 ≈ 2V，逻辑 0', '显性覆盖隐性——这是仲裁与错误帧的物理基础'],
+    sourceRef: { kind: 'table', label: '物理层电平表 · 状态/CAN_H/CAN_L/差分电压/逻辑' },
+    relatedTerms: ['差分信号', '显性', '隐性']
+  },
+  {
+    id: 'Q-02-01-02', chapterNum: 2, sectionIndex: 1, sectionTitle: '一、物理层：两根线的世界',
+    module: 'A', type: 'judge', cat: '参数记忆', difficulty: '基础', direction: '反向',
+    tags: ['CAN', '终端电阻', '台架检查'],
+    stem: '整车台架通电前用万用表断电测量 CAN_H 与 CAN_L 之间的电阻，正常读数应为 120Ω。',
+    answer: ['F'],
+    explanation: '错。终端电阻确实是 120Ω 一只，但总线物理两端各装一只，两只 120Ω 对总线来说是并联关系，所以在总线任意位置测 CAN_H↔CAN_L 应读到约 60Ω。读到 120Ω 说明只剩一只终端电阻（另一端漏装或断线），读到接近开路则两只都没接——这两种情况都会引起信号反射、波形振铃、错误帧激增。',
+    keyPoints: ['单只终端电阻 120Ω，匹配线束特性阻抗', '两端各一只，并联后实测约 60Ω', '实测 120Ω = 少了一只，属于典型台架搭建缺陷'],
+    sourceRef: { kind: 'table', label: '终端电阻速查表 · 阻值/位置/作用/少了会怎样' },
+    relatedTerms: ['终端电阻', '信号反射']
+  },
+  {
+    id: 'Q-02-02-01', chapterNum: 2, sectionIndex: 2, sectionTitle: '二、CAN帧格式：数据帧七段',
+    module: 'A', type: 'single', cat: '协议流程', difficulty: '进阶', direction: '正向',
+    tags: ['CAN', '标准帧', '扩展帧', '仲裁'],
+    stem: '一个标准帧和一个扩展帧同时起发，且两者仲裁段的前 11 位完全相同。总线上最终由谁赢得仲裁？',
+    options: [
+      { key: 'A', text: '扩展帧赢，因为扩展帧 ID 位数更多、信息量更大' },
+      { key: 'B', text: '标准帧赢，因为它的 IDE 位是显性 0，覆盖了扩展帧的隐性 1' },
+      { key: 'C', text: '两者冲突，双方都退出并随机退避后重发' },
+      { key: 'D', text: '由收发器硬件随机决定，协议未作规定' }
+    ],
+    answer: ['B'],
+    explanation: '前 11 位相同意味着仲裁在这 11 位上分不出胜负，比较继续往后走。紧接着的一位，标准帧发的是 RTR 位置上的 IDE=0（显性），扩展帧发的是 SRR=1（隐性），显性覆盖隐性，扩展帧检测到回读不一致就退出仲裁。选项 C 混淆了以太网 CSMA/CD 的冲突退避机制——CAN 是非破坏性仲裁，赢的一方帧完整发完，不需要重传。',
+    keyPoints: ['仲裁逐位比较，显性 0 覆盖隐性 1', '前 11 位相同时靠 IDE/SRR 位决胜，标准帧赢', 'CAN 是非破坏性仲裁，输的静默退场、赢的帧不受损'],
+    sourceRef: { kind: 'table', label: '标准帧 vs 扩展帧仲裁行为表 · 四种场景' },
+    relatedTerms: ['仲裁', '标准帧', '扩展帧', 'IDE']
+  },
+  {
+    id: 'Q-02-02-02', chapterNum: 2, sectionIndex: 2, sectionTitle: '二、CAN帧格式：数据帧七段',
+    module: 'A', type: 'single', cat: '参数记忆', difficulty: '挑战', direction: '正向',
+    tags: ['CAN', '位时序', '采样点'],
+    stem: '某 CAN 控制器位时序配置为 SYNC_SEG=1 Tq、TSEG1=12 Tq、TSEG2=2 Tq，总计 16 Tq。该配置的采样点位置约为多少？',
+    options: [
+      { key: 'A', text: '约 75%' },
+      { key: 'B', text: '约 81%' },
+      { key: 'C', text: '约 87.5%' },
+      { key: 'D', text: '约 93%' }
+    ],
+    answer: ['B'],
+    explanation: '采样点 =(1 + TSEG1) ÷ (1 + TSEG1 + TSEG2) = (1+12) ÷ 16 ≈ 81%，落在推荐区间 75%~87.5% 内，配置合理。这个公式必须能当场算：分子是同步段加相位缓冲前段，分母是一个完整位的总 Tq 数。采样点太早会在波形尚未稳定时取样导致误判，太晚则留给 TSEG2 的再同步余量不足，下一位同步容易出错。',
+    keyPoints: ['采样点 =(1+TSEG1)÷(1+TSEG1+TSEG2)', '推荐区间 75%~87.5%', '太早误判波形，太晚再同步余量不足'],
+    sourceRef: { kind: 'blockquote', label: '面试说 · 采样点设在哪' },
+    relatedTerms: ['位时序', '采样点', 'Tq']
+  },
+  {
+    id: 'Q-02-05-01', chapterNum: 2, sectionIndex: 5, sectionTitle: '五、CAN FD：升级版',
+    module: 'A', type: 'multiple', cat: '概念辨析', difficulty: '进阶', direction: '正向',
+    tags: ['CAN FD', '兼容性', '网关'],
+    stem: '关于 CAN FD，以下说法正确的有哪些？',
+    options: [
+      { key: 'A', text: '数据段最高速率可达 8 Mbps，远高于 CAN 2.0 的 1 Mbps' },
+      { key: 'B', text: '单帧数据最多 64 字节，刷写 ECU 时效率显著高于 CAN 2.0' },
+      { key: 'C', text: 'CAN FD 取消了扩展帧，只支持 11 位标准帧 ID' },
+      { key: 'D', text: '总线上的 CAN 2.0 节点不认识 FD 帧，会把它当错误帧处理' }
+    ],
+    answer: ['A', 'B', 'D'],
+    explanation: 'A、B、D 正确。C 错在把 CAN FD 和 CAN XL 搞混了：CAN FD 同时支持 11 位与 29 位 ID，真正只支持 11 位标准帧 ID 的是 CAN XL。D 是实际项目里最容易踩的坑——新旧 ECU 共存的过渡期，FD 帧会让 2.0 节点持续发错误帧，严重时引发错误帧风暴甚至 Bus Off，所以必须由网关做 FD 与 2.0 的隔离转换。',
+    keyPoints: ['FD 数据段最高 8 Mbps、单帧最多 64 字节', 'FD 仍支持 11/29 位 ID；只支持 11 位的是 CAN XL', '2.0 节点不识别 FD 帧，过渡期必须网关转换'],
+    sourceRef: { kind: 'table', label: 'CAN 2.0 vs CAN FD 参数对比表 + CAN FD vs CAN XL 对比表' },
+    relatedTerms: ['CAN FD', 'CAN XL', 'Bus Off']
+  },
+  {
+    id: 'Q-02-03-01', chapterNum: 2, sectionIndex: 3, sectionTitle: '三、仲裁机制：谁赢谁发',
+    module: 'A', type: 'short', cat: '协议流程', difficulty: '进阶', direction: '正向',
+    tags: ['CAN', '仲裁', 'CSMA/CD', '面试高频'],
+    stem: '面试官问：CAN 的总线仲裁和以太网的 CSMA/CD 有什么本质区别？为什么说 CAN 在高负载下"不会崩"？',
+    answer: [],
+    refAnswer: 'CAN 是"边发边听、逐位裁决"的非破坏性仲裁：所有节点同时发送 ID，靠线与特性让显性位覆盖隐性位，节点回读总线发现自己发的隐性被压成显性就立即退出，ID 小的一方全程无感知地把帧完整发完。以太网 CSMA/CD 是冲突检测：双方发完（或发到一半检测到冲突）才知道撞了，两边都要中止并随机退避重发，已发出的数据全部作废。所以高负载下以太网的冲突损耗随负载急剧上升，而 CAN 只是低优先级报文的延迟变大，高优先级报文的实时性依然有保障，总线本身不会崩溃。',
+    explanation: '这道题考的是"能不能讲清机制差异并推导出结论"，而不是背名词。答题主线：线与特性 → 逐位仲裁 → 非破坏性 → 高负载下只是低优先级延迟增大。如果只答"CAN 有优先级、以太网没有"，属于结论正确但过程缺失，面试官通常会继续追问"那为什么不会崩"。',
+    keyPoints: ['线与打底、逐位比 ID、显性吃隐性、小 ID 先走、输的下轮再来', 'CAN 非破坏性：赢的帧完整发完，不浪费带宽', '以太网 CSMA/CD 是发后检测，冲突双方都要退避重发', '高负载结论：CAN 不崩，只是低优先级报文延迟变大'],
+    sourceRef: { kind: 'blockquote', label: '面试说 · 仲裁口诀与 CSMA/CD 对比' },
+    relatedTerms: ['仲裁', '线与', 'CSMA/CD']
+  },
+  {
+    id: 'Q-02-04-01', chapterNum: 2, sectionIndex: 4, sectionTitle: '四、错误检测与容错',
+    module: 'A', type: 'single', cat: '故障定位', difficulty: '进阶', direction: '正向',
+    tags: ['CAN', '位错误', '错误帧'],
+    stem: 'CAN 的"位错误"是通过什么机制检测出来的？',
+    options: [
+      { key: 'A', text: '接收方计算 CRC 与发送方携带的 CRC 比对' },
+      { key: 'B', text: '发送方回读总线电平，与自己发出的位进行比对' },
+      { key: 'C', text: '连续 5 个相同位后检查是否插入了反向填充位' },
+      { key: 'D', text: '检查 CRC 分隔符、ACK 分隔符、EOF 等固定格式位是否被破坏' }
+    ],
+    answer: ['B'],
+    explanation: 'B 是位错误的定义：发送方一边发一边回读总线，若发出隐性却读回显性（仲裁段与 ACK 段除外），判定为位错误并立即发出主动错误帧。A 是 CRC 错误、C 是填充错误、D 是格式错误——这四种是 CAN 五大错误检测中最常被混淆的四个，面试里经常连起来问，要能一一对应到"谁检测、怎么检测、什么场景触发"。',
+    keyPoints: ['位错误：发送方回读比对，仲裁段与 ACK 段除外', 'CRC 错误由接收方算 CRC 比对发现', '填充错误：连续 5 个同电平位后必须插反向位', '格式错误：固定格式位被破坏'],
+    sourceRef: { kind: 'table', label: '错误类型表 · 错误类型/检测机制/触发场景/容错措施' },
+    relatedTerms: ['位错误', '错误帧', 'Bus Off']
+  },
+  {
+    id: 'Q-02-07-01', chapterNum: 2, sectionIndex: 7, sectionTitle: '七、测试实战关联',
+    module: 'A', type: 'short', cat: '故障定位', difficulty: '挑战', direction: '正向',
+    tags: ['CAN', '故障排查', 'DBC', '实战'],
+    stem: '台架上仪表车速一直不显示，但 Trace 里能看到车速报文在正常发送。请给出你的排查思路。',
+    answer: [],
+    refAnswer: '报文能收到说明物理层和链路层基本正常，问题大概率在解析或路由层。第一步在 Trace 中定位车速报文，同时对比 Raw Value 与 DBC 解析后的 Physical Value。若 Raw 正确、Physical 错误，问题在 DBC：依次核对 factor、offset、StartBit、Length 以及 Intel/Motorola 字节序，任何一项配错都会让物理值面目全非。若 Raw 本身就不对，则回到发送 ECU，查其软件版本与信号映射是否与需求文档一致。若 Raw 与 Physical 都正确，则查网关路由表是否把该信号转发到仪表所在网段，以及仪表的接收过滤规则是否误过滤。',
+    explanation: '这道题的得分点不在"猜中原因"，而在于展示分层定位的方法论：先用"能不能收到报文"这一条把物理层和链路层摘出去，再用"Raw 对不对"把 DBC 解析问题和发送侧问题切开，最后才查网关路由与接收过滤。上来就翻 DBC 的人排查效率低，也显不出思路。',
+    keyPoints: ['先看 Raw Value 与 Physical Value 是否一致，用它切分问题域', 'Physical 错 → 查 factor/offset/StartBit/Length/字节序', 'Raw 错 → 查发送 ECU 软件版本与信号映射', '都对 → 查网关路由表与接收过滤规则', '通用原则：物理层 → 数据链路层 → 应用层，逐层往上排'],
+    sourceRef: { kind: 'table', label: '故障排查表 · 仪表车速不显示' },
+    relatedTerms: ['DBC', '字节序', '网关']
+  },
+  {
+    id: 'Q-08-09-01', chapterNum: 8, sectionIndex: 9, sectionTitle: '十、面试高频考点',
+    module: 'B', type: 'single', cat: '工具操作', difficulty: '基础', direction: '正向',
+    tags: ['CANoe', '日志', 'blf', 'asc'],
+    stem: 'CANoe 中 .blf 与 .asc 两种日志格式的核心区别是什么？',
+    options: [
+      { key: 'A', text: '.blf 是二进制格式、体积小效率高；.asc 是文本格式、可直接阅读' },
+      { key: 'B', text: '.blf 只能存 CAN 报文；.asc 可以存所有总线类型' },
+      { key: 'C', text: '.blf 是 CANoe 工程文件；.asc 是导出的测试报告' },
+      { key: 'D', text: '两者内容完全一致，只是文件扩展名不同' }
+    ],
+    answer: ['A'],
+    explanation: '.blf 是 Vector 的二进制日志格式，写入效率高、体积小，适合长时间大流量录制；.asc 是 ASCII 文本格式，可以用记事本直接打开查看，便于人工比对和脚本处理，但体积大很多。选项 C 混淆了工程文件——CANoe 的工程文件是 .cfg，它打包的是数据库、拓扑、仿真节点、测试模块和硬件通道映射。',
+    keyPoints: ['.blf 二进制，高效小巧，适合长时间录制', '.asc 文本可读，便于人工查看与脚本解析', 'CANoe 工程文件是 .cfg，别和日志格式混淆'],
+    sourceRef: { kind: 'table', label: '面试高频考点表 · .blf 与 .asc 区别' },
+    relatedTerms: ['CANoe', 'BLF', 'ASC']
+  },
+  {
+    id: 'Q-08-09-02', chapterNum: 8, sectionIndex: 9, sectionTitle: '十、面试高频考点',
+    module: 'B', type: 'judge', cat: '工具操作', difficulty: '基础', direction: '反向',
+    tags: ['CANoe', 'Channel Mapping'],
+    stem: 'CANoe 中 Channel Mapping（通道映射）配置错误，通常只会导致部分报文丢失，不影响整体通信。',
+    answer: ['F'],
+    explanation: '错。Channel Mapping 决定了 CANoe 内部逻辑通道与实际硬件接口的对应关系，映射错了意味着数据根本没走到正确的物理通道上，典型表现是总线上完全没有通信，或者满屏错误帧，而不是"丢几帧"这种轻微症状。实际调试中，一上来发现"什么都收不到"，Channel Mapping 和硬件连接是必查的前两项。',
+    keyPoints: ['Channel Mapping = 逻辑通道 ↔ 硬件接口的对应关系', '配错的典型表现是总线无通信或全错误帧', '"收不到任何报文"时优先排查通道映射与硬件连接'],
+    sourceRef: { kind: 'table', label: '面试高频考点表 · Channel Mapping 错了会怎样' },
+    relatedTerms: ['CANoe', 'Channel Mapping']
+  },
+  {
+    id: 'Q-24-02-01', chapterNum: 24, sectionIndex: 2, sectionTitle: '三、Motorola vs Intel 字节序（高频考点）',
+    module: 'B', type: 'single', cat: '概念辨析', difficulty: '进阶', direction: '正向',
+    tags: ['DBC', '字节序', 'Motorola', 'Intel'],
+    stem: 'DBC 中某信号标注为 @1（Motorola 大端），其 StartBit 字段表示的是什么？',
+    options: [
+      { key: 'A', text: '信号最低位（LSB）所在的位号' },
+      { key: 'B', text: '信号最高位（MSB）所在的位号' },
+      { key: 'C', text: '信号所占的第一个字节的编号' },
+      { key: 'D', text: '信号在报文中的字节偏移量' }
+    ],
+    answer: ['B'],
+    explanation: 'Motorola（@1，大端）的 StartBit 指向信号的最高位 MSB，bit 编号从高到低倒着数；Intel（@0，小端）的 StartBit 指向最低位 LSB，编号从低到高正着数。这一条搞反，跨字节信号的解析结果会完全错乱——现实中转速被解析成 6000rpm 冲进红区、车速显示 320km/h 的事故，根因往往就在这里。拿到新 DBC 的稳妥做法是在 CANdb++ 的 Layout 视图里用已知特征值反推验证。',
+    keyPoints: ['Motorola @1：StartBit 指 MSB，bit 从高到低数', 'Intel @0：StartBit 指 LSB，bit 从低到高数', '搞反会导致跨字节信号解析值完全错误', '验证手段：CANdb++ Layout 视图 + 已知特征值反推'],
+    sourceRef: { kind: 'table', label: 'Motorola vs Intel 字节序对比表 · StartBit 含义' },
+    relatedTerms: ['DBC', '字节序', 'StartBit']
+  },
+  {
+    id: 'Q-24-11-01', chapterNum: 24, sectionIndex: 11, sectionTitle: '十二、面试高频考点',
+    module: 'B', type: 'multiple', cat: '概念辨析', difficulty: '挑战', direction: '正向',
+    tags: ['DBC', 'Signal Group', 'Multiplexing'],
+    stem: '关于 DBC 中的 Signal Group 与 Multiplexing（信号多路复用），以下说法正确的有哪些？',
+    options: [
+      { key: 'A', text: 'Signal Group 内的信号同时有效，必须原子更新，典型例子是四轮轮速' },
+      { key: 'B', text: 'Multiplexing 的各组信号互斥，同一时刻只有一组有效' },
+      { key: 'C', text: 'Multiplexing 依靠一个 M 选择器信号 + m0/m1 等被复用信号来实现' },
+      { key: 'D', text: '两者作用相同，Signal Group 只是 Multiplexing 的旧写法' }
+    ],
+    answer: ['A', 'B', 'C'],
+    explanation: 'A、B、C 正确，D 错。两者解决的是完全不同的问题：Signal Group 强调"同时有效、原子更新"，防止一组本该同时刷新的信号被拆开使用（四轮轮速取到不同时刻的值会让 ESP 算错）；Multiplexing 强调"互斥择一"，用一条报文分时承载多种互斥含义（比如车门状态和灯光状态轮流用同一批数据位），目的是节省 ID 与带宽。测试关注点也不同：前者验证原子性，后者验证选择器切换时的解析正确性。',
+    keyPoints: ['Signal Group = 组内同时有效、必须原子更新', 'Multiplexing = 组间互斥、同一时刻只有一组有效', 'Multiplexing 结构：M 选择器 + m0/m1 被复用信号', '两者目的不同，不可互相替代'],
+    sourceRef: { kind: 'table', label: '面试高频考点表 · Signal Group 和 Multiplexing 怎么区分' },
+    relatedTerms: ['DBC', 'Signal Group', 'Multiplexing']
+  }
+]
+
+/* ============================================================
+   QuizMark —— localStorage 轻标记（与 LastViewed 同族）
+   只存用户主动标注的 known / review，不存对错、不存分数
+   ============================================================ */
+const QuizMark = {
+  KEY: 'avt-quizmark',
+  _d: null,
+  all() {
+    if (this._d) return this._d
+    try { this._d = JSON.parse(localStorage.getItem(this.KEY) || '{}') } catch (e) { this._d = {} }
+    return this._d
+  },
+  get(id) { return this.all()[id] || '' },
+  set(id, v) {
+    const d = this.all()
+    if (!v || d[id] === v) delete d[id]; else d[id] = v
+    try { localStorage.setItem(this.KEY, JSON.stringify(d)) } catch (e) {}
+    return d[id] || ''
+  },
+  count(v) { const d = this.all(); return Object.keys(d).filter(k => d[k] === v).length }
+}
+
+/* ============================================================
+   QuizPage v0.1 —— 长列表自测
+   ============================================================ */
+const QuizPage = (function () {
+  const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const PAGE = 6
+  const state = { mod: 'all', type: 'all', diff: 'all', ch: 'all', q: '', shown: PAGE, shuffle: false, hideKnown: false, reviewOnly: false }
+  const sess = {}                 // 本次会话作答态（不落地）：{ picked:[], revealed, explOpen }
+  let SHUFFLE_ORDER = null        // 打乱顺序一次性生成，保持稳定
+  let filtersEl, listEl, resultEl
+
+  function countBy(fn) { return QUESTIONS.filter(fn).length }
+
+  /* ---------- 筛选 chip ---------- */
+  function chip(dim, val, label, c, color) {
+    const on = state[dim] === val
+    return '<button type="button" class="chip' + (color ? ' chip-mod' : '') + (on ? ' active' : '') + '"' +
+      (color ? ' style="--mod-c:' + color + '"' : '') +
+      ' data-dim="' + dim + '" data-val="' + esc(val) + '"' + (c === 0 ? ' disabled' : '') + '>' +
+      (color ? '<span class="c-dot"></span>' : '') + esc(label) +
+      (c == null ? '' : '<span class="c-count">' + c + '</span>') + '</button>'
+  }
+  function modCard(val, label, c, color, badge) {
+    const on = state.mod === val
+    return '<button type="button" class="qz-mod' + (on ? ' on' : '') + '"' +
+      ' data-mod="' + esc(val) + '"' + (c === 0 && val !== 'all' ? ' disabled' : '') +
+      (color ? ' style="--mod-c:' + color + '"' : '') + '>' +
+      (badge ? '<span class="qz-mod-badge">' + badge + '</span>' : '') +
+      '<span class="qz-mod-name">' + esc(label) + '</span>' +
+      '<span class="qz-mod-count">' + c + '</span></button>'
+  }
+  function renderFilters() {
+    let h = ''
+    // 模块：全站 7 模块（A-R）卡片式选择器，无题量模块 disabled；试点外模块先占位，扩量时不用改 UI
+    h += '<div class="qz-filter-row"><div class="qz-fl">模块</div><div class="qz-mods">'
+    h += modCard('all', '全部模块', QUESTIONS.length, null, null)
+    Object.keys(MODULE_NAMES).forEach(m => {
+      h += modCard(m, MODULE_NAMES[m], countBy(q => q.module === m), MODULE_COLORS[m], m)
+    })
+    h += '</div></div>'
+    h += '<div class="qz-filter-row"><div class="qz-fl">题型</div><div class="qz-chips">'
+    h += chip('type', 'all', '全部', QUESTIONS.length)
+    QUIZ_META.types.forEach(t => { h += chip('type', t, TYPE_NAMES[t], countBy(q => q.type === t)) })
+    h += '</div></div>'
+    h += '<div class="qz-filter-row"><div class="qz-fl">难度</div><div class="qz-chips">'
+    h += chip('diff', 'all', '全部', QUESTIONS.length)
+    QUIZ_META.difficulties.forEach(d => { h += chip('diff', d, d, countBy(q => q.difficulty === d), DIFF_COLORS[d]) })
+    h += '</div></div>'
+    // 章节：平铺全部 18，不分组、不级联
+    h += '<div class="qz-filter-row"><div class="qz-fl">章节</div><div class="qz-chips">'
+    h += chip('ch', 'all', '全部章节', QUESTIONS.length)
+    QUIZ_META.pilotChapters.forEach(c => {
+      h += chip('ch', String(c.num), c.num + ' ' + c.title, countBy(q => q.chapterNum === c.num), MODULE_COLORS[c.module])
+    })
+    h += '</div></div>'
+    filtersEl.innerHTML = h
+  }
+
+  /* ---------- 匹配（筛选 + 搜索 + toggle） ---------- */
+  function matchBase(q) {
+    if (state.mod !== 'all' && q.module !== state.mod) return false
+    if (state.type !== 'all' && q.type !== state.type) return false
+    if (state.diff !== 'all' && q.difficulty !== state.diff) return false
+    if (state.ch !== 'all' && String(q.chapterNum) !== state.ch) return false
+    if (state.q) {
+      const s = (q.stem + ' ' + (q.tags || []).join(' ') + ' ' + q.sectionTitle + ' ' + q.id).toLowerCase()
+      if (!s.includes(state.q.toLowerCase())) return false
+    }
+    return true
+  }
+  function baseList() {
+    let list = QUESTIONS.filter(q => matchBase(q))
+    if (state.hideKnown) list = list.filter(q => QuizMark.get(q.id) !== 'known')
+    if (state.reviewOnly) list = list.filter(q => QuizMark.get(q.id) === 'review')
+    if (state.shuffle) {
+      if (!SHUFFLE_ORDER) SHUFFLE_ORDER = QUESTIONS.map(q => q.id).sort(() => Math.random() - 0.5)
+      const pos = {}; SHUFFLE_ORDER.forEach((id, i) => { pos[id] = i })
+      list = list.slice().sort((a, b) => pos[a.id] - pos[b.id])
+    }
+    return list
+  }
+
+  /* ---------- 题卡 ---------- */
+  function optionsHTML(q, st) {
+    if (q.type === 'short') return ''
+    const opts = q.type === 'judge'
+      ? [{ key: 'T', text: '正确' }, { key: 'F', text: '错误' }]
+      : (q.options || [])
+    const revealed = st && st.revealed
+    const picked = st ? st.picked : []
+    return '<div class="qz-options">' + opts.map(o => {
+      let cls = 'qz-opt', ic = ''
+      if (revealed) {
+        const isAns = q.answer.indexOf(o.key) >= 0, isPk = picked.indexOf(o.key) >= 0
+        if (isAns) { cls += ' correct'; ic = ICON('check') }
+        else if (isPk) { cls += ' wrong'; ic = ICON('cross') }
+        else cls += ' dim'
+      } else if (picked.indexOf(o.key) >= 0) cls += ' picked'
+      return '<button type="button" class="' + cls + '" data-key="' + o.key + '"' + (revealed ? ' disabled' : '') + '>' +
+        '<span class="qz-opt-key">' + o.key + '</span>' +
+        '<span class="qz-opt-text">' + esc(o.text) + '</span>' +
+        '<span class="qz-opt-ic">' + ic + '</span></button>'
+    }).join('') + '</div>'
+  }
+  // v0.1 揭示区：4 盒（思路解析折叠 + 绿色答案框 + 解析框 + 素材来源死文本）
+  function revealHTML(q, st) {
+    const isShort = q.type === 'short'
+    const ansLabel = isShort ? '参考答案'
+      : '正确答案 ' + (q.type === 'judge' ? (q.answer[0] === 'T' ? '正确' : '错误') : q.answer.join(' · '))
+    const open = st && st.explOpen
+    let body = ''
+    if (isShort) {
+      body += '<div class="qz-refans">' + esc(q.refAnswer) + '</div>'
+    }
+    body += '<div class="qz-expl-body">' + esc(q.explanation) + '</div>'
+    if (q.keyPoints && q.keyPoints.length) {
+      body += '<div class="qz-keypoints"><div class="qz-keypoints-h">答题要点</div><ul>' +
+        q.keyPoints.map(k => '<li>' + esc(k) + '</li>').join('') + '</ul></div>'
+    }
+    const srcLabel = q.sourceRef ? q.sourceRef.label : q.sectionTitle
+    return '<div class="qz-reveal">' +
+      '<button type="button" class="qz-toggle-expl' + (open ? ' on' : '') + '" aria-expanded="' + (open ? 'true' : 'false') + '">思路解析 ' + ICON('chevronDown') + '</button>' +
+      '<div class="qz-answer">' + ICON('check') + esc(ansLabel) + '</div>' +
+      '<div class="qz-expl"' + (open ? '' : ' hidden') + '>' + body + '</div>' +
+      '<div class="qz-source">' + ICON('link') + '素材来源：' + esc(srcLabel) + '</div>' +
+    '</div>'
+  }
+  function cardHTML(q) {
+    const mc = MODULE_COLORS[q.module], dc = DIFF_COLORS[q.difficulty] || mc
+    const mk = QuizMark.get(q.id)
+    const badges = [
+      '<span class="qz-badge qz-badge-mod" style="--mod-c:' + mc + '">' + q.module + ' · 第' + q.chapterNum + '章</span>',
+      '<span class="qz-badge qz-badge-type">' + TYPE_NAMES[q.type] + '</span>',
+      '<span class="qz-badge qz-badge-diff" style="--df-c:' + dc + '">' + esc(q.difficulty) + '</span>',
+      '<span class="qz-badge qz-badge-cat">' + esc(q.cat) + '</span>'
+    ]
+    if (q.direction === '反向') badges.push('<span class="qz-badge qz-badge-dir">反向题</span>')
+    badges.push('<span class="qz-badge qz-badge-num">' + esc(q.id) + '</span>')
+    const submit = q.type === 'multiple'
+      ? '<button type="button" class="qz-btn qz-btn-primary qz-submit" disabled>' + ICON('check') + '提交作答</button>'
+      : (q.type === 'short' ? '<button type="button" class="qz-btn qz-btn-primary qz-submit">' + ICON('link') + '查看参考答案</button>' : '')
+    const st = sess[q.id]
+    return '<article class="qz-card" data-id="' + q.id + '" style="--mod-c:' + mc + ';--df-c:' + dc + '">' +
+      '<div class="qz-card-badges">' + badges.join('') + '</div>' +
+      '<div class="qz-stem">' + esc(q.stem) + (q.type === 'multiple' ? '<span class="qz-multi-hint">可多选</span>' : '') + '</div>' +
+      optionsHTML(q, st) +
+      '<div class="qz-actions">' +
+        submit +
+        '<button type="button" class="qz-btn qz-btn-known qz-mark' + (mk === 'known' ? ' on' : '') + '" data-mark="known">' + ICON('check') + '已掌握</button>' +
+        '<button type="button" class="qz-btn qz-btn-review qz-mark' + (mk === 'review' ? ' on' : '') + '" data-mark="review">' + ICON('bookmark') + '再看</button>' +
+        '<a class="qz-src" href="chapter.html?id=' + q.chapterNum + '&kp=' + q.sectionIndex + '" title="回到第' + q.chapterNum + '章原文知识点：' + esc(q.sectionTitle) + '">' + ICON('link') + esc(q.sectionTitle) + '</a>' +
+      '</div>' +
+      (st && st.revealed ? revealHTML(q, st) : '') +
+    '</article>'
+  }
+  function emptyHTML() {
+    return '<div class="qz-empty">' + ICON('search') +
+      '<div class="qz-empty-t">这个条件下暂时没有题目</div>' +
+      '<div>放宽筛选，或点击工具条的「只看再看」试试。</div></div>'
+  }
+
+  /* ---------- 渲染主列表 ---------- */
+  function render() {
+    const list = baseList()
+    resultEl.innerHTML = '匹配 <b>' + list.length + '</b> 题'
+    if (!list.length) { listEl.innerHTML = emptyHTML(); return }
+    const show = list.slice(0, state.shown)
+    let h = show.map(cardHTML).join('')
+    if (list.length > state.shown) h += '<button type="button" class="qz-more" id="qz-more">加载更多（剩 ' + (list.length - state.shown) + ' 题）</button>'
+    listEl.innerHTML = h
+  }
+
+  /* ---------- 作答即揭示（原地更新） ---------- */
+  function doReveal(cardEl, q) {
+    const st = sess[q.id] || (sess[q.id] = { picked: [], revealed: false, explOpen: false })
+    if (q.type !== 'short') {
+      const picked = q.type === 'multiple'
+        ? Array.from(cardEl.querySelectorAll('.qz-opt.picked')).map(b => b.getAttribute('data-key'))
+        : [cardEl.querySelector('.qz-opt.picked').getAttribute('data-key')]
+      cardEl.querySelectorAll('.qz-opt').forEach(b => {
+        b.disabled = true
+        const k = b.getAttribute('data-key')
+        const isAns = q.answer.indexOf(k) >= 0, isPk = picked.indexOf(k) >= 0
+        b.classList.remove('picked')
+        if (isAns) { b.classList.add('correct'); b.querySelector('.qz-opt-ic').innerHTML = ICON('check') }
+        else if (isPk) { b.classList.add('wrong'); b.querySelector('.qz-opt-ic').innerHTML = ICON('cross') }
+        else b.classList.add('dim')
+      })
+      st.picked = picked
+    }
+    st.revealed = true
+    const wrap = document.createElement('div'); wrap.innerHTML = revealHTML(q, st)
+    cardEl.appendChild(wrap.firstChild)
+    const sub = cardEl.querySelector('.qz-submit'); if (sub) sub.hidden = true
+  }
+
+  /* ---------- 事件 ---------- */
+  function bind() {
+    // 筛选 chip + 模块卡片
+    filtersEl.addEventListener('click', e => {
+      const modBtn = e.target.closest('.qz-mod')
+      if (modBtn && !modBtn.disabled) {
+        state.mod = modBtn.getAttribute('data-mod')
+        state.shown = PAGE; renderFilters(); render(); return
+      }
+      const c = e.target.closest('.chip'); if (!c || c.disabled) return
+      const dim = c.getAttribute('data-dim'), val = c.getAttribute('data-val')
+      state[dim] = val; state.shown = PAGE; renderFilters(); render()
+    })
+    // 工具条 toggle
+    document.querySelectorAll('.qz-toggle').forEach(b => {
+      b.addEventListener('click', () => {
+        const tg = b.getAttribute('data-tg')
+        state[tg] = !state[tg]
+        b.classList.toggle('on', state[tg])
+        if (tg === 'shuffle' && !state[tg]) SHUFFLE_ORDER = null   // 关闭打乱 → 恢复原始顺序
+        state.shown = PAGE; render()
+      })
+    })
+    // 搜索
+    document.getElementById('qz-q').addEventListener('input', e => { state.q = e.target.value.trim(); state.shown = PAGE; render() })
+    // 列表交互（选项/提交/思路解析折叠/标记/加载更多）
+    listEl.addEventListener('click', e => {
+      if (e.target.closest('#qz-more')) { state.shown += PAGE; render(); return }
+      const card = e.target.closest('.qz-card'); if (!card) return
+      const q = QUESTIONS.find(x => x.id === card.getAttribute('data-id')); if (!q) return
+
+      const tog = e.target.closest('.qz-toggle-expl')
+      if (tog) {
+        const st = sess[q.id] || (sess[q.id] = { picked: [], revealed: false, explOpen: false })
+        st.explOpen = !st.explOpen
+        const ex = card.querySelector('.qz-expl'); if (ex) ex.hidden = !st.explOpen
+        tog.classList.toggle('on', st.explOpen)
+        tog.setAttribute('aria-expanded', st.explOpen ? 'true' : 'false')
+        return
+      }
+      const opt = e.target.closest('.qz-opt')
+      if (opt && !opt.disabled) {
+        if (q.type === 'multiple') {
+          opt.classList.toggle('picked')
+          card.querySelector('.qz-submit').disabled = card.querySelectorAll('.qz-opt.picked').length === 0
+        } else {
+          card.querySelectorAll('.qz-opt').forEach(b => b.classList.remove('picked'))
+          opt.classList.add('picked'); doReveal(card, q)
+        }
+        return
+      }
+      if (e.target.closest('.qz-submit')) { doReveal(card, q); return }
+      const mk = e.target.closest('.qz-mark')
+      if (mk) { QuizMark.set(q.id, mk.getAttribute('data-mark')); render(); return }
+    })
+    // 主题
+    document.getElementById('theme-btn').addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme')
+      const next = cur === 'dark' ? 'light' : 'dark'
+      document.documentElement.setAttribute('data-theme', next)
+      localStorage.setItem('avt-theme', next)
+    })
+  }
+
+  /* ---------- 原型说明 ---------- */
+  function renderProtoNote() {
+    document.getElementById('proto-h').innerHTML = ICON('alert') + ' 原型说明 · v0.1 第一版设计'
+    document.getElementById('proto-list').innerHTML = [
+      '<b>第一版结构</b>：站点头 + 简化页头(标题+副标题) + 工具条(toggle) + 4 行筛选 + 长列表卡片',
+      '<b>工具条 3 toggle</b>：打乱顺序 / 隐藏已掌握 / 只看再看 + 题干搜索 + 匹配计数',
+      '<b>模块选择器</b>：全站 7 模块（A 网络与协议 / B 工具链 / C 流程与方法 / D 域测试专项 / E 座舱功能测试 / F 标准与进阶 / R 学习路径）卡片式展示；试点暂未覆盖的模块 disabled（0 题量），将来扩量不用改 UI',
+      '<b>筛选 4 行</b>：模块（7 模块卡片） / 题型 / 难度 / 章节（章节 18 个平铺，不分组不级联）',
+      '<b>题卡 6 徽标</b>：模块+章 / 题型 / 难度 / 分类 / 反向题(仅反向) / 题号',
+      '<b>揭示 4 盒</b>：思路解析折叠 + 绿色答案框 + 解析框(含要点) + 素材来源死文本',
+      '<b>核心交互</b>：单选/判断点选即揭示；多选提交后揭示；简答点「查看参考答案」揭示',
+      '<b>核心交互</b>：正确绿+对勾、误选红+叉、未选淡出、全部锁定',
+      '<b>核心交互</b>：已掌握/再看 互斥书签，写 localStorage 刷新留存；隐藏已掌握/只看再看即时生效',
+      '<b>图标</b>：quiz / cross / bookmark / chevronDown（v0.1 落地需并入 app.js 的新图标）',
+      '<b>列表批处理</b>：首次显示 6 题，底部「加载更多」每次 +6',
+      '<b>示例数据</b>：12 题取自第 2 / 8 / 24 章真实内容，正式版目标约 280 题、覆盖 159 个知识点',
+      '<b>产品红线</b>：全页无分数 / 无正确率 / 无百分比 / 无进度条 / 无打卡，localStorage 只存 known 与 review',
+      '<b>待落地</b>：拆 quiz.html + quiz.css + quiz.js；数据走 data/quiz/NN.json + 独立 quiz-bundle.js',
+      '<b>响应式</b>：≤960px 筛选标签换行、章节 chip 整行、题卡满宽',
+      '<b>说明</b>：本版为初版设计还原基础上再精简页头：去掉统计条(题目/章节/知识点/题型)和「无分数」声明框——前者是建设进度对用户无价值，后者是产品向用户解释自己没做什么，多余。核心交互与样式保持第一版结构不变。'
+    ].map(s => '<li>' + s + '</li>').join('')
+  }
+
+  return {
+    init() {
+      filtersEl = document.getElementById('qz-filters')
+      listEl = document.getElementById('qz-list')
+      resultEl = document.getElementById('qz-result')
+      renderFilters(); renderProtoNote(); bind(); render()
+    }
+  }
+})()
+window.QuizPage = QuizPage
+document.addEventListener('DOMContentLoaded', () => QuizPage.init())
+</script>
+</body>
+</html>

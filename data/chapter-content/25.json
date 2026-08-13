@@ -1,0 +1,222 @@
+{
+  "num": 25,
+  "slug": "车载自动化框架",
+  "title": "车载自动化测试框架 ⭐工具",
+  "oneliner": "中控/娱乐屏多为 Android 系统；仪表通常运行 QNX/Linux 等安全域系统，部分一芯多屏方案下由 Hypervisor 分域，仅非安全画面来自 Android，UI 自动化靠 ADB + Airtest/Appium 驱动；把零散脚本组织成分层框架，才能稳定、可维护、可回归。",
+  "sections": [
+    {
+      "title": "一、座舱自动化为什么需要框架",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "现代中控、娱乐屏多为 Android 系统；仪表通常运行 QNX/Linux 等安全域系统。它们的交互（点按、滑动、输入、语音触发）本质就是 App UI，因此车载座舱自动化 = Android UI 自动化。但「会写几行点击脚本」离「能用的自动化」差很远：控件动态变化、多分辨率适配、用例成百上千、结果要可追溯——这些靠一个分层框架才兜得住。"
+        },
+        {
+          "type": "blockquote",
+          "style": "核心理念",
+          "text": "自动化的价值不在「省人力」，而在「可重复、可回归、可量化」。一次手工点 100 步，和脚本点 100 步，单次成本差不多；但脚本能一夜跑十遍、能每次都点得一模一样、能自动出报告——这才是框架的意义。"
+        }
+      ]
+    },
+    {
+      "title": "二、技术栈总览",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "层",
+            "技术",
+            "角色"
+          ],
+          "rows": [
+            [
+              "系统底座",
+              "ADB（Android Debug Bridge）",
+              "连接设备、装包、启停、抓日志、注入输入"
+            ],
+            [
+              "原生驱动",
+              "UiAutomator2",
+              "Android 原生控件树定位，Appium/Airtest 的底层"
+            ],
+            [
+              "框架",
+              "Airtest / Appium",
+              "上层驱动，提供元素定位与操作 API"
+            ],
+            [
+              "脚本",
+              "Python",
+              "编排用例、断言、出报告"
+            ],
+            [
+              "总线协同",
+              "CANoe / ZCANpro",
+              "UI 操作的同时监听/注入 CAN 信号，做端到端验证"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "三、ADB 命令基础",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "ADB 是一切的上游。不熟练 ADB，自动化排错寸步难行。下面是座舱测试最高频的一组："
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "filename": "adb_cheatsheet.sh",
+          "code": "adb devices                 # 查看已连接设备（确认 serial 在线）\nadb shell am start -n com.xxx.launcher/.MainActivity   # 启动指定 Activity\nadb shell pm list packages | grep launcher   # 查包名\nadb logcat -b all | findstr \"ANR\\|CRASH\"    # 抓崩溃/ANR 日志\nadb shell input tap 960 540   # 1920×1080 横屏中控中心\nadb shell input text \"导航到家\" # 输入文本\nadb shell uiautomator dump /sdcard/ui.xml  # 导出当前控件树\nadb shell monkey -p com.xxx.launcher -v 10000  # 随机压测\nadb pull /sdcard/crash.log ./   # 拉取设备文件"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/adb-devices.svg",
+          "alt": "终端执行 adb devices 列出已连接设备",
+          "caption": "终端执行 adb devices：emulator / 真机序列号 / 网络设备均显示 device 即连接成功"
+        },
+        {
+          "type": "blockquote",
+          "style": "warning",
+          "text": "adb devices 看到 offline 或 unauthorized，先确认「USB 调试」已开、弹窗「允许调试」已点。车机往往默认关闭调试，且多次拒绝后需重启 adb（adb kill-server && adb start-server）才能重新弹授权。"
+        }
+      ]
+    },
+    {
+      "title": "四、Airtest vs Appium 选型",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "维度",
+            "Airtest",
+            "Appium"
+          ],
+          "rows": [
+            [
+              "定位方式",
+              "图像识别 + Poco 控件",
+              "原生控件树（WebDriver 协议）"
+            ],
+            [
+              "上手",
+              "快，IDE 录屏即脚本",
+              "需配 client/server，略重"
+            ],
+            [
+              "抗控件变化",
+              "强（靠截图）",
+              "弱（靠控件 ID，ID 变就挂）"
+            ],
+            [
+              "跨平台",
+              "Android/iOS/Win 游戏",
+              "多平台标准协议"
+            ],
+            [
+              "适合",
+              "HMI 图形多、控件不稳定",
+              "标准 App、需要规范框架"
+            ]
+          ]
+        },
+        {
+          "type": "image",
+          "src": "assets/images/airtest-ide.svg",
+          "alt": "Airtest IDE：左侧设备镜像与右侧脚本",
+          "caption": "Airtest IDE：左侧为车机实时镜像（绿圈为 touch 命中点），右侧为 Python 脚本"
+        },
+        {
+          "type": "paragraph",
+          "text": "座舱 HMI 常常自绘控件、ID 不稳定，Airtest 的图像识别反而更稳；但若被测是标准 Android App 且控件规范，Appium 的工程化更顺。实际项目常二者结合：Appium 做主框架，关键难定位处用 Airtest 图像兜底。"
+        }
+      ]
+    },
+    {
+      "title": "五、框架分层设计",
+      "content_blocks": [
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "Driver 层：封装 ADB/Airtest/Appium 连接与基础操作（点击、滑动、等待），隔离底层差异",
+            "Action 层：业务动作（如「进入导航并搜目的地」），由多个 Driver 操作组合",
+            "Case 层：用例脚本，调用 Action，做断言",
+            "Report 层：统一收集结果、截图、日志，生成 HTML 报告",
+            "Config 层：设备 SN、包名、环境地址等外置，一套代码多环境跑"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "六、与总线测试协同",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "座舱自动化的高级形态是「UI 操作 → 信号验证」闭环：脚本在屏上点「开空调」，同时用 [[08-CANoe]] 监听 HVAC 相关信号是否真的变为开启；或反过来，CANoe 注入「车速 120km/h」，验证屏上限速警示是否弹出。UI 与总线两套证据互证，才算端到端覆盖。"
+        },
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "这就是为什么车载自动化测试工程师要同时懂 ADB 和 CAN——只点屏不懂信号，测不出「功能真的生效」；只抓信号不点屏，测不出「用户交互路径正确」。两条线在 [[27-台架搭建与HIL]] 的台架上交汇。"
+        }
+      ]
+    },
+    {
+      "title": "七、实战套路与常见坑",
+      "content_blocks": [
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "元素定位优先用控件 ID，不稳定再用图像/坐标兜底",
+            "所有操作前加「等待元素出现」而非固定 sleep，提升稳定性",
+            "断言要具体：不仅断言「页面跳了」，还要断言「目标文本出现了」",
+            "多分辨率：避免写死坐标，改用相对比例或控件锚点",
+            "异常要截图+抓 logcat，排错才有据可依",
+            "车机启动慢，冷启动后等待时长要留足（常需 30s+）"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "八、面试高频考点",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "要点"
+          ],
+          "rows": [
+            [
+              "ADB 怎么连设备",
+              "开 USB 调试、adb devices 确认在线"
+            ],
+            [
+              "Airtest 和 Appium 区别",
+              "图像识别 vs 原生控件，稳定性取舍"
+            ],
+            [
+              "框架怎么分层",
+              "Driver/Action/Case/Report/Config"
+            ],
+            [
+              "UI 与总线怎么协同",
+              "屏上操作+CANoe 监听信号互证"
+            ],
+            [
+              "脚本不稳定怎么治",
+              "显式等待、控件优先、截图日志"
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": "车载座舱（中控/仪表/娱乐屏）多为 Android 系统，其 UI 自动化本质是 Android UI 自动化，技术栈以 ADB 为底座，UiAutomator2 为原生驱动，Airtest/Appium 为上层框架，Python 编排用例与报告，并可联动 CANoe/ZCANpro 做信号级端到端验证。ADB 是排错上游：devices 确认在线、am start 启 Activity、logcat 抓崩溃、input 注入操作、uiautomator dump 取控件树、monkey 压测。Airtest 靠图像识别抗控件变化、上手快；Appium 走标准 WebDriver 协议、工程化强——座舱 HMI 控件常不稳，二者常结合。框架要分层：Driver 封装底层、Action 组合业务、Case 写断言、Report 出报告、Config 外置多环境。高级形态是「UI 操作→信号验证」闭环：屏上点开空调同时用 CANoe 监听 HVAC 信号是否真变。稳定性靠显式等待、控件优先定位、异常截图+logcat。",
+  "prev_chapter": 24,
+  "next_chapter": 26
+}

@@ -1,0 +1,1007 @@
+{
+  "num": 5,
+  "slug": "车载以太网",
+  "title": "车载以太网 ⭐未来方向",
+  "oneliner": "车载以太网用单对双绞线跑100M~1Gbps，上层SOME/IP做服务化通信、DoIP做远程诊断刷写、TSN保证实时性——是OTA、ADAS、中央计算架构的通信基石，面试必问",
+  "sections": [
+    {
+      "title": "一、关键参数",
+      "icon": "📏",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "参数",
+            "100BASE-T1",
+            "1000BASE-T1"
+          ],
+          "rows": [
+            [
+              "速率",
+              "100 Mbps",
+              "1 Gbps"
+            ],
+            [
+              "线数",
+              "**单对双绞线（1对 = 2根）**",
+              "单对双绞线"
+            ],
+            [
+              "编码",
+              "PAM-3 / IEEE 802.3bw",
+              "IEEE 802.3bp"
+            ],
+            [
+              "最大距离",
+              "≤15m（非屏蔽UTP）",
+              "≤15m"
+            ],
+            [
+              "全双工",
+              "✅ 同时收发",
+              "✅"
+            ],
+            [
+              "标准以太网对比",
+              "百兆100BASE-TX需**2对4根**（一对收、一对发）",
+              "千兆1000BASE-T需4对8根"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "warning",
+          "text": "⚠️ **车载以太网≠家里网线**：车里用**单对**非屏蔽双绞线就实现全双工（一对线同时收发，靠混合电路分离）；传统百兆100BASE-TX要**2对**（一对收、一对发），千兆1000BASE-T要**4对**。物理层完全不同，不能直接互通。"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h4",
+          "text": "阶段性回顾"
+        },
+        {
+          "type": "review",
+          "current": "**你现在掌握的是**：车载以太网关键参数——100BASE-T1单对双绞线(不是4对)、全双工同时收发(不是分开收/发)、PAM-3编码(不是MLT-3)。和家用以太网物理层完全不同，不能互通。",
+          "next": "**接下来要解决的**：参数知道了（单对线、全双工）。但车上用的连接器长什么样？MATEnet和H-MTD是什么接头？OPEN Alliance TC标准体系包含哪些？这些是台架上接线时必须知道的事情。"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": true,
+      "point_count": 0
+    },
+    {
+      "title": "二、物理层细节：连接器与标准",
+      "icon": "🔌",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "**承上**：参数告诉你车载以太网用单对线+PAM-3编码。物理层细节回答的是——连接器长什么样、有哪些行业标准、怎么选型。这些是台架上接线时必须知道的。"
+        },
+        {
+          "type": "h3",
+          "text": "物理连接器类型"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "连接器类型",
+            "形态",
+            "车企偏好",
+            "特点"
+          ],
+          "rows": [
+            [
+              "**MATEnet** (罗森伯格)",
+              "小型化防水接头",
+              "欧洲车企(宝马/大众)",
+              "类似USB-C小型化，1对线+屏蔽，ISO 21195"
+            ],
+            [
+              "**H-MTD** (泰科)",
+              "高密度Mini连接器",
+              "北美/日系",
+              "比MATEnet更小，4通道可堆叠，支持1000BASE-T1"
+            ],
+            [
+              "**Coaxial** (同轴)",
+              "单芯同轴",
+              "早期方案/摄像头专用",
+              "BroadR-Reach时代用，现在退居摄像头连接"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "OPEN Alliance 标准体系"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "标准编号",
+            "内容",
+            "测试价值"
+          ],
+          "rows": [
+            [
+              "**TC1**",
+              "100BASE-T1 PHY定义 (IEEE 802.3bw)",
+              "物理层互操作性"
+            ],
+            [
+              "**TC8**",
+              "EMC/EMI测试规范",
+              "实车EMC测试必做"
+            ],
+            [
+              "**TC9**",
+              "线束和连接器特性阻抗(100欧姆)规范",
+              "线束质量检测"
+            ],
+            [
+              "**TC10**",
+              "休眠唤醒协议",
+              "静态电流测试依据"
+            ],
+            [
+              "**TC12**",
+              "1000BASE-T1 PHY与EMC",
+              "千兆以太网测试"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：车载以太网连接器目前两个主要阵营——MATEnet(欧洲)和H-MTD(北美/日系)。面试问到\"以太网和CAN的线束区别\"能答出连接器型号的，比只说\"一对线\"的明显高一档。"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h4",
+          "text": "阶段性回顾"
+        },
+        {
+          "type": "review",
+          "current": "**你现在掌握的是**：物理层连接器类型(MATEnet/H-MTD/Coaxial)+OPEN Alliance标准体系(TC1/TC8/TC9/TC10/TC12)。物理层的所有细节全部到位——从编码到线束到接头到标准。",
+          "next": "**接下来要解决的**：物理层只是一根线。车载以太网不只有一根线——它有一整层协议栈。SOME/IP/DoIP/TSN都在上面跑。协议栈全景是你理解上层协议的导航图。"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "三、协议栈全景",
+      "icon": "📋",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "**承上**：物理层细节解决了\"连接器长什么样、线束怎么测\"。协议栈全景回答的是——从物理层到应用层，每一层用什么协议。SOME/IP(服务发现)、DoIP(远程诊断)、TSN(时间同步)都在协议栈的第5~7层。"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "┌─────────────────────────────────────────────────────┐\n│  应用层                                                │\n│  SOME/IP (服务发现/Event/Method/Field)                 │\n│  DoIP (UDS over IP)    XCP over Ethernet(标定)       │\n├─────────────────────────────────────────────────────┤\n│  表示层: SOME/IP序列化(大小端、TLV编码)                 │\n├─────────────────────────────────────────────────────┤\n│  传输层: TCP(可靠) / UDP(实时)                         │\n├─────────────────────────────────────────────────────┤\n│  网络层: IP (IPv4/IPv6)                               │\n├─────────────────────────────────────────────────────┤\n│ 链路层: Ethernet MAC + VLAN(802.1Q) + TSN(Qav/Qbv)  │\n├─────────────────────────────────────────────────────┤\n│  物理层: 100BASE-T1 (单对双绞线、全双工、PAM-3编码)      │\n└─────────────────────────────────────────────────────┘"
+        },
+        {
+          "type": "h3",
+          "text": "VLAN (802.1Q)：域隔离+QoS分级"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "802.1Q Tag (4字节):\n┌────────┬─────┬─────┬────────────┐\n│ TPID   │ PCP │ DEI │    VID     │\n│ 0x8100 │3bit │1bit │   12bit    │\n└────────┴─────┴─────┴────────────┘\n\nPCP (Priority Code Point): 0~7，越高优先级越高\n  PCP=7 ─→ 网络控制（gPTP时钟同步帧）\n  PCP=6 ─→ 安全关键（线控制动/转向）\n  PCP=5 ─→ 实时音视频（AVB/TSN流）\n  PCP=0 ─→ 尽力而为（普通诊断/刷写）\n\nVID (VLAN ID): 1~4094，用于域隔离\n  VID=10 → ADAS域\n  VID=20 → 座舱域\n  VID=30 → 动力域"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"VLAN在车载以太网里做两件事——域隔离（ADAS和座舱VLAN不同，互不可见）+ QoS分级（PCP定优先级，TSN Qbv按PCP分配门控窗口）。\""
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": false,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "四、与CAN的深度对比",
+      "icon": "⚖️",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "**承上**：协议栈全景让你看清了L1~L7每一层的协议。但光说\"以太网比CAN快\"不够——快多少？快在哪？代价是什么？一张深度对比表说清选型逻辑。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "维度",
+            "CAN (2.0/FD)",
+            "车载以太网"
+          ],
+          "rows": [
+            [
+              "通信模式",
+              "**信号广播**：发一个信号，所有人都能收到",
+              "**服务化(SOA)**：谁订阅谁收到，定向发送"
+            ],
+            [
+              "寻址方式",
+              "CAN ID（11/29bit）→ 信号",
+              "IP地址 + Port + Service ID"
+            ],
+            [
+              "数据类型",
+              "固定小数据（8/64字节）",
+              "任意长度（TCP流、UDP包分段）"
+            ],
+            [
+              "发现机制",
+              "DBC静态配置",
+              "SOME/IP-SD动态服务发现"
+            ],
+            [
+              "配置方式",
+              "DBC文件（离线）",
+              "ARXML（AUTOSAR标准格式）"
+            ],
+            [
+              "刷写速度",
+              "500Kbps → 30分钟",
+              "100Mbps → **<3分钟**"
+            ],
+            [
+              "线束重量",
+              "双绞线，重",
+              "单对双绞线，更轻"
+            ],
+            [
+              "OTA能力",
+              "几乎不能",
+              "**原生支持**"
+            ],
+            [
+              "安全",
+              "无（裸奔）",
+              "TLS/SecOC/IPSec"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"以太网不是来取代CAN的，而是和CAN**并存**——以太网做高速骨干（域控互联、OTA、ADAS大数据），CAN继续管实时可靠的控制子网（动力、底盘），中间靠网关做Signal↔Service转换。未来车上长期是'以太网骨干 + CAN/CAN FD子网'的混合架构。\""
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "                以太网骨干网 100M/1Gbps（100BASE-T1 / 1000BASE-T1）\n   ┌──────────┬──────────┬──────────┐\n   │          │          │          │\n 智驾域控   座舱域控     T-BOX    中央网关\n (摄像头/  (IVI/仪表/  (4G/5G     │\n  雷达原始流)  HUD)     云端OTA)   ├── 动力CAN 500K：EMS/TCU/VCU\n                                 ├── 底盘CAN 500K：ESP/EPS/EPB\n                                 └── 车身CAN 125K：BCM（下挂LIN）\n        控制类ECU仍走CAN/CAN FD——可靠、便宜、实时，不会被以太网取代"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "五、SOME/IP 详解",
+      "icon": "🔗",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "通信模型：从信号到服务"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "CAN时代：                         SOME/IP时代：\n┌─────┐  (门状态=1, 广播)     ┌─────┐  OfferService(门状态服务)\n│ BCM │ ───────→ 所有人       │ BCM │ ───────→ SOME/IP-SD广播\n└─────┘                       └─────┘           ↓\n                              ┌─────┐    Subscribe(我关心门状态)\n                              │ IVI │ ←─────────────┤\n                              └─────┘               ↓\n                              BCM → IVI: Event(门开了)\n                              IVI → BCM: Method(锁门请求)"
+        },
+        {
+          "type": "h3",
+          "text": "四种通信模式"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "模式",
+            "方向",
+            "示例"
+          ],
+          "rows": [
+            [
+              "**Event**",
+              "Server→订阅的Client",
+              "车速变化时主动推"
+            ],
+            [
+              "**Method** (R&R)",
+              "Client→Server→Client",
+              "请求锁门→返回结果"
+            ],
+            [
+              "**Method** (Fire&Forget)",
+              "Client→Server",
+              "设置氛围灯颜色，无需回复"
+            ],
+            [
+              "**Field** (Get/Set/Notify)",
+              "双向",
+              "空调温度：可读/可写/变化时通知"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "SOME/IP-TP：大包分段传输"
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "SOME/IP基于UDP，单包MTU≈1400字节。ADAS摄像头一帧>1MB怎么办？→ TP分段。"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "原始数据 [█████████████████████████]  1.2MB 单帧\n\n分段后：\nSegment 1: [TP Header | offset=0     | 1392 bytes]\nSegment 2: [TP Header | offset=1392  | 1392 bytes]\n...\nSegment N: [TP Header | offset=...   | 剩余 + MoreFlag=0]\n\nTP Header 关键字段：\n- Message ID (Session ID, 4B)\n- Offset (当前偏移量, 4B)\n- More Segments Flag (1=还有, 0=最后一段)\n- 单段最大 1392 字节 (1400 UDP - SOME/IP Header)"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "vs DoIP",
+            "SOME/IP-TP",
+            "DoIP"
+          ],
+          "rows": [
+            [
+              "传输层",
+              "UDP",
+              "TCP"
+            ],
+            [
+              "分片",
+              "应用层自分段",
+              "TCP流自动分段"
+            ],
+            [
+              "适用",
+              "实时大数据（摄像头流）",
+              "可靠传输（诊断/刷写）"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "Service Discovery (SD) 流程"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "Server 启动 → OfferService          \"我提供车速服务！\"\n                                    (广播：Service ID + Instance ID)\n  \nClient 启动 → FindService           \"谁有车速服务？\"\n              (也可等Offer主动来)\n\nClient → SubscribeEventGroup        \"车速变化时通知我\"\nServer → SubscribeACK                \"好的，开始推送\"\nServer → Event(车速=80km/h)         周期性推送"
+        },
+        {
+          "type": "h4",
+          "text": "阶段性回顾"
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "你现在掌握的是：SOME/IP四种通信模式——Event(推送)、Method R&R(请求响应)、Method FF(即发即忘)、Field(读写+通知)。SD流程：OfferService -> FindService -> Subscribe -> SubscribeACK -> Event推送。SOME/IP-TP大包分段(1400字节/段)。"
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "接下来要解决的：SOME/IP解决了服务发现和通信。但远程诊断和刷写怎么办？CAN诊断500Kbps刷写30分钟，以太网100Mbps可以做到3分钟。DoIP就是把UDS诊断搬到以太网上。"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "六、DoIP：诊断飞起来",
+      "icon": "🏥",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "承上：SOME/IP解决了服务化通信。DoIP解决的是远程诊断和刷写——把传统CAN诊断的UDS搬到以太网上，速度从500Kbps到100Mbps，刷写时间从30分钟到3分钟。"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "传统CAN诊断                            DoIP以太网诊断\n500Kbps                                100Mbps\n刷写ECU ≈ 30分钟                       刷写ECU ≈ 2-3分钟\n\nTester                                Tester(PC/LAN口)\n  │                                      │\nOBD口(CAN)                             OBD口(以太网激活线)\n  │                                      │\nECU(直接响应)                           DoIP网关(激活路由)\n                                          │\n                                      ┌─→ ECU1(CAN)\n                                      ├─→ ECU2(CAN FD) \n                                      └─→ ECU3(以太网)"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "DoIP 步骤",
+            "报文",
+            "说明"
+          ],
+          "rows": [
+            [
+              "**车辆发现**",
+              "Vehicle ID Request (广播)",
+              "找到目标车辆的VIN/EID/GID"
+            ],
+            [
+              "**通信建立**",
+              "TCP连接 + TLS握手",
+              "安全通道（可选）"
+            ],
+            [
+              "**路由激活**",
+              "Routing Activation Request",
+              "告诉网关：我要访问哪个ECU"
+            ],
+            [
+              "→ 激活响应",
+              "Routing Activation Response",
+              "网关分配逻辑地址"
+            ],
+            [
+              "**诊断通信**",
+              "UDS请求封装在DoIP报文中",
+              "和普通UDS一模一样"
+            ],
+            [
+              "**关闭**",
+              "Routing Activation + TCP Close",
+              "释放连接"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "七、TSN：时间敏感网络",
+      "icon": "⏱️",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "TSN 让以太网获得 FlexRay 级别的确定性，是车载以太网做安全关键系统的前提。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "TSN 标准",
+            "中文",
+            "作用"
+          ],
+          "rows": [
+            [
+              "**802.1AS**",
+              "时钟同步",
+              "全网时钟误差 < 1μs（gPTP协议）"
+            ],
+            [
+              "**802.1Qbv**",
+              "时间感知调度",
+              "给关键数据预留时间窗口，到点优先发"
+            ],
+            [
+              "**802.1Qbu/802.3br**",
+              "帧抢占",
+              "高优先级帧可打断低优先级帧"
+            ],
+            [
+              "**802.1Qav**",
+              "流量整形",
+              "音视频流平滑传输，防抖动"
+            ],
+            [
+              "**802.1CB**",
+              "无缝冗余",
+              "双链路发相同数据，单路故障无感知"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "AVB vs TSN：进化关系"
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "AVB（Audio Video Bridging, IEEE 802.1BA）是 TSN 的前身，TSN 是 AVB 的超集和演进。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "对比维度",
+            "AVB (802.1BA)",
+            "TSN (802.1Q 系列扩展)"
+          ],
+          "rows": [
+            [
+              "时间线",
+              "2011年，面向车载音视频",
+              "2015年后，面向工业/自动驾驶"
+            ],
+            [
+              "时钟同步",
+              "802.1AS (gPTP)",
+              "802.1AS-Rev (增强gPTP，多时钟域)"
+            ],
+            [
+              "流预留",
+              "802.1Qat (SRP动态注册)",
+              "802.1Qcc (集中式/全分布式配置)"
+            ],
+            [
+              "流量整形",
+              "802.1Qav (CBS信用整形)",
+              "802.1Qbv (TAS时间门控) + Qav"
+            ],
+            [
+              "帧抢占",
+              "❌",
+              "✅ 802.1Qbu/802.3br"
+            ],
+            [
+              "无缝冗余",
+              "❌",
+              "✅ 802.1CB (FRER)"
+            ],
+            [
+              "确定性",
+              "软实时（毫秒级）",
+              "硬实时（微秒级）"
+            ],
+            [
+              "车载用途",
+              "音响、后座屏",
+              "ADAS融合、线控制动"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"TSN是AVB的进化版。AVB只管音视频的软实时，TSN加了Qbv门控和帧抢占后能做到微秒级硬实时——让以太网替代FlexRay成为可能。\""
+        },
+        {
+          "type": "h3",
+          "text": "gPTP (802.1AS) 时钟同步三步流程"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "Step 1: BMCA — 选出主时钟(Grandmaster)\n  所有节点发 Announce → 比较 clockQuality/priority →\n  最优者成为 GM，其余为 Slave\n\nStep 2: Pdelay — 链路延迟测量\n  Slave ──Pdelay_Req─────────→ Master (t1)\n  Slave ←──Pdelay_Resp──────── Master (t2)\n  Slave ←──Pdelay_Resp_FollowUp Master (携带t2, t3)\n  Slave 记录 t4 = 接收时刻\n  → 链路延迟 = ((t4-t1) - (t3-t2)) / 2\n\nStep 3: Sync — 时钟同步\n  Master ──Sync(t1)──────────→ Slave (记录t2)\n  Master ──Follow_Up(t1)──────→ Slave\n  → Clock_Offset = t2 - t1 - 链路延迟\n  → Slave 调整本地时钟 → 全网同步至 <1μs"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"gPTP是TSN的基石，没有它Qbv门控就没意义——你门开对了但时钟不对，数据照样错过窗口。GM挂了BMCA自动重选，<100ms切换。\""
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"TSN解决了'以太网不确定性'的痛点。有了TSN，线控制动的紧急报文走以太网也能保证微秒级延迟——这就是车载以太网替代FlexRay的技术底气。\""
+        },
+        {
+          "type": "h4",
+          "text": "阶段性回顾"
+        },
+        {
+          "type": "review",
+          "current": "**你现在掌握的是**：TSN 五大标准——802.1AS(gPTP 时钟同步<1μs)、802.1Qbv(时间门控预留窗口)、802.1Qbu(帧抢占高优先打断低优先)、802.1Qav(流量整形平滑抖动)、802.1CB(无缝冗余双路发相同数据)。gPTP 三步流程：BMCA 选主时钟 → Pdelay 测链路延迟 → Sync 校准全网时钟。TSN 让以太网具备了替代 FlexRay 做安全关键系统的能力——微秒级硬实时+帧抢占保紧急数据+无缝冗余防单点故障。",
+          "next": "**接下来要解决的**：TSN 让以太网可以做安全关键系统了。但这些技术在真实车型里怎么组合？T-BOX 怎么通过以太网做 OTA？ADAS 域控间怎么用 1000BASE-T1 传摄像头原始数据？座舱和仪表怎么用 100BASE-T1+LVDS 投屏？诊断刷写怎么从 30 分钟变成 3 分钟？"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "八、实际车型应用",
+      "icon": "🧰",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "**承上**：TSN 给了以太网确定性，让它能替代 FlexRay 做安全关键系统。实际车型里以太网已经大规模上车——T-BOX 到云端走 4G/5G+以太网做 OTA、ADAS 域控间走 1000BASE-T1 传摄像头原始数据、座舱走 100BASE-T1+LVDS 投屏、诊断刷写走 DoIP 从 30 分钟到 3 分钟、中央网关做多路域间交换。每一层理论都在实车上落地。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "场景",
+            "用什么",
+            "实际例子"
+          ],
+          "rows": [
+            [
+              "**T-BOX到云端**",
+              "4G/5G + 车内以太网",
+              "OTA升级包从云端→T-BOX→以太网→域控"
+            ],
+            [
+              "**ADAS域控**",
+              "1000BASE-T1",
+              "摄像头原始数据→域控融合"
+            ],
+            [
+              "**座舱域控**",
+              "100BASE-T1 + LVDS",
+              "中控大屏、仪表投屏"
+            ],
+            [
+              "**诊断刷写**",
+              "DoIP(100BASE-T1)",
+              "产线刷写从30分钟→3分钟"
+            ],
+            [
+              "**中央网关**",
+              "多路以太网交换",
+              "域间大数据互通"
+            ]
+          ]
+        },
+        {
+          "type": "h4",
+          "text": "阶段性回顾"
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "你现在掌握的是：以太网在实车上的5大应用——T-BOX(OTA)、ADAS(1000BASE-T1摄像头流)、座舱(100BASE-T1+LVDS)、诊断(DoIP刷写3分钟)、中央网关(多路交换)。"
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "接下来要解决的：实车怎么用知道了。台架上怎么测——物理层看眼图、SOME/IP测SD时间、DoIP验路由激活、TSN量gPTP精度、MACsec测加密延迟。每层有每层的工具。"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "九、测试实战关联",
+      "icon": "🛠️",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "承上：实际车型让你知道以太网在车上怎么布线。测试实战把每一层理论映射到具体操作——物理层(CANoe Ethernet+示波器)、SOME/IP(服务发现时间)、DoIP(Routing Activation)、TSN(gPTP同步精度)。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "测试层",
+            "测试项",
+            "工具"
+          ],
+          "rows": [
+            [
+              "**物理层**",
+              "眼图测试、开路/短路诊断、信号衰减",
+              "示波器+矢量网络分析仪"
+            ],
+            [
+              "**SOME/IP**",
+              "服务发现时间、订阅正确性、序列化/反序列化",
+              "CANoe Ethernet模块"
+            ],
+            [
+              "**DoIP**",
+              "车辆发现、路由激活、诊断响应时间",
+              "CANoe + DIVA"
+            ],
+            [
+              "**TSN**",
+              "gPTP同步精度、Qbv门控调度、帧抢占效果",
+              "Vector TSN测试工具"
+            ],
+            [
+              "**性能**",
+              "吞吐量、UDP丢包率、TCP重传率",
+              "iperf/CANoe"
+            ],
+            [
+              "**安全**",
+              "SecOC MAC校验、TLS证书、DoS攻击防护",
+              "渗透测试工具"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "MACsec (802.1AE)：二层线速加密"
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "唯一能做线速逐跳加密+完整性校验的链路层安全方案，ADAS原始传感器数据流必须上。"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "MACsec 帧结构:\n┌────┬────┬──────────┬────────────────┬────────┐\n│ DA │ SA │ SecTAG   │ 加密Payload     │  ICV   │\n│6B  │6B  │8~16B    │                │8~16B   │\n└────┴────┴──────────┴────────────────┴────────┘\n         SecTAG: AN(2bit关联号) + PN(32bit包序号防重放) + SCI(8B安全通道ID)\n         ICV: AES-GCM-128 完整性校验值"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "安全方案",
+            "工作层",
+            "保护范围",
+            "延迟",
+            "车载应用"
+          ],
+          "rows": [
+            [
+              "**MACsec**",
+              "L2链路",
+              "逐跳，每段独立加密",
+              "**极低**(硬件线速)",
+              "域控间、摄像头到域控"
+            ],
+            [
+              "**IPSec**",
+              "L3网络",
+              "端到端",
+              "中",
+              "T-BOX到云端"
+            ],
+            [
+              "**TLS**",
+              "L4传输",
+              "端到端应用",
+              "中",
+              "DoIP安全通道"
+            ],
+            [
+              "**SecOC**",
+              "应用层",
+              "PDU级认证",
+              "极低",
+              "CAN/CAN FD信号"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"为什么ADAS原始数据要MACsec不用TLS？因为TLS走TCP开销太大，摄像头原始数据流动辄Gbps级，不可能逐包做高层加密。MACsec硬件线速加密，延迟可忽略。\""
+        },
+        {
+          "type": "h3",
+          "text": "常见故障排查"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "故障",
+            "原因",
+            "排查"
+          ],
+          "rows": [
+            [
+              "SOME/IP无Offer",
+              "Server未启动/Service ID配错",
+              "抓包看SD报文，查ARXML"
+            ],
+            [
+              "订阅失败",
+              "EventGroup不匹配",
+              "对比ARXML的Provide/Consume"
+            ],
+            [
+              "DoIP连不上",
+              "以太网激活线没接/TCP端口错",
+              "13400端口、激活线电压"
+            ],
+            [
+              "丢包严重",
+              "线束过长/EMC干扰",
+              "缩短线缆、网分测S参数"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "十、面试高频考点",
+      "icon": "🎯",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "必会基础"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "回答"
+          ],
+          "rows": [
+            [
+              "**车载以太网跟普通网线区别**",
+              "单对双绞线(不是RJ45)、100BASE-T1、全双工、PAM-3编码"
+            ],
+            [
+              "**SOME/IP三个核心**",
+              "Event(推送)、Method(请求响应)、Field(可读写属性+通知)"
+            ],
+            [
+              "**DoIP比CAN诊断快在哪**",
+              "100M vs 500K，刷写30分钟→3分钟"
+            ],
+            [
+              "**为什么OTA需要以太网**",
+              "升级包几个GB，CAN根本传不动"
+            ],
+            [
+              "**以太网会取代CAN吗**",
+              "不会。以太网做高速骨干，CAN继续做动力/底盘控制子网，长期并存"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "进阶加分项"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "回答"
+          ],
+          "rows": [
+            [
+              "**SOME/IP-SD流程**",
+              "OfferService→FindService→Subscribe→SubscribeACK→Event推送"
+            ],
+            [
+              "**TSN解决什么问题**",
+              "以太网不确定性→确定延迟，替代FlexRay做安全关键"
+            ],
+            [
+              "**DoIP安全怎么保证**",
+              "TLS加密通道 + 激活线物理保护 + MAC地址白名单"
+            ],
+            [
+              "**CAN和以太网网关怎么做**",
+              "Signal→Service转换。CAN DBC信号映射到SOME/IP Event"
+            ],
+            [
+              "**VLAN在车载以太网中干什么**",
+              "隔离不同的域（ADAS VLAN 10, 座舱 VLAN 20），安全+QoS"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "十一、一句话面试速答",
+      "icon": "🎯",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "\"车载以太网了解吗？\""
+        },
+        {
+          "type": "paragraph",
+          "text": ">"
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "\"了解。车载以太网用100BASE-T1单对双绞线，100Mbps全双工。上层跑SOME/IP做服务化通信——和CAN的信号广播不同，SOME/IP是谁订阅谁收到。跑DoIP做远程诊断，刷写速度比CAN快200倍。TSN保证确定性，做安全关键系统。目前ADAS域控和T-BOX已经标配以太网。我们测试主要关注服务发现、DoIP路由激活、信号→服务的一致性映射。\""
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "⚠️ 实战中常见严重问题"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "严重度",
+            "现象",
+            "根因+教训"
+          ],
+          "rows": [
+            [
+              "**SOME/IP服务发现失败**",
+              "严重",
+              "ADAS域控找不到摄像头服务→自动驾驶功能不可用",
+              "Service ID/Instance ID配置不一致，ARXML和ECU固件必须同步"
+            ],
+            [
+              "**DoIP路由激活失败**",
+              "中等",
+              "诊断仪搜到车→路由激活被拒→无法刷写",
+              "激活线电压不足/安全网关白名单未包含诊断仪MAC"
+            ],
+            [
+              "**TSN时钟不同步**",
+              "严重",
+              "gPTP主时钟故障→全网时间漂移→Qbv门控错位→关键帧被延迟",
+              "TSN主时钟冗余必须验证，主备切换<100ms"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "⬅ 返回 [[MOC_车载测试]] | 继续 → [[06-UDS诊断]]"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    }
+  ],
+  "summary": "\"车载以太网了解吗？\" > > \"了解。车载以太网用100BASE-T1单对双绞线，100Mbps全双工。上层跑SOME/IP做服务化通信——和CAN的信号广播不同，SOME/IP是谁订阅谁收到。跑DoIP做远程诊断，刷写速度比CAN快200倍。TSN保证确定性，做安全关键系统。目前ADAS域控和T-BOX已经标配以太网。我们测试主要关注服务发现、DoIP路由激活、信号→服务的一致性映射。\"",
+  "prev_chapter": {
+    "num": 4,
+    "name": "FlexRay"
+  },
+  "next_chapter": {
+    "num": 6,
+    "name": "UDS诊断"
+  }
+}

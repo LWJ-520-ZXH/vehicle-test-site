@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+(function () {
+  const saved = localStorage.getItem('avt-theme') || 'system'
+  let t = 'light'
+  if (saved === 'dark') t = 'dark'
+  else if (saved === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark'
+  document.documentElement.setAttribute('data-theme', t)
+  document.documentElement.style.background = t === 'dark' ? '#0a0f1e' : '#f4f7fb'
+})()
+</script>
+<title>题库中心 · 车载测试学堂</title>
+<meta name="description" content="车载测试学堂题库中心：从试点章节抽取真实知识点题目，轻量自测、作答即揭示解析、可标记「已掌握 / 再看」。覆盖 CAN/LIN/以太网/UDS 诊断/CANoe/CAPL/DBC 等核心考点。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232563eb'/><text x='16' y='22' text-anchor='middle' fill='white' font-size='18' font-family='sans-serif' font-weight='bold'>VT</text></svg>">
+<link rel="stylesheet" href="assets/css/main.css?v=20260813225913">
+<link rel="stylesheet" href="assets/css/quiz.css?v=20260813225913">
+<script>
+(function(){
+  var V='20260813225913';
+  function check(){
+    fetch('assets/version.json?t='+Date.now(),{cache:'no-store'})
+      .then(function(r){return r.json();})
+      .then(function(j){ if(j&&j.version&&j.version!==V){location.reload(true);} })
+      .catch(function(){});
+  }
+  check();
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible'){ setTimeout(check,800); }
+  });
+})();
+</script>
+</head>
+<body>
+
+<!-- ====== 顶部导航 ====== -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">
+          <path d="M5 12h3l2-5 4 10 2-5h3"/>
+          <circle cx="12" cy="12" r="1.5" fill="#fff"/>
+        </svg>
+      </div>
+      车载测试学堂
+    </a>
+    <nav class="nav">
+      <a href="index.html">首页</a>
+      <div class="nav-item-dropdown">
+        <a href="chapters.html">知识库</a>
+        <div class="nav-dropdown" id="kb-dropdown"><!-- JS填充 --></div>
+      </div>
+      <a href="glossary.html" title="专业术语速查与释义">术语表</a>
+      <a href="quiz.html" class="active" title="知识点自测题库">题库中心</a>
+    </nav>
+    <div class="header-right">
+      <div class="hdr-search">
+        <input id="hdr-search" type="search" placeholder="搜索章节 / 知识点…" aria-label="站内搜索">
+        <button type="button" id="hdr-search-btn" aria-label="搜索"><svg class="ui-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
+      </div>
+      <button class="theme-btn" id="theme-btn" aria-label="切换主题">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42 1.42"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="qz-wrap">
+  <!-- 简化页头：仅标题 + 副标题(题量，由 quiz.js 按真实数据填充) -->
+  <section class="qz-head">
+    <div class="qz-h-top">
+      <div class="qz-h-title">题库中心</div>
+      <div class="qz-h-sub"></div>
+    </div>
+  </section>
+
+  <!-- 工具条：搜索 + 3 toggle + 结果计数 -->
+  <div class="qz-toolbar">
+    <div class="qz-search">
+      <svg class="ui-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="qz-q" type="search" placeholder="搜题干 / 标签 / 章节…" aria-label="题目搜索">
+    </div>
+    <div class="qz-toggles">
+      <button type="button" class="qz-toggle" data-tg="shuffle">打乱顺序</button>
+      <button type="button" class="qz-toggle" data-tg="hideKnown">隐藏已掌握</button>
+      <button type="button" class="qz-toggle" data-tg="reviewOnly">只看再看</button>
+    </div>
+    <div class="qz-result" id="qz-result">匹配 <b>0</b> 题</div>
+  </div>
+
+  <!-- 4 行筛选（平铺，章节不分组） -->
+  <div class="qz-filters" id="qz-filters"></div>
+
+  <!-- 长列表 -->
+  <div class="qz-list" id="qz-list"></div>
+</div>
+
+<!-- ====== 页脚 ====== -->
+<footer class="site-footer">
+  <b>车载测试学堂</b> · 题库中心 · 轻量自测，无分数 / 无进度 / 无打卡<br>
+  纯原生 JS + SVG · 科技写实风 · 亮/暗双主题
+</footer>
+
+<script src="assets/js/data-bundle.js?v=20260813225913" defer></script>
+<script src="assets/js/app.js?v=20260813225913" defer></script>
+<script src="assets/js/quiz-bundle.js?v=20260813225913" defer></script>
+<script src="assets/js/quiz.js?v=20260813225913" defer></script>
+</body>
+</html>

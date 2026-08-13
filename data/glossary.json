@@ -1,0 +1,550 @@
+{
+  "glossary": [
+    {
+      "term": "ECU",
+      "cat": "基础",
+      "full": "Electronic Control Unit 电子控制单元",
+      "def": "车上的微型电脑，负责控制某个具体功能（如门窗、制动）。几十上百个 ECU 通过总线连成整车网络。"
+    },
+    {
+      "term": "网关",
+      "cat": "基础",
+      "full": "Gateway",
+      "def": "连接不同总线（CAN/LIN/以太网）的“翻译官+守门员”，做协议转换、信号路由与安全隔离。"
+    },
+    {
+      "term": "总线",
+      "cat": "基础",
+      "full": "Bus",
+      "def": "车上 多个 ECU 共享的通信介质（CAN 为一对差分线，LIN 为单线；车载以太网是点对点+交换机组网，习惯一并归入车载网络），典型如 CAN、LIN、车载以太网。"
+    },
+    {
+      "term": "CAN",
+      "cat": "协议",
+      "full": "Controller Area Network",
+      "def": "汽车最核心的通信协议，所有 ECU 挂在一对差分线上广播通信，ID 越小优先级越高。"
+    },
+    {
+      "term": "CAN FD",
+      "cat": "协议",
+      "full": "CAN Flexible Data-rate",
+      "def": "CAN 的升级版，速率更高、单帧数据更长，兼容 CAN 生态，是当前主流升级方向。"
+    },
+    {
+      "term": "LIN",
+      "cat": "协议",
+      "full": "Local Interconnect Network",
+      "def": "CAN 的低成本“小弟”：单线、主从架构、最高 19.2kbps（常说 20kbps），专伺候车窗/座椅/天窗等不急的活。"
+    },
+    {
+      "term": "FlexRay",
+      "cat": "协议",
+      "full": "FlexRay",
+      "def": "时间触发+双通道冗余的总线，曾为线控底盘设计，因成本高生态封闭，新平台多转向 CAN FD/以太网。"
+    },
+    {
+      "term": "车载以太网",
+      "cat": "协议",
+      "full": "Automotive Ethernet",
+      "def": "用单对双绞线跑 100M~1Gbps，上层 SOME/IP 做服务化通信，是 OTA/ADAS/中央计算架构的基石。"
+    },
+    {
+      "term": "SOME/IP",
+      "cat": "协议",
+      "full": "Scalable service-Oriented MiddlewarE over IP",
+      "def": "车载以太网上的服务化通信协议，把“信号”变成“服务调用”，支持发布/订阅。"
+    },
+    {
+      "term": "DoIP",
+      "cat": "协议",
+      "full": "Diagnostic over IP",
+      "def": "基于以太网的诊断传输协议，让 UDS 诊断/刷写飞起来，remote 诊断与大面积刷写靠它。"
+    },
+    {
+      "term": "TSN",
+      "cat": "协议",
+      "full": "Time-Sensitive Networking",
+      "def": "时间敏感网络，给以太网加确定性时延保障，让音视频/控制流量在同一根线上不打架。"
+    },
+    {
+      "term": "CAN XL",
+      "cat": "协议",
+      "full": "CAN eXtra Long",
+      "def": "CAN 的第三代，单帧数据最长 2048 字节、速率约 10Mbps（规划可达 20Mbps），介于 CAN FD 与以太网之间，主打“大payload 还保留 CAN 简单性”。"
+    },
+    {
+      "term": "J1939",
+      "cat": "协议",
+      "full": "SAE J1939",
+      "def": "商用车（卡车/客车）基于 CAN 的应用层协议，用 29 位扩展帧+参数组(PGN)描述发动机/车速等重型车信号。"
+    },
+    {
+      "term": "CANopen",
+      "cat": "协议",
+      "full": "CANopen",
+      "def": "基于 CAN 的通用应用层协议，多用于工业/非车载设备；对象字典+PDO/SDO 是其核心，车载较少见但工控背景常提。"
+    },
+    {
+      "term": "DBC",
+      "cat": "文件",
+      "full": "Database CAN",
+      "def": "CAN 通信的“字典”，描述报文 ID 与信号布局。没有它 Trace 里只是一堆十六进制；会读 DBC 是基本功。"
+    },
+    {
+      "term": "LDF",
+      "cat": "文件",
+      "full": "LIN Description File",
+      "def": "LIN 的“DBC”，描述 LIN 节点、调度表、信号，配置 LIN 通信必用。"
+    },
+    {
+      "term": "FIBEX",
+      "cat": "文件",
+      "full": "Field Bus Exchange Format",
+      "def": "ASAM 通用总线描述格式（覆盖 CAN/LIN/FlexRay/以太网等，FlexRay 项目最常用），描述网络、帧、信号，类似 CAN 的 DBC。"
+    },
+    {
+      "term": "ARXML",
+      "cat": "文件",
+      "full": "AUTOSAR XML",
+      "def": "AUTOSAR 的 XML 描述文件，承载 ECU 配置、通信矩阵、BSW 配置等，是工具链间交换的“总字典”。"
+    },
+    {
+      "term": "通信矩阵",
+      "cat": "文件",
+      "full": "Communication Matrix",
+      "def": "整车信号通信的“总表”：哪个 ECU 在哪些报文里发什么信号、周期多少。DBC/ARXML 是其载体，测试对齐的基准。"
+    },
+    {
+      "term": "UDS",
+      "cat": "诊断",
+      "full": "Unified Diagnostic Services (ISO 14229)",
+      "def": "车载诊断的“通用语言”：诊断仪发 SID+参数，ECU 回肯定/否定，覆盖读数据、清码、解锁、刷写。"
+    },
+    {
+      "term": "OBD-II",
+      "cat": "诊断",
+      "full": "On-Board Diagnostics II",
+      "def": "排放诊断标准，国标（国六/C-OBD）强制要求，比 UDS 简单，管发动机+排放，年检就靠它。"
+    },
+    {
+      "term": "DTC",
+      "cat": "诊断",
+      "full": "Diagnostic Trouble Code 故障码",
+      "def": "ECU 报出的故障代号，格式含系统/类型/具体码，是定位问题的第一线索。"
+    },
+    {
+      "term": "Bootloader",
+      "cat": "诊断",
+      "full": "引导加载程序",
+      "def": "ECU 上电后第一段运行的代码，判断正常启动还是进刷写模式；刷写测试核心四问：进得去/刷不坏/能用/救得回。"
+    },
+    {
+      "term": "安全访问",
+      "cat": "诊断",
+      "full": "Security Access (UDS 0x27)",
+      "def": "刷写/写关键数据前的“钥匙”：ECU 下发 Seed、诊断仪算 Key 回送校验（失败有试错锁定），防止随便改 ECU。解锁失败是刷写高频坑。"
+    },
+    {
+      "term": "刷写",
+      "cat": "诊断",
+      "full": "Flash Programming",
+      "def": "把新固件写进 ECU。UDS 34/36/37 请求下载-传输-退出传输走完流程；断电流/校验错都可能变砖，需救回机制。"
+    },
+    {
+      "term": "诊断会话",
+      "cat": "诊断",
+      "full": "Diagnostic Session",
+      "def": "诊断仪与 ECU 的“聊天模式”：默认会话只能读，扩展会话才能做例程，编程会话才允许刷写，切换有超时。"
+    },
+    {
+      "term": "XCP",
+      "cat": "诊断",
+      "full": "Universal Measurement and Calibration Protocol",
+      "def": "标定与测量协议（源自 CCP），支持 CAN/以太网等传输层，用来在线调参、采数、标定 ECU，和刷写是两码事。"
+    },
+    {
+      "term": "CANoe",
+      "cat": "工具",
+      "full": "Vector CANoe",
+      "def": "Vector 旗舰仿真测试平台，仿真整车网络、收发报文、写 CAPL、自动化测试、生成报告，吃饭的家伙。"
+    },
+    {
+      "term": "CAPL",
+      "cat": "工具",
+      "full": "CAN Access Programming Language",
+      "def": "CANoe 内置脚本语言，类 C、事件驱动，用来仿真 ECU、处理报文、写自动化用例。"
+    },
+    {
+      "term": "HIL",
+      "cat": "工具",
+      "full": "Hardware-In-the-Loop 硬件在环",
+      "def": "把真实控制器接入实时仿真模型台架，可无限复现极限工况、随意注入故障，是安全关键域主力环境。"
+    },
+    {
+      "term": "台架",
+      "cat": "工具",
+      "full": "Test Bench",
+      "def": "测试用的“家”：把 ECU、负载、电源、总线接口按实车拓扑搭起来，先测 60Ω 再上电是铁律。"
+    },
+    {
+      "term": "python-can",
+      "cat": "工具",
+      "full": "python-can",
+      "def": "Python 的 CAN 通信库，配几百块 USB-CAN 即可写自动化脚本，低成本可集成 CI，是 CANoe 的补充。"
+    },
+    {
+      "term": "ZCANpro",
+      "cat": "工具",
+      "full": "ZCANpro (周立功)",
+      "def": "国产低成本 CAN 工具及配套软件，发报文/看 Trace/小脚本够用，个人学习与小团队性价比之选。"
+    },
+    {
+      "term": "Test Module",
+      "cat": "工具",
+      "full": "CANoe Test Module",
+      "def": "CANoe 里组织自动化测试用例的“容器”：含用例、检查点、报告，配 vTESTstudio 可图形化编排。"
+    },
+    {
+      "term": "vTESTstudio",
+      "cat": "工具",
+      "full": "Vector vTESTstudio",
+      "def": "CANoe 的测试设计工具，用图形化/表格方式编排用例、参数化、生成可复用测试套件，比纯 CAPL 好维护。"
+    },
+    {
+      "term": "Trace",
+      "cat": "工具",
+      "full": "报文跟踪窗",
+      "def": "CANoe 里实时滚动显示收发报文/信号的窗口，是“看车上发生了什么”的第一现场，配合 DBC 解物理值。"
+    },
+    {
+      "term": "仿真",
+      "cat": "工具",
+      "full": "Simulation / 节点仿真",
+      "def": "用 CANoe 等虚拟出不存在的 ECU 节点收发报文，让被测件有“对话对象”，是单件测试的关键手段。"
+    },
+    {
+      "term": "BMS",
+      "cat": "域系统",
+      "full": "Battery Management System 电池管理系统",
+      "def": "新能源车的“电池保姆+保镖”，管 SOC/SOH/均衡/热管理/高压安全，算得准、保镖反应快是测试核心。"
+    },
+    {
+      "term": "VCU",
+      "cat": "域系统",
+      "full": "Vehicle Control Unit 整车控制器",
+      "def": "动力域“大脑”，接收油门/制动/挡位，做扭矩仲裁，限制电机输出；BMS 上报的功率边界是它的输入之一。"
+    },
+    {
+      "term": "MCU",
+      "cat": "域系统",
+      "full": "Motor Control Unit 电机控制器（注意与微控制器 Microcontroller Unit 同名缩写，按语境区分）",
+      "def": "驱动电机的控制器，把高压直流电逆变成三相交流驱动电机，受 VCU 扭矩指令约束。"
+    },
+    {
+      "term": "SOC",
+      "cat": "域系统",
+      "full": "State of Charge 荷电状态",
+      "def": "剩余电量百分比。安时积分打底+OCV 定期修正（量产+卡尔曼滤波融合），精度通常要求 ≤±5%。"
+    },
+    {
+      "term": "SOH",
+      "cat": "域系统",
+      "full": "State of Health 健康度",
+      "def": "电池寿命/健康度，由容量衰减趋势、内阻增长等推算，是二手车估值与保修判定的依据。"
+    },
+    {
+      "term": "ADAS",
+      "cat": "域系统",
+      "full": "Advanced Driver Assistance Systems 高级驾驶辅助",
+      "def": "智驾域核心：FCW/AEBS/BSD/LKA/ACC 等。测试不仅验功能正确，更要验安全边界——误报吓人、漏报要命。"
+    },
+    {
+      "term": "OTA",
+      "cat": "域系统",
+      "full": "Over-The-Air 空中升级",
+      "def": "远程升级固件/软件，不用去 4S 店。测试核心：升得上去、升不坏、升完能用、升失败能救回。"
+    },
+    {
+      "term": "IVI",
+      "cat": "域系统",
+      "full": "In-Vehicle Infotainment 车载信息娱乐",
+      "def": "中控大屏，用户交互最密集的模块：触屏/导航/多媒体/蓝牙/语音/车控/倒车影像/CarPlay。"
+    },
+    {
+      "term": "ESP",
+      "cat": "域系统",
+      "full": "Electronic Stability Program 车身电子稳定",
+      "def": "转向不足/过度时纠正车身姿态，靠单轮独立制动+降动力（跨域找 VCU），ASIL D。"
+    },
+    {
+      "term": "EPS",
+      "cat": "域系统",
+      "full": "Electric Power Steering 电动助力转向",
+      "def": "提供方向盘助力与主动回正；失效后机械转向仍可用（无助力“死沉”但可控），是强制冗余要求。"
+    },
+    {
+      "term": "Cluster",
+      "cat": "域系统",
+      "full": "Instrument Cluster 仪表",
+      "def": "驾驶员正前方的显示总成，车速/转速/报警/指示灯都在这；信号延迟或错显直接影响安全感知。"
+    },
+    {
+      "term": "GNSS",
+      "cat": "域系统",
+      "full": "Global Navigation Satellite System",
+      "def": "全球卫星导航（GPS/北斗/GLONASS/Galileo 统称），给导航提供定位；冷启动、隧道、城市峡谷丢星是测试重点。"
+    },
+    {
+      "term": "CarPlay",
+      "cat": "域系统",
+      "full": "Apple CarPlay",
+      "def": "苹果手机互联投屏标准，认证严格；测试覆盖连接稳定性、音频路由、Siri、退回车机等多场景。"
+    },
+    {
+      "term": "ASIL",
+      "cat": "标准",
+      "full": "Automotive Safety Integrity Level",
+      "def": "ISO 26262 的功能安全等级，A→D 要求越来越严，D 为最严苛（如制动/转向）。"
+    },
+    {
+      "term": "功能安全",
+      "cat": "标准",
+      "full": "Functional Safety",
+      "def": "电子电气系统出故障时不能伤人，覆盖概念到退役全生命周期；测试关注 ASIL 与故障注入。"
+    },
+    {
+      "term": "AUTOSAR",
+      "cat": "标准",
+      "full": "AUTomotive Open System ARchitecture",
+      "def": "车载软件标准化底座，定义分层架构与接口，让不同供应商软件像拼乐高一样集成到同一 ECU。"
+    },
+    {
+      "term": "ISO 26262",
+      "cat": "标准",
+      "full": "道路车辆功能安全标准",
+      "def": "源自 IEC 61508，管“电子电气系统出故障时不能伤人”，含 ASIL、安全分析、安全生命周期。"
+    },
+    {
+      "term": "GB/T 27930",
+      "cat": "标准",
+      "full": "电动汽车非车载传导式充电机通信协议",
+      "def": "直流快充的车桩 CAN 握手协议，定义一整套充电报文，BMS 实时告诉桩“我要多少伏多少安”。"
+    },
+    {
+      "term": "GB/T 40855",
+      "cat": "标准",
+      "full": "电动汽车远程服务与管理系统技术要求（2021，对 32960 的更新系列）",
+      "def": "国标电动汽车远程监控（T-Box 上报车辆状态/电池/位置），是新能源车的“国标体检表”，OTA/安全合规相关。"
+    },
+    {
+      "term": "GB/T 32960",
+      "cat": "标准",
+      "full": "电动汽车远程服务与管理系统技术规范（2016，现行主用上报标准）",
+      "def": "早期新能源车远程监控国标，与 40855 同源；理解国标演进与车企合规上报要求。"
+    },
+    {
+      "term": "ASPICE",
+      "cat": "标准",
+      "full": "Automotive SPICE",
+      "def": "汽车软件过程能力评估模型，从 CL0 到 CL5 衡量研发流程成熟度（量产项目常考 CL1–CL3）；主机厂用它审供应商，测开流程也要对齐。"
+    },
+    {
+      "term": "UN-R155",
+      "cat": "标准",
+      "full": "联合国汽车网络安全法规",
+      "def": "强制要求建立 CSMS（网络安全管理体系）并通过车辆网络安全型式认证，欧盟上市门槛。"
+    },
+    {
+      "term": "ISO/SAE 21434",
+      "cat": "标准",
+      "full": "道路车辆网络安全工程",
+      "def": "汽车网络安全工程标准，与 UN-R155 配套：管威胁分析(TARA)、安全需求、SecOC 等全生命周期防护。"
+    },
+    {
+      "term": "故障注入",
+      "cat": "测试",
+      "full": "Fault Injection",
+      "def": "人为制造传感器断路/短路/总线 off 等故障，验证系统降级与告警是否正确，安全关键域必做。"
+    },
+    {
+      "term": "回归测试",
+      "cat": "测试",
+      "full": "Regression Test",
+      "def": "改了代码/配置后重跑已有用例，确认没引入新问题；DBC/参数变更、FOTA 后尤其重要。"
+    },
+    {
+      "term": "字节序",
+      "cat": "测试",
+      "full": "Byte Order (Motorola/Intel)",
+      "def": "信号在多字节报文里的排布方式。Motorola(大端)与 Intel(小端)搞反，解析出的信号值会乱跳——高频考点。"
+    },
+    {
+      "term": "V模型",
+      "cat": "测试",
+      "full": "V-Model",
+      "def": "汽车研发主流流程：左半边需求→设计→实现逐级分解，右半边对应测试逐级验证，强调“测试左移、尽早介入”。"
+    },
+    {
+      "term": "测试用例",
+      "cat": "测试",
+      "full": "Test Case",
+      "def": "把“测什么、怎么测、预期是什么”写清楚的可执行步骤；好的用例含前置、步骤、预期结果，可重复、可追踪需求。"
+    },
+    {
+      "term": "测试报告",
+      "cat": "测试",
+      "full": "Test Report",
+      "def": "交付物：覆盖情况、通过/失败统计、缺陷清单、风险结论。结论要可决策，别只堆数据。"
+    },
+    {
+      "term": "自动化测试",
+      "cat": "测试",
+      "full": "Automated Test",
+      "def": "用脚本/框架代替手工重复点击，提升回归效率与一致性；分层（信号层/场景层/用例层）才好维护。"
+    },
+    {
+      "term": "CI/CD",
+      "cat": "测试",
+      "full": "持续集成 / 持续交付",
+      "def": "代码一提交就自动构建+跑测试+出报告；车载测试把自动化用例接进流水线，问题早发现。"
+    },
+    {
+      "term": "E/E 架构",
+      "cat": "架构",
+      "full": "Electrical/Electronic Architecture",
+      "def": "整车的电子电气拓扑蓝图：多少 ECU、怎么联网、谁算谁控。从分布式→域控→中央计算是行业主线。"
+    },
+    {
+      "term": "域控制器",
+      "cat": "架构",
+      "full": "Domain Controller (DCU)",
+      "def": "把某功能域（动力/智驾/座舱等）多个 ECU 的活合并到一块高性能算力板，减少 ECU 数量、集中算力。"
+    },
+    {
+      "term": "中央计算架构",
+      "cat": "架构",
+      "full": "Central Compute / Zonal Architecture",
+      "def": "下一步形态：少数中央计算平台 + 区域控制器(ZCU)就近收线，线束大幅简化，软件定义汽车的基础。"
+    },
+    {
+      "term": "网关路由",
+      "cat": "架构",
+      "full": "Gateway Routing",
+      "def": "网关在 CAN/LIN/以太网间转发/翻译报文，可按需路由、做信号映射与安全隔离，是跨网通信枢纽。"
+    },
+    {
+      "term": "拓扑",
+      "cat": "架构",
+      "full": "Network Topology",
+      "def": "网络节点的物理连接形态：总线型/星型/环形/混合型。决定了一根线挂多少节点、单点故障影响范围。"
+    },
+    {
+      "term": "差分信号",
+      "cat": "物理",
+      "full": "Differential Signal (CAN_H/CAN_L)",
+      "def": "用两根反相线传同一信号，外部干扰会同时作用在两根线上被接收端相减抵消，抗干扰强、辐射低。"
+    },
+    {
+      "term": "终端电阻",
+      "cat": "物理",
+      "full": "Termination Resistor (120Ω)",
+      "def": "总线两端各挂一个 120Ω，并联约 60Ω 匹配阻抗、吸收信号反射；少一个或多了都会通信异常，台架必测。"
+    },
+    {
+      "term": "采样点",
+      "cat": "物理",
+      "full": "Sample Point",
+      "def": "位时间内读取电平的时刻（常配 75%~87.5%）。采样点偏离会导致位错误，是 CAN 位定时配置核心参数。"
+    },
+    {
+      "term": "波特率",
+      "cat": "物理",
+      "full": "Baud Rate",
+      "def": "总线每秒传多少位（如 500kbps）。收发双方波特率/位定时必须一致，否则满屏错误帧。"
+    },
+    {
+      "term": "隐性/显性",
+      "cat": "物理",
+      "full": "Recessive / Dominant",
+      "def": "CAN 的两态：隐性(逻辑1,差分≈0V)与显性(逻辑0,差分≈2V)，显性可覆盖隐性——这就是仲裁能“抢线”的底层原理。"
+    },
+    {
+      "term": "仲裁",
+      "cat": "物理",
+      "full": "Arbitration",
+      "def": "多节点同时发时，CAN 靠 ID 逐位比对、显性覆盖隐性决定谁先发，ID 越小优先级越高，非破坏性、不丢帧。"
+    },
+    {
+      "term": "错误帧",
+      "cat": "物理",
+      "full": "Error Frame",
+      "def": "节点检测到位/CRC/填充等错误时立刻发错误帧打断总线；连续错会由错误主动→错误被动→Bus Off。"
+    },
+    {
+      "term": "Bus Off",
+      "cat": "物理",
+      "full": "总线关闭",
+      "def": "节点错误计数(TEC)超阈值被踢下线，不再收发，需等待恢复条件重新加入；是 CAN 可靠性的“熔断”机制。"
+    },
+    {
+      "term": "总线负载率",
+      "cat": "物理",
+      "full": "Bus Load",
+      "def": "总线上已用带宽占比。过高会增大延迟与冲突风险，是评估网络设计与新增报文可行性的关键指标。"
+    },
+    {
+      "term": "报文",
+      "cat": "物理",
+      "full": "Message / Frame",
+      "def": "总线上一次广播的数据单元（CAN 帧含 ID+DLC+数据场），是通信与测试的最小可观测单位。"
+    },
+    {
+      "term": "信号",
+      "cat": "物理",
+      "full": "Signal",
+      "def": "报文数据场里被“抠”出来的某个具体含义的位段（如车速=某字节某几位），配 DBC 才能从十六进制解成物理值。"
+    },
+    {
+      "term": "唤醒",
+      "cat": "物理",
+      "full": "Wakeup",
+      "def": "让休眠节点重新上电工作，CAN 支持本地(电压)唤醒与远程(总线活动唤醒；局部网络 CAN PN 用特定唤醒帧)唤醒；低功耗与响应速度的权衡点。"
+    },
+    {
+      "term": "网络管理",
+      "cat": "物理",
+      "full": "Network Management (NM)",
+      "def": "协调各节点统一休眠/唤醒的协议（AUTOSAR NM / OSEK NM），避免有的睡了有的还在发，节省电瓶。"
+    },
+    {
+      "term": "SecOC",
+      "cat": "安全",
+      "full": "Secure Onboard Communication",
+      "def": "车载网络安全机制：给关键报文加 MAC 新鲜值防篡改/重放，AUTOSAR 定义的机制，是 ISO 21434 的落地手段之一。"
+    },
+    {
+      "term": "TARA",
+      "cat": "安全",
+      "full": "Threat Analysis and Risk Assessment",
+      "def": "网络安全威胁分析与风险评估，ISO 21434 的起点：输出风险值与风险处置决策（影响×攻击可行性），据此导出网络安全需求。"
+    },
+    {
+      "term": "渗透测试",
+      "cat": "安全",
+      "full": "Penetration Test",
+      "def": "以攻击者视角找车载系统漏洞（蓝牙/USB/远程接口等），验证防护是否真挡得住，合规与实车安全都要求。"
+    },
+    {
+      "term": "CCP",
+      "cat": "诊断",
+      "full": "CAN Calibration Protocol",
+      "def": "XCP 的前身，基于 CAN 的标定协议；老项目仍见，新项目普遍迁到 XCP（支持多传输层）。"
+    },
+    {
+      "term": "标定",
+      "cat": "诊断",
+      "full": "Calibration",
+      "def": "调 ECU 里那些“经验参数”（空燃比表、扭矩限值等）让性能/能耗/排放达标；在线标定靠 XCP/CCP。"
+    }
+  ]
+}

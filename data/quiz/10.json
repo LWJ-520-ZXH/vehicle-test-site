@@ -1,0 +1,1347 @@
+[
+  {
+    "id": "Q-10-00-01",
+    "chapterNum": 10,
+    "sectionIndex": 0,
+    "sectionTitle": "一、环境搭建",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "python-can",
+      "环境搭建",
+      "PCAN"
+    ],
+    "stem": "你手里是一块 PCAN-USB 硬件，准备用 Python 收发 CAN 报文。按章节给出的安装步骤，除了通用库之外还应执行哪条命令来装上对应的硬件驱动支持？",
+    "options": [
+      {
+        "key": "A",
+        "text": "pip install python-can[pcan]"
+      },
+      {
+        "key": "B",
+        "text": "pip install python-can[serial]"
+      },
+      {
+        "key": "C",
+        "text": "pip install pcan-driver"
+      },
+      {
+        "key": "D",
+        "text": "pip install cantools[pcan]"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节的安装块写得很清楚：先 `pip install python-can` 装通用库，然后「按硬件选装驱动」——PCAN-USB 对应 `pip install python-can[pcan]`，串口类 CAN（ZCAN/USBCAN 等）对应 `[serial]`，Intrepid neoVI 对应 `[neovi]`。这里的方括号是 Python 的 extras 语法，表示安装 python-can 的某个可选依赖组，而不是另一个包。B 是串口类硬件用的，装了也驱动不了 PCAN；C 的包名章节里根本不存在；D 把 extras 挂到了 cantools 上，cantools 只管 DBC 解析，不管硬件驱动。",
+    "keyPoints": [
+      "通用库：pip install python-can",
+      "PCAN-USB 走 extras：python-can[pcan]",
+      "extras 是可选依赖组，挂在 python-can 上而非 cantools"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "一、环境搭建·pip 安装命令块"
+    },
+    "relatedTerms": [
+      "extras",
+      "PCAN-USB",
+      "pip"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-00-02",
+    "chapterNum": 10,
+    "sectionIndex": 0,
+    "sectionTitle": "一、环境搭建",
+    "module": "B",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "环境搭建",
+      "cantools",
+      "依赖管理"
+    ],
+    "stem": "关于章节给出的 Python + CAN 环境搭建，以下说法正确的有哪些？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "`pip install python-can` 装的是通用 CAN 接口库，本身不区分硬件品牌"
+      },
+      {
+        "key": "B",
+        "text": "不同品牌硬件通过 extras 选装驱动，如 [pcan]、[serial]、[neovi]"
+      },
+      {
+        "key": "C",
+        "text": "要解析 DBC 得再装 cantools，章节把它列为推荐项"
+      },
+      {
+        "key": "D",
+        "text": "python-can 自带 DBC 解析能力，装了它就不需要 cantools"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "环境搭建块分成三段：通用库、按硬件选装驱动、DBC 解析（推荐）。A 对应第一段——python-can 的价值就在于用统一 API 封装不同品牌硬件；B 对应第二段的三条 extras 命令；C 对应第三段 `pip install cantools`，章节明确标注「推荐」。D 是常见误解：python-can 负责的是「把帧收发出去」，DBC 的信号编解码是 cantools 的职责，两者分工不同，章节的面试考点表里也把二者分开表述（python-can 收发 can.Message，cantools 做 encode/decode）。",
+    "keyPoints": [
+      "python-can = 通用收发层，硬件差异靠 extras 抹平",
+      "cantools = DBC 解析层，负责物理值与字节互转",
+      "两个库分工不同，不能互相替代"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "一、环境搭建·pip 安装命令块"
+    },
+    "relatedTerms": [
+      "cantools",
+      "DBC",
+      "python-can"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-01-01",
+    "chapterNum": 10,
+    "sectionIndex": 1,
+    "sectionTitle": "二、核心API",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "can.interface.Bus",
+      "初始化",
+      "bitrate"
+    ],
+    "stem": "章节的收发基础代码中，`can.interface.Bus(channel='PCAN_USBBUS1', bustype='pcan', bitrate=500000)` 三个参数分别是什么含义？",
+    "options": [
+      {
+        "key": "A",
+        "text": "channel = 通道名（设备管理器中查看）、bustype = 接口类型、bitrate = 波特率"
+      },
+      {
+        "key": "B",
+        "text": "channel = 报文 ID、bustype = 帧类型、bitrate = 数据段速率"
+      },
+      {
+        "key": "C",
+        "text": "channel = 硬件序列号、bustype = 操作系统类型、bitrate = 采样点位置"
+      },
+      {
+        "key": "D",
+        "text": "channel = DBC 文件路径、bustype = 数据库类型、bitrate = 信号刷新率"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "代码注释逐行标注：channel='PCAN_USBBUS1' 是通道名（设备管理器中查看）；bustype='pcan' 是接口类型，可选 pcan/socketcan/serial/vector；bitrate=500000 是波特率 500Kbps。这三个参数是所有 python-can 脚本的第一行门槛，面试考点表里「怎么指定 CAN 卡」问的就是它。B 把 Bus 层参数和 Message 层参数搞混了——arbitration_id 才是报文 ID；C 的采样点在 python-can 常规初始化里不由 bitrate 表示；D 是 cantools 加载 DBC 的事。",
+    "keyPoints": [
+      "channel 指通道名，来自设备管理器",
+      "bustype 指接口类型：pcan/socketcan/serial/vector",
+      "bitrate 是仲裁段波特率，500000 即 500Kbps"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "二、核心API·收发基础代码（初始化段）"
+    },
+    "relatedTerms": [
+      "socketcan",
+      "vector",
+      "波特率"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-01-02",
+    "chapterNum": 10,
+    "sectionIndex": 1,
+    "sectionTitle": "二、核心API",
+    "module": "B",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "can.Message",
+      "is_extended_id",
+      "is_fd"
+    ],
+    "stem": "构造 `can.Message(arbitration_id=0x123, data=[0x01,0x02,0x03,0x04], is_extended_id=False, is_fd=False)` 时，`is_extended_id=False` 和 `is_fd=False` 各自意味着什么？",
+    "options": [
+      {
+        "key": "A",
+        "text": "is_extended_id=False 表示标准帧（11 位 ID），is_fd=False 表示按 CAN 2.0 发送"
+      },
+      {
+        "key": "B",
+        "text": "is_extended_id=False 表示扩展帧（29 位 ID），is_fd=False 表示关闭波特率切换"
+      },
+      {
+        "key": "C",
+        "text": "is_extended_id=False 表示数据长度不超过 8 字节，is_fd=False 表示不带远程帧标志"
+      },
+      {
+        "key": "D",
+        "text": "两个参数含义相同，都是用来关闭 CAN FD 的冗余写法"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "代码注释原文写着：is_extended_id 为「标准帧(False) / 扩展帧(True)」，is_fd 为「CAN 2.0(False) / CAN FD(True)」。这两个参数分管两件完全不同的事——前者决定 ID 位宽（11 位还是 29 位），后者决定帧格式（经典 CAN 还是 FD）。B 把标准帧与扩展帧的真值读反了，是最典型的写错方向；同时波特率切换是另一个参数 bitrate_switch（BRS），不是 is_fd。C 把「帧格式」误当成「长度限制」；D 更是把两个正交的维度混为一谈。",
+    "keyPoints": [
+      "is_extended_id：False=标准帧11位，True=扩展帧29位",
+      "is_fd：False=CAN 2.0，True=CAN FD",
+      "BRS 由独立参数 bitrate_switch 控制，别和 is_fd 混淆"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "二、核心API·收发基础代码（发送段）"
+    },
+    "relatedTerms": [
+      "arbitration_id",
+      "bitrate_switch",
+      "CAN FD"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-01-03",
+    "chapterNum": 10,
+    "sectionIndex": 1,
+    "sectionTitle": "二、核心API",
+    "module": "B",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "recv",
+      "Notifier",
+      "接收模式"
+    ],
+    "stem": "关于章节介绍的两种接收方式与收尾处理，说法正确的有哪些？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "`bus.recv(timeout=1.0)` 是阻塞式接收，最多等 1 秒，取到的是单帧"
+      },
+      {
+        "key": "B",
+        "text": "`can.Notifier(bus, [on_message])` 注册回调后可非阻塞持续监听，主程序继续往下跑"
+      },
+      {
+        "key": "C",
+        "text": "Notifier 监听结束要调用 `notifier.stop()`，用完总线还应 `bus.shutdown()` 清理"
+      },
+      {
+        "key": "D",
+        "text": "recv() 返回的对象里带 timestamp 和 channel，可直接用于打印时间与来源通道"
+      },
+      {
+        "key": "E",
+        "text": "Notifier 与 recv() 二选一是语法要求，同一脚本里绝不能同时出现两种写法"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "explanation": "章节的收发基础代码把接收拆成两段演示：阻塞式 `msg = bus.recv(timeout=1.0)`（注释「1秒超时」）与非阻塞回调式 `notifier = can.Notifier(bus, [on_message])`（注释「... 程序继续运行 ...」，随后 `notifier.stop()` 停止监听），末尾还有 `bus.shutdown()` 做清理。取到 msg 后代码打印了 `msg.timestamp` 与 `msg.channel`，所以 D 成立。面试考点表也把这条总结为「recv() vs Notifier：阻塞等待单帧 vs 注册回调非阻塞持续监听」。E 是编造的语法限制，章节从未这样规定，两种方式只是适用场景不同（点对点等一帧 vs 长期监听）。",
+    "keyPoints": [
+      "recv(timeout=N)：阻塞等单帧，必须设超时",
+      "Notifier：回调式非阻塞持续监听，结束用 stop()",
+      "收尾 bus.shutdown()；msg 自带 timestamp/channel"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "二、核心API·收发基础代码（接收与清理段）"
+    },
+    "relatedTerms": [
+      "can.Notifier",
+      "timestamp",
+      "bus.shutdown"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-02-01",
+    "chapterNum": 10,
+    "sectionIndex": 2,
+    "sectionTitle": "三、cantools：DBC解析利器",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "cantools",
+      "encode",
+      "decode"
+    ],
+    "stem": "章节示例中 `speed_signal.encode({'VehSpeed': 80})` 与 `speed_signal.decode(bytes.fromhex('00 50'))` 这一对方法，分别完成什么转换？",
+    "options": [
+      {
+        "key": "A",
+        "text": "encode：物理值 → CAN 数据字节；decode：CAN 数据字节 → 物理值"
+      },
+      {
+        "key": "B",
+        "text": "encode：明文 → 加密报文；decode：加密报文 → 明文"
+      },
+      {
+        "key": "C",
+        "text": "encode：DBC 文本 → 二进制数据库；decode：二进制数据库 → DBC 文本"
+      },
+      {
+        "key": "D",
+        "text": "encode：把报文写到总线上；decode：从总线上读回报文"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "代码注释直接标了「编码：物理值 → CAN数据」和「解码：CAN数据 → 物理值」：`encode({'VehSpeed': 80})` 把 80km/h 这个人能看懂的物理量按 DBC 里的起始位、长度、factor、offset 打包成字节；`decode()` 反过来把裸字节还原成 `{'VehSpeed': 80}`。B 把编解码误解成加解密——DBC 编码是格式转换不是安全机制。C 混淆了 `load_file()` 的职责。D 是致命误解：cantools 完全不碰硬件，真正把字节发上总线的是 python-can 的 `bus.send()`，这也是两个库必须配合使用的原因。",
+    "keyPoints": [
+      "encode = 物理值打包成 CAN 字节",
+      "decode = CAN 字节还原成物理值",
+      "cantools 只做编解码，收发交给 python-can"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "三、cantools：DBC解析利器·编码与解码代码段"
+    },
+    "relatedTerms": [
+      "load_file",
+      "get_message_by_name",
+      "factor/offset"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-02-02",
+    "chapterNum": 10,
+    "sectionIndex": 2,
+    "sectionTitle": "三、cantools：DBC解析利器",
+    "module": "B",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "cantools",
+      "DBC遍历",
+      "信号属性"
+    ],
+    "stem": "按章节「遍历所有报文和信号」的代码，通过 `db.messages` 与 `msg.signals` 可以读到下列哪些属性？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "报文的 frame_id 与 name"
+      },
+      {
+        "key": "B",
+        "text": "信号的 start 起始位与 length 长度"
+      },
+      {
+        "key": "C",
+        "text": "信号的 scale（factor）、offset 与 unit"
+      },
+      {
+        "key": "D",
+        "text": "该信号在总线上的实时瞬时值"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "遍历代码打印的正是这些静态属性：`msg.frame_id`、`msg.name`，以及每个信号的 `sig.name`、`sig.start`、`sig.start+sig.length`、`sig.scale`、`sig.offset`、`sig.unit`。D 是概念性错误——DBC 是一份「信号矩阵」，描述的是报文与信号的定义规则（在哪一位、多长、怎么换算、什么单位），它是静态文档，不含任何运行时数据。要拿实时值必须先用 python-can 收帧，再交给 `decode()` 解出来。这个区分是初学者最容易踩的坑：DBC 给的是「说明书」，不是「读数」。",
+    "keyPoints": [
+      "db.messages 给出报文级：frame_id / name / signals",
+      "signal 给出定义级：start、length、scale、offset、unit",
+      "DBC 是静态矩阵，实时值必须靠收帧 + decode"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "三、cantools：DBC解析利器·遍历所有报文和信号代码段"
+    },
+    "relatedTerms": [
+      "信号矩阵",
+      "start bit",
+      "unit"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-03-01",
+    "chapterNum": 10,
+    "sectionIndex": 3,
+    "sectionTitle": "四、DBC报文发送/接收（完整封装）",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "CANAutomation",
+      "send_signal",
+      "封装"
+    ],
+    "stem": "`CANAutomation.send_signal(msg_name, signal_dict)` 内部按什么顺序完成「按信号名发送」？",
+    "options": [
+      {
+        "key": "A",
+        "text": "get_message_by_name 取报文定义 → encode 得到 data → 用 frame_id 构造 can.Message → bus.send"
+      },
+      {
+        "key": "B",
+        "text": "bus.send 先占用总线 → get_message_by_name → encode → 释放总线"
+      },
+      {
+        "key": "C",
+        "text": "直接把 signal_dict 传给 can.Message 的 data 参数 → bus.send"
+      },
+      {
+        "key": "D",
+        "text": "先 recv 一帧同名报文作为模板 → 修改其中字段 → bus.send"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "封装类的四行代码就是这个顺序：`msg_def = self.db.get_message_by_name(msg_name)` 拿到 DBC 里的报文定义（含 frame_id 与信号布局）→ `data = msg_def.encode(signal_dict)` 把 {'EngineSpeed': 3000} 这类物理值编码成字节 → `msg = can.Message(arbitration_id=msg_def.frame_id, data=data)` 用定义里的 frame_id 组帧 → `self.bus.send(msg)` 发出。这套封装的价值在于：调用方只需要写 `ca.send_signal('EngineData', {'EngineSpeed': 3000, 'EngineTemp': 90})`，完全不用记 ID 和位布局。C 是想当然——can.Message 的 data 只吃字节序列，不认字典；D 引入了不必要的依赖，发送不需要先收。",
+    "keyPoints": [
+      "查定义 → 编码 → 组帧 → 发送，四步固定套路",
+      "arbitration_id 来自 DBC 的 frame_id，不用手写",
+      "封装后调用方只关心信号名与物理值"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "四、DBC报文发送/接收（完整封装）·CANAutomation.send_signal"
+    },
+    "relatedTerms": [
+      "frame_id",
+      "encode",
+      "bus.send"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-03-02",
+    "chapterNum": 10,
+    "sectionIndex": 3,
+    "sectionTitle": "四、DBC报文发送/接收（完整封装）",
+    "module": "B",
+    "type": "short",
+    "cat": "故障定位",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "recv_signal",
+      "listen_forever",
+      "代码评审"
+    ],
+    "stem": "请分析封装类里的 `recv_signal(msg_name, timeout=1.0)`：它在什么情况下会返回 None？这个实现放到真实繁忙总线上有什么局限？另外 `listen_forever()` 为什么要用 try/except 包住解码？",
+    "options": [],
+    "answer": [],
+    "explanation": "本题考查对封装代码的阅读深度。recv_signal 只调用了一次 bus.recv 并做 ID 比对，这个「只捞一帧」的写法在实验环境够用，但在真实总线上很容易误判超时，是从「能跑」到「可靠」的关键一跃；listen_forever 的 try/except 则对应 DBC 覆盖不全时的健壮性处理。",
+    "keyPoints": [
+      "返回 None 有两种成因：超时无帧，或收到的帧 ID 不匹配",
+      "只 recv 一次不循环过滤，繁忙总线上会被其他报文抢走机会",
+      "listen_forever 的 try/except 兜住 DBC 中不存在的报文，避免整个监听崩掉"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "四、DBC报文发送/接收（完整封装）·recv_signal 与 listen_forever"
+    },
+    "relatedTerms": [
+      "decode_message",
+      "CAN filters",
+      "健壮性"
+    ],
+    "refAnswer": "【一、什么时候返回 None】看代码逻辑：`msg = self.bus.recv(timeout=timeout)`，随后 `if msg and msg.arbitration_id == msg_def.frame_id: return msg_def.decode(msg.data)`，其余路径 `return None`。所以有两种情况会拿到 None：①在 timeout（默认 1.0 秒）内总线上一帧都没收到，recv 返回 None；②确实收到了一帧，但它的 arbitration_id 与目标报文在 DBC 里的 frame_id 不相等，比对不通过，函数直接落到最后一行返回 None。\n【二、放到繁忙总线上的局限】关键问题是它只 recv 了一次，没有循环过滤。真实整车总线上同时跑着几十上百个 ID，你想等的 EngineData 很可能排在若干其他报文后面；这一次 recv 极大概率先捞到别的 ID，函数就判定为「没收到」返回 None，上层测试会误报 FAIL——这是典型的假失败（false negative），比真失败更浪费排查时间。改进方向有三个：①改成带截止时间的循环，在 timeout 窗口内反复 recv，直到 ID 匹配或真正超时，即 while time.time() < deadline: 里做比对；②用 python-can 的硬件/软件过滤器（can_filters）只放行目标 ID，从源头减少无关帧；③改用 can.Notifier 回调 + 队列的方式，让接收与判定解耦，避免主线程被单帧阻塞。另外还有一个隐含风险：该函数没有区分「标准帧/扩展帧」，如果 DBC 与实际总线的帧类型不一致，即便 ID 数值相同也可能是不同报文，这一点在章节的『DBC解析ID不匹配』问题里也被点名。\n【三、listen_forever 里 try/except 的作用】它执行的是 `self.db.decode_message(msg.arbitration_id, msg.data)`，而总线上完全可能出现 DBC 里没有定义的 ID（其他子网的报文、诊断响应、私有帧），或者 DLC 与定义不符。这类情况 cantools 会抛异常，若不捕获，整个 for 循环会中断，监听程序当场退出——对于要长时间挂机抓数据的场景是不可接受的。所以代码用 except 兜住，退化成打印 `ID=0x... 未知报文: 原始十六进制`，既保证监听不中断，又保留了原始字节供人工分析。工程上更好的做法是只捕获具体异常类型并记录日志计数，而不是裸 except，这样不会连编码错误、键盘中断一起吞掉。"
+  },
+  {
+    "id": "Q-10-04-01",
+    "chapterNum": 10,
+    "sectionIndex": 4,
+    "sectionTitle": "五、自动化测试框架",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "TestRunner",
+      "assert_signal",
+      "tolerance"
+    ],
+    "stem": "`TestRunner.assert_signal(msg_name, signal_name, expected, tolerance=0)` 用什么表达式判定这一步 PASS？",
+    "options": [
+      {
+        "key": "A",
+        "text": "abs(actual - expected) <= tolerance"
+      },
+      {
+        "key": "B",
+        "text": "actual == expected，tolerance 仅用于打印日志"
+      },
+      {
+        "key": "C",
+        "text": "actual >= expected - tolerance 且忽略上界"
+      },
+      {
+        "key": "D",
+        "text": "actual / expected <= tolerance"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "代码原文是 `if abs(actual - expected) <= tolerance:` 才计 PASS 并 `self.passed += 1`，否则打印 FAIL 并 `self.failed += 1`。用绝对差值配合容差是模拟量断言的标准写法：像转速这种信号受 DBC 的 factor 量化、ECU 内部滤波影响，很难精确等于期望值，所以实战用例里写的是 `runner.assert_signal('EngineData', 'EngineSpeed', 2000, tolerance=5)`；而边界值 0 这种确定量则用默认 tolerance=0 严格比较。C 只卡下界会漏掉超上限的异常；D 的比例式在 expected=0 时直接除零崩溃，恰好边界用例里就有 expected=0。",
+    "keyPoints": [
+      "判定式：abs(actual - expected) <= tolerance",
+      "模拟量给容差，边界值用 tolerance=0 严格比",
+      "比例式判据在期望值为 0 时会除零，不可取"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "五、自动化测试框架·TestRunner.assert_signal"
+    },
+    "relatedTerms": [
+      "容差",
+      "边界值",
+      "断言"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-04-02",
+    "chapterNum": 10,
+    "sectionIndex": 4,
+    "sectionTitle": "五、自动化测试框架",
+    "module": "B",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "TestRunner",
+      "自动化框架",
+      "用例设计"
+    ],
+    "stem": "关于章节自动化测试框架示例（TestRunner + test_engine_speed_display），下列说法正确的有哪些？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "超时未收到报文时会打印 FAIL 并计入 failed，而不是抛异常中断整轮测试"
+      },
+      {
+        "key": "B",
+        "text": "assert_signal 内部调用 recv_signal 时用了 timeout=2.0，比封装类默认值更宽松"
+      },
+      {
+        "key": "C",
+        "text": "用例里 `time.sleep(0.5)` 是为了给 ECU 留出响应与信号刷新的时间"
+      },
+      {
+        "key": "D",
+        "text": "summary() 输出 passed/total 的汇总，是这套框架的「测试报告」雏形"
+      },
+      {
+        "key": "E",
+        "text": "该框架内置了 HTML 报告导出，可直接归档给客户"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "explanation": "逐条对照代码：A——`if decoded is None:` 分支打印「FAIL: ... 超时未收到」后 `self.failed += 1; return`，属于「记账式失败」，保证后续用例继续跑，这正是自动化框架该有的行为；B——`decoded = self.ca.recv_signal(msg_name, timeout=2.0)`，比 CANAutomation 里默认的 1.0 秒更宽松；C——两条用例都在 send_signal 之后 `time.sleep(0.5)` 再断言，留出 ECU 响应窗口；D——summary() 打印 `测试完成: {passed}/{total} PASS, {failed} FAIL`，是最朴素的报告。E 是明显的杜撰，而且与章节面试考点表的表述直接冲突：python-can 相对 CANoe 的劣势之一就是「无内置测试报告」，要出报告得靠 pytest 的 --junit-xml。",
+    "keyPoints": [
+      "失败记账不中断，保证整轮用例跑完",
+      "断言前留 sleep 给 ECU 响应窗口",
+      "python-can 无内置报告，报告能力要靠 pytest 等外部框架补"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "五、自动化测试框架·TestRunner 与 test_engine_speed_display"
+    },
+    "relatedTerms": [
+      "pytest",
+      "junit-xml",
+      "summary"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-05-01",
+    "chapterNum": 10,
+    "sectionIndex": 5,
+    "sectionTitle": "六、CAN FD 支持",
+    "module": "B",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "CAN FD",
+      "BRS",
+      "data_bitrate"
+    ],
+    "stem": "按章节代码，用 python-can 发一帧「64 字节数据、数据段 2Mbps 加速」的 CAN FD 报文，需要同时设置哪一组参数？",
+    "options": [
+      {
+        "key": "A",
+        "text": "Bus 侧 fd=True + data_bitrate=2000000；Message 侧 is_fd=True + bitrate_switch=True"
+      },
+      {
+        "key": "B",
+        "text": "只在 Message 侧设 is_fd=True，data 长度写 64 即可"
+      },
+      {
+        "key": "C",
+        "text": "Bus 侧把 bitrate 直接改成 2000000，Message 侧无需改动"
+      },
+      {
+        "key": "D",
+        "text": "Bus 侧 fd=True；Message 侧 is_extended_id=True + dlc=64"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节 FD 代码分两层配置：初始化时 `can.interface.Bus(..., bitrate=500000, fd=True, data_bitrate=2000000)`——bitrate 仍是仲裁段 500K，fd=True 启用 FD，data_bitrate 指定数据段 2Mbps；构造帧时 `can.Message(..., data=bytes(range(64)), is_fd=True, bitrate_switch=True)`——is_fd 声明这是 FD 帧，bitrate_switch=True 即 BRS=1 让数据段真正切到高速。面试考点表把它浓缩成一句：「is_fd=True + bitrate_switch=True + data_bitrate=2000000，data 最长 64 bytes」。C 的做法会把仲裁段也拉到 2M，与总线上其他节点不兼容；D 混进了与 FD 无关的扩展帧参数。",
+    "keyPoints": [
+      "两层配置：Bus 开 fd 与 data_bitrate，Message 开 is_fd 与 BRS",
+      "bitrate 管仲裁段，data_bitrate 管数据段，不能混改",
+      "FD 数据最长 64 字节"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "六、CAN FD 支持·FD 初始化与发送代码"
+    },
+    "relatedTerms": [
+      "BRS",
+      "仲裁段",
+      "数据段"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-05-02",
+    "chapterNum": 10,
+    "sectionIndex": 5,
+    "sectionTitle": "六、CAN FD 支持",
+    "module": "B",
+    "type": "judge",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "CAN FD",
+      "参数配置",
+      "易错点"
+    ],
+    "stem": "判断：只要在 `can.Message` 里把 `is_fd` 设为 True，数据段就会自动以 2Mbps 发送，Bus 初始化时不需要写 fd 与 data_bitrate。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误。章节代码明确把 FD 配置分在两处：Bus 初始化的 `fd=True, data_bitrate=2000000` 决定控制器工作模式与数据段速率，Message 的 `is_fd=True, bitrate_switch=True` 决定这一帧的格式与是否切速。速率是控制器级的配置，一条报文对象无权也无法凭空指定 2Mbps——如果 Bus 没开 FD，发 FD 帧通常直接报错或退化。这是初学者最常见的漏配：脚本里 is_fd 写了、data 也塞了 64 字节，结果发不出去，回头查才发现 Bus 那行忘了 fd=True。",
+    "keyPoints": [
+      "FD 必须 Bus 层与 Message 层双开",
+      "data_bitrate 只能在 Bus 初始化时指定",
+      "漏配 Bus 侧 fd=True 是典型发送失败原因"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "六、CAN FD 支持·FD 初始化与发送代码"
+    },
+    "relatedTerms": [
+      "fd=True",
+      "data_bitrate",
+      "bitrate_switch"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-06-01",
+    "chapterNum": 10,
+    "sectionIndex": 6,
+    "sectionTitle": "七、信号记录与回放",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Trace记录",
+      "CSV",
+      "回放"
+    ],
+    "stem": "章节「记录：CAN Trace → CSV」的代码中，写入 CSV 表头的四个字段是什么？",
+    "options": [
+      {
+        "key": "A",
+        "text": "timestamp、id、data、dlc"
+      },
+      {
+        "key": "B",
+        "text": "time、signal、value、unit"
+      },
+      {
+        "key": "C",
+        "text": "channel、node、frame_type、crc"
+      },
+      {
+        "key": "D",
+        "text": "index、name、factor、offset"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "代码里 `writer.writerow(['timestamp', 'id', 'data', 'dlc'])` 定义表头，循环体逐帧写 `msg.timestamp, hex(msg.arbitration_id), msg.data.hex(), msg.dlc`。这四个字段是回放的最小充分集：时间戳还原节奏、ID 与 data 还原内容、dlc 还原长度。B 是「信号级」记录的字段，本节记录的是原始帧级数据（没有 DBC 也能录）；C、D 与代码无关。理解「帧级 Trace vs 信号级日志」的区别很重要：帧级录下来的东西事后随时可以配任意版本 DBC 重新解析，信号级一旦解错就无法回溯。",
+    "keyPoints": [
+      "表头四字段：timestamp / id / data / dlc",
+      "记录的是帧级原始数据，不依赖 DBC",
+      "帧级 Trace 可事后重新解析，信息不丢失"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "七、信号记录与回放·CSV 记录代码段"
+    },
+    "relatedTerms": [
+      "Trace",
+      "msg.dlc",
+      "arbitration_id"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-06-02",
+    "chapterNum": 10,
+    "sectionIndex": 6,
+    "sectionTitle": "七、信号记录与回放",
+    "module": "B",
+    "type": "short",
+    "cat": "故障定位",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "回放",
+      "时序还原",
+      "时间戳单位"
+    ],
+    "stem": "章节回放代码用 `time.sleep((float(row['timestamp']) - prev_ts) / 1000)` 来还原报文节奏。请说明这段回放逻辑的原理，并指出实际使用时在时间戳单位、首帧处理、时序精度三方面需要注意什么。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题把「按差值 sleep」这一朴素回放思路拆开讲透。回放不是简单地把报文再发一遍，而是要把时间轴一起还原——单位算错、首帧处理不当、sleep 精度不足，都会让回放出来的总线行为与原始录制对不上，导致 ECU 表现不一致、问题复现失败。",
+    "keyPoints": [
+      "原理：按相邻两行时间戳差值 sleep，再逐帧 bus.send 还原节奏",
+      "单位必须与 sleep 的秒制对齐，除以 1000 是按毫秒时间戳处理",
+      "首帧 prev_ts 为 None 时不 sleep，直接发送并记录基准",
+      "sleep 精度与发送耗时会累积误差，高精度回放需用绝对时间轴"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "七、信号记录与回放·CSV 回放代码段"
+    },
+    "relatedTerms": [
+      "time.sleep",
+      "累积误差",
+      "问题复现"
+    ],
+    "refAnswer": "【一、回放逻辑的原理】代码用 csv.DictReader 逐行读回之前录制的 trace.csv，对每一行做两件事：先按「当前行时间戳 - 上一行时间戳」算出这两帧之间原本的间隔并 sleep 相应时长，再用 `can.Message(arbitration_id=int(row['id'],16), data=bytes.fromhex(row['data']), dlc=int(row['dlc']))` 把这一帧原样重建并 bus.send 出去，最后把 prev_ts 更新为当前时间戳。核心思想是：回放不仅要还原「发了什么」，还要还原「什么时候发」——因为 ECU 的很多行为（超时判定、周期监控、防抖逻辑）都依赖报文节奏，节奏错了就复现不出原问题。注意 id 用 int(...,16) 还原是因为记录时写的是 hex 字符串，data 用 bytes.fromhex 还原是因为记录时写的是 msg.data.hex()，收发两端的格式约定必须一一对应。\n【二、时间戳单位】这是最容易翻车的点。代码里除以 1000，意味着它把 CSV 里的时间戳当成毫秒来处理。而 python-can 的 msg.timestamp 通常是以秒为单位的浮点数（Unix 时间或相对测量起点的秒数）。如果录制时直接写的是秒级 timestamp，回放时再除以 1000，帧间隔就会被压缩到原来的千分之一，表现为「整段日志瞬间灌完」——总线瞬时负载爆表，ECU 可能丢帧甚至进入 Bus Off。所以实践中必须先确认自己录下来的到底是秒还是毫秒：若是秒，差值应直接 sleep 不再除；若统一约定用毫秒，则记录时就要写成 msg.timestamp*1000。一句话：记录端与回放端的时间单位必须签订同一份「合同」，并在代码注释里写明。\n【三、首帧处理】代码用 `if prev_ts:` 做保护，第一行时 prev_ts 为 None，跳过 sleep 直接发送，然后才把 prev_ts 赋值。这是必要的，否则会拿 None 参与减法报错。但要注意 `if prev_ts:` 用的是真值判断而非 `is not None`，若某帧时间戳恰好为 0.0，会被当成假值而误跳过一次 sleep；严谨写法应是 `if prev_ts is not None:`。\n【四、时序精度】time.sleep 只保证「至少睡这么久」，实际唤醒受操作系统调度影响，Windows 上典型抖动在毫秒量级；再加上每帧 bus.send 本身的耗时，误差会逐帧累积，回放一段几分钟的日志后总时长可能明显长于原始录制。对精度敏感的场景（如验证 10ms 周期报文的超时监控）应改用绝对时间轴：以回放起点 t0 为基准，计算每帧的目标绝对时刻 t0+相对偏移，用「目标时刻 - 当前时刻」来 sleep，这样误差不会累积；要求更高时则应交给硬件侧的定时发送或直接用 CANoe 的 Replay 功能，而不是纯 Python 的软件定时。"
+  },
+  {
+    "id": "Q-10-07-01",
+    "chapterNum": 10,
+    "sectionIndex": 7,
+    "sectionTitle": "八、常用设备",
+    "module": "B",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "USB-CAN设备",
+      "CAN FD",
+      "选型"
+    ],
+    "stem": "在章节「常用设备」表列出的五款设备中，哪一款**不支持** CAN FD？",
+    "options": [
+      {
+        "key": "A",
+        "text": "ZCAN USBCAN-2A"
+      },
+      {
+        "key": "B",
+        "text": "CANable (candleLight)"
+      },
+      {
+        "key": "C",
+        "text": "PCAN-USB"
+      },
+      {
+        "key": "D",
+        "text": "Kvaser Leaf"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "表格的 CAN FD 列里，只有 ZCAN USBCAN-2A 标的是 ❌，其余 CANable、PCAN-USB、Kvaser Leaf、Intrepid neoVI 都是 ✅。这题容易错在直觉：USBCAN-2A 是双通道（2CAN），比单通道的 CANable 看起来「更高级」，价格也贵五倍（~500 vs ~100），很多人就默认它功能更全。但通道数和帧格式支持是两个独立维度——CANable 虽然只有 1 路且只要百元左右，却支持 FD，适合个人学习。选型时一定要按项目实际需要的维度逐项核对，别用价格或通道数去推断能力。",
+    "keyPoints": [
+      "五款设备中仅 ZCAN USBCAN-2A 不支持 CAN FD",
+      "通道数与 FD 支持是彼此独立的维度",
+      "价格高不等于功能全，选型要逐项核对表格"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "八、常用设备·设备对比表（CAN FD 列）"
+    },
+    "relatedTerms": [
+      "candleLight",
+      "USBCAN-2A",
+      "选型"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-07-02",
+    "chapterNum": 10,
+    "sectionIndex": 7,
+    "sectionTitle": "八、常用设备",
+    "module": "B",
+    "type": "multi",
+    "cat": "参数记忆",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "设备选型",
+      "价格档位",
+      "接口"
+    ],
+    "stem": "根据章节「常用设备」对比表，下列描述正确的有哪些？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "CANable (candleLight) 约 100 元、1 路 CAN、USB 接口，定位学习/个人使用"
+      },
+      {
+        "key": "B",
+        "text": "PCAN-USB 约 1800 元、1 路 CAN、支持 FD，定位专业自动化"
+      },
+      {
+        "key": "C",
+        "text": "Kvaser Leaf 约 2500 元，定位工业级"
+      },
+      {
+        "key": "D",
+        "text": "Intrepid neoVI 价格数万、多路通道、支持 USB/ETH 接口，定位整车级"
+      },
+      {
+        "key": "E",
+        "text": "ZCAN USBCAN-2A 只有 1 路 CAN，定位整车级验证"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "explanation": "A、B、C、D 与表格逐格对应，构成一条清晰的价格—能力阶梯：百元级 CANable 用于学习 → 五百元级 USBCAN-2A 做入门自动化 → 千八百的 PCAN-USB 做专业自动化 → 两千五的 Kvaser Leaf 工业级 → 数万元的 neoVI 多路 USB/ETH 做整车级。E 有两处与表格不符：USBCAN-2A 是 2 路 CAN 不是 1 路，定位是「入门自动化」而非整车级；真正的整车级是 Intrepid neoVI。记住这张阶梯表的意义在于：面试或方案评审时能一句话说清「这个需求配多少钱的卡就够了」，避免拿学习卡去顶整车任务，或者拿数万元设备做教学演示。",
+    "keyPoints": [
+      "价格—能力阶梯：100 / 500 / 1800 / 2500 / 数万",
+      "USBCAN-2A 是 2 路 CAN，定位入门自动化",
+      "整车级唯一选项是多路 USB/ETH 的 Intrepid neoVI"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "八、常用设备·设备对比表"
+    },
+    "relatedTerms": [
+      "Kvaser Leaf",
+      "neoVI",
+      "通道数"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-08-01",
+    "chapterNum": 10,
+    "sectionIndex": 8,
+    "sectionTitle": "九、面试高频考点",
+    "module": "B",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "python-can",
+      "cantools",
+      "分工"
+    ],
+    "stem": "面试官问「python-can 和 cantools 分别是干什么的」，按章节「必会基础」表，最准确的回答是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "python-can 是通用 CAN 接口库，用 can.Bus() 统一封装不同品牌硬件驱动并收发 can.Message；cantools 是 DBC 解析库，负责 load_file/encode/decode"
+      },
+      {
+        "key": "B",
+        "text": "python-can 负责解析 DBC，cantools 负责驱动硬件收发报文"
+      },
+      {
+        "key": "C",
+        "text": "两者都是 Vector 官方库，必须配合 CANoe License 使用"
+      },
+      {
+        "key": "D",
+        "text": "python-can 只能做离线日志分析，cantools 才能连接真实总线"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "表格原文：python-can 是「通用CAN接口库，can.Bus() 统一封装不同品牌硬件驱动，send() 收发 can.Message」；cantools 是「DBC解析库：load_file() 加载DBC → encode() 物理值→CAN bytes → decode() CAN bytes→物理值」。一句话记忆：python-can 管「路」（怎么把字节送上总线），cantools 管「话」（字节是什么意思）。B 把两者职责对调，是最常见的口误；C 完全错误——这两个都是开源库，章节强调的优势恰恰是「免费、不依赖 Vector License」；D 也颠倒了，离线 .blf 解析用的正是 python-can 的 BLFReader。",
+    "keyPoints": [
+      "python-can 管收发通路，抹平硬件品牌差异",
+      "cantools 管语义解析，物理值与字节互转",
+      "两者均为开源库，不需要 Vector License"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "九、面试高频考点·必会基础表"
+    },
+    "relatedTerms": [
+      "can.Bus",
+      "load_file",
+      "开源"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-08-02",
+    "chapterNum": 10,
+    "sectionIndex": 8,
+    "sectionTitle": "九、面试高频考点",
+    "module": "B",
+    "type": "multi",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "python-can vs CANoe",
+      "工具选型",
+      "面试"
+    ],
+    "stem": "按章节「进阶加分项」表，python-can 相比 CANoe 的**劣势**包括哪些？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "没有可视化面板（Panel）"
+      },
+      {
+        "key": "B",
+        "text": "没有 CAPL 那样的事件驱动机制"
+      },
+      {
+        "key": "C",
+        "text": "没有内置测试报告"
+      },
+      {
+        "key": "D",
+        "text": "诊断（UDS）需要另写协议栈"
+      },
+      {
+        "key": "E",
+        "text": "无法在没有 Vector License 的机器上运行"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "explanation": "表格里「和CANoe比优势/劣势」一栏写得很整齐——优势：免费/灵活/可集成CI/做离线分析/不依赖Vector License；劣势：无面板/无CAPL事件驱动/无内置测试报告/诊断需另写协议栈。A~D 正是这四条劣势。E 恰恰把优势当成了劣势：「不依赖 Vector License」是 python-can 最大的卖点之一，没有 License 的机器上它照样跑。面试时把优劣势成对说出来最显专业，并加一句章节的总结定位：python-can 是 CANoe 的补充，不是替代——需要仿真整车、做 HIL、出正式报告时仍应上 CANoe。",
+    "keyPoints": [
+      "四大劣势：无面板 / 无事件驱动 / 无内置报告 / 诊断需自建",
+      "五大优势：免费、灵活、可集成CI、离线分析、不依赖License",
+      "定位是补充而非替代"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "九、面试高频考点·进阶加分项表"
+    },
+    "relatedTerms": [
+      "CAPL",
+      "Panel",
+      "UDS"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-08-03",
+    "chapterNum": 10,
+    "sectionIndex": 8,
+    "sectionTitle": "九、面试高频考点",
+    "module": "B",
+    "type": "short",
+    "cat": "工具操作",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "CI自动化",
+      "pytest",
+      "Jenkins"
+    ],
+    "stem": "面试官问：「你怎么把 python-can 的测试脚本做成 CI 自动化？大量信号并行监听时又有什么坑？」请给出完整回答。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题合并了「进阶加分项」表中的两条高价值考点——CI 集成链路与 GIL 限制，前者体现工程落地能力，后者体现对 Python 运行机制的理解，是拉开候选人差距的地方。",
+    "keyPoints": [
+      "CI 链路：pytest + python-can + cantools → assert → --junit-xml → Jenkins/GitLab CI",
+      "判定标准化为 assert expected == decoded['Signal']",
+      "大量信号并行监听受 GIL 限制，用 multiprocessing 分通道各建 Bus",
+      "离线 .blf 解析用 BLFReader 或 can.Player"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "九、面试高频考点·进阶加分项表（CI 自动化与 GIL 两条）"
+    },
+    "relatedTerms": [
+      "GIL",
+      "multiprocessing",
+      "BLFReader"
+    ],
+    "refAnswer": "【第一部分：怎么做成 CI 自动化】章节给的链路是 pytest + python-can + cantools → assert → junit-xml → 流水线，我按四步展开：\n①用例层。用 pytest 组织用例，把总线连接写成 fixture，例如 `@pytest.fixture def ca(): return CANAutomation('Demo.dbc', channel='PCAN_USBBUS1')`，这样每条用例拿到的都是干净的连接对象，也便于统一做 teardown（bus.shutdown）。\n②断言层。判定统一写成 `assert expected == decoded['Signal']` 这种标准断言，而不是自己 print PASS/FAIL。这一步很关键：只有用 assert，pytest 才能识别成功失败并纳入统计。范围类校验写成 `assert 0 <= decoded['EngineSpeed'] <= 8000, f\"转速越界: {...}\"`，把失败信息也带上，方便看流水线日志直接定位。\n③报告层。执行 `pytest --junit-xml=report.xml` 产出标准 JUnit XML。选 JUnit 格式是因为它是 CI 世界的通用语言，Jenkins、GitLab CI、TeamCity 都能原生解析并画出趋势图。\n④流水线层。在 Jenkins/GitLab CI 里配置任务：拉取代码与 DBC → 检查 CAN 卡在位 → 跑 pytest → 收集 report.xml → 按用例结果自动判定 Pass/Fail 并阻断合并。典型用法是夜间定时跑全量回归，早上看红绿；软件包一更新就触发冒烟集。这里要补两个工程细节：一是硬件是独占资源，多个流水线并发会抢卡，需要用 Jenkins 的 lock 或节点标签串行化；二是 DBC 版本必须和被测软件版本一起纳入版本管理，否则报告没有可追溯性。\n【第二部分：大量信号并行监听的坑】核心是 Python 的 GIL（全局解释器锁）。python-can 的接收本质是在 Python 层做循环与回调，多线程监听多路总线时，线程再多也只有一个能真正执行字节码，高负载下会出现处理不过来、队列积压甚至丢帧的现象，而且丢的是软件层的帧，硬件 Trace 上看不出来，排查极其痛苦。章节给的解法是：用多进程 multiprocessing 分通道，每个进程独立建自己的 can.Bus 实例，各自绑一路通道，进程间用队列或文件汇总结果——多进程各有独立解释器与 GIL，才能真正并行。\n另一个相关坑是离线分析：不要用 Python 一边跑高负载在线监听一边做统计，正确做法是先把数据落盘，再离线解析。CANoe 录的 .blf 可以直接用 python-can 的 `can.BLFReader('trace.blf')` 遍历，或用 can.Player 做回放，把「采集」和「分析」在时间上解耦，既避免丢帧，也让分析脚本可以反复迭代而不用重新上台架。"
+  },
+  {
+    "id": "Q-10-08-04",
+    "chapterNum": 10,
+    "sectionIndex": 8,
+    "sectionTitle": "九、面试高频考点",
+    "module": "B",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "GIL",
+      "多进程",
+      "并行监听"
+    ],
+    "stem": "判断：章节指出，python-can 在「大量信号并行监听」场景下会受 GIL 限制，建议改用 multiprocessing 多进程、按通道各建一个 Bus 实例。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "T"
+    ],
+    "explanation": "正确。「进阶加分项」表最后一行写的就是：「python-can 不支持但常用的场景——大量信号并行监听（GIL限制）→ 建议用多进程 multiprocessing 分通道各建Bus；离线 .blf 解析 → 用 python-can 的 BLFReader 或 can.Player」。原理上，GIL 使同一进程内的多线程无法真正并行执行 Python 字节码，监听任务越重越明显；多进程各自拥有独立解释器和 GIL，才能把多路通道的接收压力分摊到多个 CPU 核上。这也是 Python 做高负载车载数据采集时的通用范式：进程隔离 + 队列汇总。",
+    "keyPoints": [
+      "GIL 使多线程无法真正并行处理接收",
+      "解法：multiprocessing 分通道，各进程独立建 Bus",
+      "同一行考点还给出 .blf 离线解析方案：BLFReader / can.Player"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "九、面试高频考点·进阶加分项表（GIL 行）"
+    },
+    "relatedTerms": [
+      "GIL",
+      "can.Player",
+      "多通道"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-09-01",
+    "chapterNum": 10,
+    "sectionIndex": 9,
+    "sectionTitle": "十、测试实战关联",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "BLF",
+      "离线分析",
+      "BLFReader"
+    ],
+    "stem": "要用 Python 离线分析一份 CANoe 录制的 trace.blf，章节给出的做法是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "reader = can.BLFReader('trace.blf')，然后 for msg in reader 遍历每一帧"
+      },
+      {
+        "key": "B",
+        "text": "cantools.database.load_file('trace.blf') 直接加载后遍历 messages"
+      },
+      {
+        "key": "C",
+        "text": "先在 CANoe 里把 .blf 转成 .dbc，再用 cantools 解析"
+      },
+      {
+        "key": "D",
+        "text": "用 can.interface.Bus(channel='trace.blf') 建立虚拟总线后 recv"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节「离线 .blf 日志分析」的代码就是两行核心：`reader = can.BLFReader('trace.blf')` 与 `for msg in reader:`，循环里再按 `msg.arbitration_id == 0x100` 过滤并打印 `msg.timestamp`、`msg.data.hex()`。这体现了 python-can 的一个重要价值：即使现场用的是 CANoe，事后的批量数据分析仍可以用免费的 Python 来做，不占 CANoe License。B 混淆了 DBC 与日志文件——load_file 加载的是 DBC 数据库；C 的转换关系不成立，.blf 是数据日志、.dbc 是信号矩阵，两者不能互转；D 是虚构用法。",
+    "keyPoints": [
+      "can.BLFReader('xxx.blf') 后可直接迭代每一帧",
+      "帧对象仍有 arbitration_id / timestamp / data",
+      ".blf 是日志、.dbc 是矩阵，两者不可互转"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "十、测试实战关联·离线 .blf 日志分析代码"
+    },
+    "relatedTerms": [
+      "BLF",
+      "can.Player",
+      "离线分析"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-09-02",
+    "chapterNum": 10,
+    "sectionIndex": 9,
+    "sectionTitle": "十、测试实战关联",
+    "module": "B",
+    "type": "single",
+    "cat": "故障定位",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "recv阻塞",
+      "timeout",
+      "常见问题"
+    ],
+    "stem": "脚本运行后没有任何输出、Ctrl+C 也要按半天才退出，排查发现代码写的是 `msg = bus.recv()`。按章节「实战中常见严重问题」表，这属于什么问题、怎么改？",
+    "options": [
+      {
+        "key": "A",
+        "text": "recv() 忘设 timeout：总线上没有报文时会永久阻塞导致进程卡死，应写 recv(timeout=1.0) 或改用 Notifier 回调模式"
+      },
+      {
+        "key": "B",
+        "text": "波特率配错：应把 bitrate 改成 250000 重试"
+      },
+      {
+        "key": "C",
+        "text": "DBC 未加载：应先 load_file 再 recv"
+      },
+      {
+        "key": "D",
+        "text": "属于正常现象：recv() 本来就设计为一直等到有帧为止，无需修改"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "问题表第一行原文：「bus.recv()阻塞忘设timeout / 中等 / 总线上没有报文→recv()永久阻塞→Python进程卡死 / 必须设recv(timeout=1.0)，或用Notifier回调模式」。这个坑之所以高频，是因为在有报文的台架上写代码时它「看起来能跑」，一旦换到静默总线或 ECU 未上电的场景就当场挂死，且没有任何报错信息，新人往往怀疑是硬件坏了。D 的说法虽然描述了 recv() 无参时的行为，但把「已知缺陷」当成「无需修改」，正是章节要纠正的态度：自动化脚本必须能在超时后走失败分支并继续，而不是卡死在那里。",
+    "keyPoints": [
+      "recv() 不带 timeout 会永久阻塞，进程假死无报错",
+      "修法一：recv(timeout=1.0)；修法二：改用 Notifier 回调",
+      "自动化脚本要能超时失败并继续，而不是挂起"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "十、测试实战关联·⚠️ 实战中常见严重问题表（第 1 行）"
+    },
+    "relatedTerms": [
+      "阻塞",
+      "Notifier",
+      "超时"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-09-03",
+    "chapterNum": 10,
+    "sectionIndex": 9,
+    "sectionTitle": "十、测试实战关联",
+    "module": "B",
+    "type": "multi",
+    "cat": "故障定位",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "实战问题",
+      "安全开关",
+      "帧类型"
+    ],
+    "stem": "根据章节「实战中常见严重问题」表，下列关于三类问题的现象与教训，描述正确的有哪些？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "DBC 标准帧配上总线跑扩展帧，会导致 decode 失败抛异常；教训是加载 DBC 后先确认 frame_id 范围是否匹配实际 CAN ID"
+      },
+      {
+        "key": "B",
+        "text": "Python 脚本发错信号的严重度是「严重」，典型事故是压测时误发 $11 01 硬复位导致 ECU 重启、台架全部离线"
+      },
+      {
+        "key": "C",
+        "text": "自动化脚本必须加「安全开关」，执行前确认目标 ECU 和信号值范围"
+      },
+      {
+        "key": "D",
+        "text": "recv() 忘设 timeout 的严重度被标为「中等」"
+      },
+      {
+        "key": "E",
+        "text": "只要脚本在仿真环境验证通过，接到真实台架上就无需再做任何防护"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "explanation": "A、B、C、D 分别对应表中三行的现象、严重度与教训：DBC 解析 ID 不匹配（中等）→ 先核对 frame_id 范围；Python 脚本发错信号（严重）→ 压测中误发 $11 01 硬复位使 ECU 重启、台架全部离线，教训是必须加安全开关、执行前确认目标 ECU 与信号值范围；recv 忘设 timeout（中等）。E 与整张表想传达的态度完全相反：仿真环境没有真实 ECU，误发的复位帧不会造成后果，正因如此才更容易把危险代码带上台架。真机执行前的白名单校验、ID 范围检查、危险服务二次确认，是必须保留的最后一道防线。",
+    "keyPoints": [
+      "三类问题：recv 阻塞（中等）、DBC ID 不匹配（中等）、发错信号（严重）",
+      "最严重的是误发硬复位导致台架全部离线",
+      "安全开关：执行前确认目标 ECU 与信号值范围"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "十、测试实战关联·⚠️ 实战中常见严重问题表"
+    },
+    "relatedTerms": [
+      "硬复位",
+      "frame_id",
+      "安全开关"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-10-09-04",
+    "chapterNum": 10,
+    "sectionIndex": 9,
+    "sectionTitle": "十、测试实战关联",
+    "module": "B",
+    "type": "short",
+    "cat": "概念辨析",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "面试表达",
+      "Python价值",
+      "实战案例"
+    ],
+    "stem": "面试官问：「为什么测试工程师要会 Python？」章节提醒别只说「自动化」。请按章节「面试说」的思路组织一段有说服力的回答。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题考的不是知识点而是表达结构。章节明确指出评分点：讲清 Python 在车载里的四类具体用途，并能举一个「用脚本替代手工点点」的实例——这比背库名加分。",
+    "keyPoints": [
+      "四类用途：报文脚本生成/回放、DBC 信号批量校验、台架数据后处理、无 CANoe 授权时发帧",
+      "必须举一个用脚本替代手工操作的具体例子",
+      "收口于定位：Python 是 CANoe 的补充而非替代"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "十、测试实战关联·面试说（为什么测试工程师要会 Python）"
+    },
+    "relatedTerms": [
+      "python-can",
+      "回归测试",
+      "后处理"
+    ],
+    "refAnswer": "回答分三层：说用途、举例子、给定位。\n【第一层：Python 在车载测试里具体做什么】我不会只回答「做自动化」，因为这句话太空。落到实处主要是四件事：①报文脚本生成与回放——把测试场景写成脚本批量发帧，或把现场录到的 Trace 按原时序回放出来复现问题；②DBC 信号批量校验——用 cantools 遍历 DBC 的所有报文与信号，逐条发送、接收、比对，几百个信号十几分钟跑完，人工点根本做不到；③台架数据后处理——把 CANoe 录的 .blf 用 can.BLFReader 读进来做统计、画图、算丢帧率与响应时延，产出可以直接贴进报告的结论；④在没有 CANoe 授权时也能发帧——一块几百到一千多元的 USB-CAN 卡加 python-can，就能完成日常联调与冒烟，不用排队等 License。\n【第二层：举一个替代手工的例子】我之前验证仪表转速显示，原本的做法是在工具里手动改 EngineSpeed 的值、盯着仪表看指针，一个值一分钟，覆盖 0/怠速/中段/红区/超量程几个点就要十几分钟，而且每次回归都要重来一遍，做几轮人就麻木了，边界值经常漏测。后来我写了一段脚本：用 CANAutomation 封装 send_signal/recv_signal，把待测转速点和期望值写成列表，循环发送、sleep 等 ECU 响应、再 recv 回读用 abs(actual-expected)<=tolerance 判定，最后 summary 打印 PASS/FAIL 统计。整轮从十几分钟压缩到几十秒，而且每次跑的是同一份用例、同样的边界点，结果可复现。再往前一步，我把它改写成 pytest 用例、用 --junit-xml 出报告接进 Jenkins，软件包一更新夜里自动跑，第二天早上直接看红绿。这就是「用脚本替代手工点点」的完整价值：省时间只是表象，真正的收益是可重复、可回归、可追溯。\n【第三层：给出边界与定位】我也会主动说清 Python 的边界，这样显得判断是清醒的：python-can 没有可视化面板、没有 CAPL 那种事件驱动机制、没有内置测试报告、诊断（UDS）要另写协议栈；需要仿真缺失 ECU、跑 HIL、出正式归档报告时，还是要用 CANoe。所以我的定位是——Python 是 CANoe 的补充，不是替代。会 Python 的价值在于：把重复、批量、离线的那部分工作从人手里拿走，让工程师把时间花在设计测试场景和分析异常上。"
+  },
+  {
+    "id": "Q-10-09-05",
+    "chapterNum": 10,
+    "sectionIndex": 9,
+    "sectionTitle": "十、测试实战关联",
+    "module": "B",
+    "type": "judge",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "压力测试",
+      "丢帧率",
+      "双通道"
+    ],
+    "stem": "判断：章节介绍的 Python + CAN 压力测试做法是——循环 bus.send() 高频发包，用另一个 can.Bus 实例在另一通道接收，统计丢帧率和延迟。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "T"
+    ],
+    "explanation": "正确。「Python + CAN 做压力测试」小节列了两条：一是「循环 bus.send() 高频发包 → 用另一个 can.Bus 实例在另一通道接收 → 统计丢帧率和延迟」，二是「批量修改信号值（0 → 最大值 → 0）→ 监测 ECU 是否异常复位或进入保护模式」。第一条的关键设计是「发收分离」——发送端和接收端各用一个 Bus 实例、占不同通道，这样统计到的丢帧才是总线与被测节点的真实表现，而不是自己收自己的回环结果。第二条则是典型的极值冲击测试，观察点不是信号本身而是 ECU 的稳定性（是否复位、是否进保护）。做这类测试时要牢记表里的教训：高频发包与极值写入都属于高风险操作，脚本必须带安全开关。",
+    "keyPoints": [
+      "发收分离：两个 Bus 实例占不同通道",
+      "观测指标：丢帧率与延迟",
+      "极值冲击测试观察 ECU 是否复位或进保护模式"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "十、测试实战关联·Python + CAN 做压力测试（要点列表）"
+    },
+    "relatedTerms": [
+      "丢帧率",
+      "总线负载",
+      "保护模式"
+    ],
+    "refAnswer": ""
+  }
+]

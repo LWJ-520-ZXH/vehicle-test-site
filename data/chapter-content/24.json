@@ -1,0 +1,990 @@
+{
+  "num": 24,
+  "slug": "DBC设计详解",
+  "title": "DBC 文件设计详解 ⭐基础",
+  "oneliner": "DBC 文件是 CAN 通信的\"字典\"——没有它，Trace 里看到的只是一堆十六进制数字；有了它，才知道 0x64 代表车速 100km/h。会读 DBC 是基本功，会设计 DBC 才是进阶。DBC 由网络管理/架构组统一维护，任何改动必须走版本管理和评审流程",
+  "sections": [
+    {
+      "title": "一、DBC 文件结构总览",
+      "icon": "📖",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "DBC 文件以纯文本描述 CAN 网络通信矩阵，核心由 4 大块组成："
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "VERSION \"1.0\"\n\n① BU_: 网络节点声明\nBU_: EMS TCU ABS IPC\n\n② BO_: 报文定义\nBO_ 256 EngineData: 8 EMS\n SG_ EngineSpeed : 0|16@1+ (1,0) [0|8000] \"rpm\"  Vector_XXX\n SG_ EngineTemp  : 16|8@1+ (1,-40) [-40|215] \"degC\"  Vector_XXX\n\n③ VAL_: 值表定义（可选）\nVAL_ 256 DoorStatus 0 \"Closed\" 1 \"Open\" 2 \"Error\" ;\n\n④ BA_: 特殊属性\nBA_ \"GenMsgCycleTime\" BO_ 256 10;       ← 报文周期 10ms\nBA_ \"SigType\" SG_ 256 EngineSpeed 1;    ← 信号类型"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "块",
+            "关键字",
+            "作用",
+            "示例"
+          ],
+          "rows": [
+            [
+              "节点声明",
+              "`BU_:`",
+              "声明网络中所有 ECU 节点",
+              "`BU_: EMS TCU ABS`"
+            ],
+            [
+              "报文定义",
+              "`BO_`",
+              "定义每条 CAN 报文：ID + 名称 + DLC + 发送节点",
+              "`BO_ 256 EngineData: 8 EMS`"
+            ],
+            [
+              "信号定义",
+              "`SG_`",
+              "在 BO_ 内部，定义每个信号：位布局 + 换算 + 接收方",
+              "`SG_ EngSpeed : 0\\",
+              "16@1+ (1,0) [0\\",
+              "8000] \"rpm\" IPC`"
+            ],
+            [
+              "值表定义",
+              "`VAL_`",
+              "枚举信号值与物理含义的对照表",
+              "`VAL_ 256 GearPos 0 \"P\" 1 \"R\" 2 \"N\" 3 \"D\" ;`"
+            ],
+            [
+              "属性",
+              "`BA_`",
+              "扩展属性：周期/类型/初始值/超时值等",
+              "`BA_ \"GenMsgCycleTime\" BO_ 256 10;`"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"DBC 不是随便写的文本文件，它是整车 CAN 通信矩阵的最终载体。DBC 改一行，网关路由表、各 ECU 的 CAN 驱动代码、测试脚本的解析逻辑全要同步变——所以网络管理组维护，改动必须评审，发布前走版本号管理。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "二、信号定义格式详解（SG_）",
+      "icon": "📶",
+      "content_blocks": [
+        {
+          "type": "code",
+          "language": "",
+          "code": "SG_ SignalName : StartBit|Length@ByteOrder+Sign (Factor,Offset) [Min|Max] \"Unit\" Receiver\n\n      信号名       起始位  长度  字节序  符号    系数   偏移量    最小值 最大值  单位   接收方"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "参数",
+            "含义",
+            "示例与说明"
+          ],
+          "rows": [
+            [
+              "**SignalName**",
+              "信号名称，全局唯一",
+              "`EngineSpeed`"
+            ],
+            [
+              "**StartBit**",
+              "起始位位置（含 0）",
+              "`0` —— Motorola 表示 MSB 位置，Intel 表示 LSB 位置"
+            ],
+            [
+              "**Length**",
+              "信号长度（bit）",
+              "`16` —— 16 位可表示 0~65535"
+            ],
+            [
+              "**@1 / @0**",
+              "字节序：@0 = Motorola（大端）；@1 = Intel（小端）",
+              "搞反→高低字节颠倒，解析值完全不可信"
+            ],
+            [
+              "**+ / -**",
+              "有无符号：+ 无符号（车速、转速），- 有符号（温度可为负数）",
+              "选错→负数信号被当成巨大正数"
+            ],
+            [
+              "**Factor**",
+              "缩放系数",
+              "`1` —— 物理值 = 原始值 × Factor + Offset"
+            ],
+            [
+              "**Offset**",
+              "偏移量",
+              "`-40` —— 用于温度等偏移信号"
+            ],
+            [
+              "**Min / Max**",
+              "物理值有效范围",
+              "`[0",
+              "8000]` rpm"
+            ],
+            [
+              "**Unit**",
+              "单位字符串",
+              "`\"rpm\"`, `\"km/h\"`, `\"degC\"`"
+            ],
+            [
+              "**Receiver**",
+              "接收节点列表（空格分隔）",
+              "`IPC, Gateway`"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "信号物理值换算流程"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "   CAN 总线原始字节 ──→ 拼接为原始值(LSB→MSB按字节序) ──→ 物理值 = 原始值 × Factor + Offset\n\n   例：EngineTemp 原始值=100 (0x64)\n       物理值 = (100 × 1.0) + (-40) = 60°C"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "  BO_ 256 EngineData: 8 EMS\n   SG_ EngineTemp : 16|8@1+ (1,-40) [-40|215] \"degC\" Instrument\n\n  ┌─────────────────────────────────────────────────────────────┐\n  │ CAN 帧 Byte[2..2] = 0x64                                   │\n  │                      │                                      │\n  │                      ▼                                      │\n  │   原始值(raw) = 100 (0x64)                                  │\n  │                      │                                      │\n  │          ┌───────────┴───────────┐                          │\n  │          ▼                       ▼                          │\n  │   物理值 = 100 × 1 + (-40)   范围检查：60 ∈ [-40, 215]?     │\n  │          = 60°C                 → ✅ 有效值                 │\n  │                                                             │\n  │   若原始值 = 0xFF (=255) → 物理值 = 215°C                   │\n  │   若原始值 = 0x00 (=0)   → 物理值 = -40°C                   │\n  └─────────────────────────────────────────────────────────────┘"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"拿到一个新 DBC，三件事必须马上确认：①字节序是 Motorola 还是 Intel——搞反全错；②Factor 和 Offset——决定物理值换算；③Min/Max 范围——用于判断信号是否为 Invalid。这三个参数是 DBC 解析的三要素。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "三、Motorola vs Intel 字节序（高频考点）",
+      "icon": "🎯",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "字节级差异"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "信号值 = 0x1234 (16 bit)\nCAN 数据字节序列（按地址递增）: [... Byte2=0x12, Byte3=0x34 ...]\n\nMotorola大端(@0): 低地址 = 高字节 → 0x12(高) 0x34(低) → 值 = 0x1234\nIntel小端(@1):    低地址 = 低字节 → 0x12(低) 0x34(高) → 值 = 0x3412\n\n⚠️ 同一帧数据，字节序不同 → 解析值完全不同！"
+        },
+        {
+          "type": "h3",
+          "text": "位布局图解（面试必画）"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "信号：StartBit=12, Length=16, Motorola(@1), 无符号\n\nCAN Data[8字节]:  Byte0       Byte1       Byte2       Byte3       ...\n              位  [ 7..0]    [15..8]    [23..16]    [31..24]\n\n                Byte0        Byte1        Byte2        Byte3\n              ┌──────────┬──────────┬──────────┬──────────┐\nMotorola(@1): │ 7  6  5  4│ 3  2  1  0│15 14 ... 8│       ... │\n              │ (空区域)   │ ◄───── 信号 bit[15:0] ──────────► │\n              └──────────┴──────────┴──────────┴──────────┘\n              高位在低地址     ◄── 向高地址逐位递减\n\n                Byte0        Byte1        Byte2        Byte3\n              ┌──────────┬──────────┬──────────┬──────────┐\nIntel(@0):    │ 7  6  5  4│ 3  2  1  0│       ... │15 14 ... │\n              │ (空区域)   │ ◄─── 信号 bit[0:15] ────────────► │\n              └──────────┴──────────┴──────────┴──────────┘\n              低位在低地址     ◄── 向高地址逐位递增\n\n⚠️ 同一个 StartBit=12, Length=16：\n   Motorola 的 MSB(bit15) 在 Byte1 的 bit4，LSB(bit0) 在 Byte2 的 bit5\n   Intel 的 LSB(bit0) 在 Byte1 的 bit4，MSB(bit15) 在 Byte2 的 bit5\n   → 不确认字节序，解析值完全不可信！"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "对比维度",
+            "Motorola(@1) — 大端",
+            "Intel(@0) — 小端"
+          ],
+          "rows": [
+            [
+              "**StartBit 含义**",
+              "信号最高位（MSB）所在位号",
+              "信号最低位（LSB）所在位号"
+            ],
+            [
+              "**bit 编号方向**",
+              "从高到低（倒着数）",
+              "从低到高（正着数）"
+            ],
+            [
+              "**车载使用率**",
+              "✅ 90%+ 主流",
+              "少数 ECU（部分 BCM、德系 Legacy）"
+            ],
+            [
+              "**跨字节存储**",
+              "MSB 在低地址字节，LSB 在高地址字节",
+              "LSB 在低地址字节，MSB 在高地址字节"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"传统德系项目多用 Motorola，其他体系 Intel 也很常见，以实际 DBC 标注为准；字节序命名源自 Motorola 68k / Intel x86 的存储习惯，与 CAN 协议本身无关。但做测试不能只记结论——拿到 DBC 先在 CANdb++ 里看 Layout 视图，用几个已知特征值来回推算，确认字节序、bit 位置、Factor/Offset 都没问题。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "四、值表定义（VAL_）",
+      "icon": "🔬",
+      "content_blocks": [
+        {
+          "type": "code",
+          "language": "",
+          "code": "VAL_ CAN_ID SignalName Value \"描述\" Value \"描述\" ... ;\n\n例：VAL_ 256 GearPos 0 \"P_Park\" 1 \"R_Reverse\" 2 \"N_Neutral\" 3 \"D_Drive\" ;"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "作用",
+            "说明"
+          ],
+          "rows": [
+            [
+              "**枚举映射**",
+              "将离散数值映射为可读字符串（档位/开关状态/故障码）"
+            ],
+            [
+              "**报告可读**",
+              "CANoe Trace 中直接显示 \"D_Drive\" 而非数字 \"3\""
+            ],
+            [
+              "**Invalid 判断**",
+              "收到未定义值（如 GearPos=5）→ 判定为无效/故障"
+            ],
+            [
+              "**vs Signal Group**",
+              "VAL_ 是值级枚举，Signal Group 是信号级原子更新"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"VAL_ 最容易被忽略但最实用。比如 GearPos 你只看原始值 0/1/2/3，和看 'P/R/N/D'，排查效率天差地别。写测试报告时，VAL_ 让你直接用业务语言描述问题，不用翻译数字。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "五、信号多路复用（Multiplexing）",
+      "icon": "📶",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "同一 CAN ID 下，用一个 MuxSignal 的值来切换不同信号组的解析方式——一条报文承载多种互斥含义，节省 CAN ID 资源。"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "// 场景：报文 0x300 同时承载车门状态和灯光状态\n// MuxSignal=0 → 解析为车门状态；MuxSignal=1 → 解析为灯光状态\n\nBO_ 768 BodyStatus: 8 BCM\n SG_ MuxSignal M : 0|4@1+ (1,0) [0|15] \"\"  IPC,Gateway   // M = Multiplexor 选择器\n SG_ DoorLF_Status m0 : 4|2@1+ (1,0) [0|3] \"\"  IPC        // m0 = 被选中组0\n SG_ DoorRF_Status m0 : 6|2@1+ (1,0) [0|3] \"\"  IPC\n SG_ LightLowBeam m1 : 4|1@1+ (1,0) [0|1] \"\"  IPC         // m1 = 被选中组1\n SG_ LightHighBeam m1 : 5|1@1+ (1,0) [0|1] \"\"  IPC\n SG_ LightFog m1 : 6|1@1+ (1,0) [0|1] \"\"  IPC"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "关键字",
+            "含义",
+            "说明"
+          ],
+          "rows": [
+            [
+              "**M**",
+              "Multiplexor（多路选择器）",
+              "决定当前帧解析为哪一组信号，每条报文只能有 1 个 M"
+            ],
+            [
+              "**m0, m1, m2...**",
+              "被选中的信号组",
+              "只有 MuxSignal 的值匹配时才解析该组信号"
+            ],
+            [
+              "**Extended Multiplexing**",
+              "嵌套复用",
+              "m0 组内再设子 MuxSignal，二级选择（极少用）"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"Multiplexing 是节省 CAN ID 的核心手段——一条报文 ID 承载多种互斥含义。测试时特别注意：① MuxSignal 值切换后，旧组的信号是否被正确清零/忽略，不能留脏数据；② 收到非预期的 MuxSignal 值时，ECU 是否能正确处理（不崩溃、不进死循环）。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "六、信号组（Signal Group）",
+      "icon": "📶",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "将多个必须同步更新的信号绑定为一个组，做原子性检查。"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "// 四轮轮速必须同时更新——不能三个是新值、一个是旧值\nSIG_GROUP_ 512 WheelSpeeds 1 : FL_Speed FR_Speed RL_Speed RR_Speed;\n//         ^报文ID  ^组名    ^更新间隔(1=每次发送)  ^组内信号列表"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "用途",
+            "说明"
+          ],
+          "rows": [
+            [
+              "**一致性检查**",
+              "CANoe 检测到组内任一信号更新→检查组内其他信号是否同步更新"
+            ],
+            [
+              "**防止部分更新**",
+              "网关转发时 Signal Group 原子操作→不会出现半新半旧的状态"
+            ],
+            [
+              "**vs Multiplexing**",
+              "Signal Group = 并行全部有效（必须一起更新），Multiplexing = 互斥择一有效"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"轮速四轮信号必须同步——如果 ESP 读到左前轮速是新值、右前轮速是旧值，车辆稳定性控制会误判打滑。Signal Group 就是强制校验这个一致性。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "七、BA_ 属性完整速查",
+      "icon": "📖",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "属性",
+            "作用域",
+            "说明",
+            "典型值"
+          ],
+          "rows": [
+            [
+              "`GenMsgCycleTime`",
+              "BO_",
+              "报文周期（ms）",
+              "10, 100, 1000"
+            ],
+            [
+              "`GenMsgCycleTimeFast`",
+              "BO_",
+              "快速发送周期（诊断/刷写时切换）",
+              "诊断会话切到 1ms"
+            ],
+            [
+              "`GenMsgSendType`",
+              "BO_",
+              "发送类型",
+              "Cyclic（周期）/ Event（事件）/ Spontaneous（自发）"
+            ],
+            [
+              "`GenMsgDelayTime`",
+              "BO_",
+              "上电首次发送延迟（ms）",
+              "50"
+            ],
+            [
+              "`GenMsgStartDelayTime`",
+              "BO_",
+              "启动延迟（ms）",
+              "1000"
+            ],
+            [
+              "`GenSigStartValue`",
+              "SG_",
+              "信号初始值",
+              "0x00"
+            ],
+            [
+              "`GenSigInactiveValue`",
+              "SG_",
+              "ECU 未激活时默认值",
+              "0xFF"
+            ],
+            [
+              "`GenSigTimeoutValue`",
+              "SG_",
+              "信号超时默认值",
+              "0x00"
+            ],
+            [
+              "`NmMessage`",
+              "BO_",
+              "网络管理报文标记",
+              "0=普通, 1=NM 报文"
+            ],
+            [
+              "`DiagState`",
+              "SG_",
+              "诊断状态信号",
+              "—"
+            ],
+            [
+              "`SigType`",
+              "SG_",
+              "信号类型",
+              "RangeContinuous / RangeDiscrete"
+            ],
+            [
+              "`SystemSignalLongSymbol`",
+              "SG_",
+              "长信号名（代码生成用）",
+              "—"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "八、设计 DBC 的 5 步法",
+      "icon": "📖",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "步骤",
+            "内容",
+            "关键检查点"
+          ],
+          "rows": [
+            [
+              "**1. 定节点**",
+              "`BU_`: 列出发送/接收该报文的所有 ECU",
+              "接收节点是否和网关路由表一致"
+            ],
+            [
+              "**2. 定报文**",
+              "`BO_`: 确定 CAN ID + 报文名 + DLC（数据长度）",
+              "ID 不与已有报文冲突；DLC 必须能容纳所有信号"
+            ],
+            [
+              "**3. 定信号**",
+              "`SG_`: 每个信号放哪个 bit 位、多长",
+              "CANdb++ Layout 视图逐 byte 检查无重叠"
+            ],
+            [
+              "**4. 定换算**",
+              "Factor + Offset，确保物理值范围合理",
+              "验证 Min/Max 对应的原始值在 bit 范围内"
+            ],
+            [
+              "**5. 定属性**",
+              "报文周期、信号类型、默认值、Invalid 值",
+              "安全信号周期 ≤ 10ms；每个信号设 Invalid 值"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "九、常见设计错误",
+      "icon": "🧰",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "错误",
+            "后果",
+            "预防"
+          ],
+          "rows": [
+            [
+              "**两个信号 bit 位重叠**",
+              "互相覆盖，值错乱",
+              "CANdb++ Layout 视图逐字节检查"
+            ],
+            [
+              "**Motorola/Intel 搞反**",
+              "高低字节颠倒，解析全错",
+              "确认字节序后用已知特征值验证"
+            ],
+            [
+              "**Factor 精度不够**",
+              "0~100% 用 8bit→分辨率仅 0.39%；电压 8bit→0.1V 分辨率不足",
+              "精度需求决定 bit 长度：电压需 10bit、电流需 12bit"
+            ],
+            [
+              "**Invalid 值未定义**",
+              "故障时仪表显示异常（如 0xFFFF、Factor=0.01 → 655.35km/h）",
+              "每个信号定义 0xFF/0xFFFF 为 Invalid；仪表端有 Invalid 处理逻辑"
+            ],
+            [
+              "**报文周期过大**",
+              "信号更新慢，仪表动画卡顿、ASW 域信号延迟超标",
+              "安全信号 ≤ 10ms、显示信号 ≤ 50ms、状态信号 ≤ 100ms"
+            ],
+            [
+              "**DLC 声明与实际不符**",
+              "DLC 声明 6 字节但实际只用 4 字节→浪费带宽；信号跨越 DLC 边界→截断",
+              "DLC = 最大信号占用的最高字节索引 + 1"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "十、DBC 工具链",
+      "icon": "📖",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "工具",
+            "用途"
+          ],
+          "rows": [
+            [
+              "**CANdb++**（Vector）",
+              "创建/编辑 DBC（标配），Layout 视图可视化 bit 布局"
+            ],
+            [
+              "**CANoe Trace**",
+              "加载 DBC 后实时解析信号"
+            ],
+            [
+              "**Python `cantools`**",
+              "代码解析 DBC，提取信号值，生成 C 代码"
+            ],
+            [
+              "**Excel → DBC 脚本**",
+              "车企常用：需求在 Excel 中管理→自动生成 DBC（保证源端一致）"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "十一、DBC 版本管理（⚠️ 必知）",
+      "icon": "📖",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "DBC 不是\"写完就完\"的静态文件。整车开发周期中 DBC 频繁变更："
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "需求变更 → 架构组改 DBC → 发布新版本 → 同步更新网关路由表\n                                     → 各 ECU 软件组更新 CAN 驱动代码\n                                     → 测试组更新测试脚本/DBC 解析\n                                     → 发布变更通知（邮件/ALM）"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "环节",
+            "说明"
+          ],
+          "rows": [
+            [
+              "**维护方**",
+              "网络管理组 / EE 架构组，不是测试组"
+            ],
+            [
+              "**版本号**",
+              "每次变更必须升版号（如 V2.3 → V2.4），不能覆盖"
+            ],
+            [
+              "**变更评审**",
+              "改 DBC 必须经过评审——新增信号要确认不与其他信号重叠、不影响网关路由"
+            ],
+            [
+              "**测试前置**",
+              "测试前必须确认 DBC 版本号与 SUT 版本对应，用错版本→满屏假 Bug"
+            ],
+            [
+              "**同步要求**",
+              "改 DBC 新增信号→必须同步网关路由表（否则信号跨不了网）"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "十二、面试高频考点",
+      "icon": "🎯",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "必会基础"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "你要能说出来的"
+          ],
+          "rows": [
+            [
+              "**DBC 四大块**",
+              "BU_（节点）、BO_（报文）、SG_（信号）、BA_（属性）"
+            ],
+            [
+              "**SG_ 格式**",
+              "`SignalName : StartBit\\",
+              "Length@ByteOrder+Sign (Factor,Offset) [Min\\",
+              "Max] \"Unit\" Receiver`"
+            ],
+            [
+              "**Motorola vs Intel**",
+              "@1 = 大端（车载主流 90%+）、@0 = 小端；搞反→解析全错"
+            ],
+            [
+              "**物理值换算公式**",
+              "物理值 = 原始值 × Factor + Offset"
+            ],
+            [
+              "**Multiplexing**",
+              "M 选择器 + m0/m1 信号组，一条报文承载多种互斥含义"
+            ],
+            [
+              "**DBC 维护方**",
+              "网络管理/架构组，测试组是使用者，不是维护者"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "进阶加分项"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "高分回答思路"
+          ],
+          "rows": [
+            [
+              "**StartBit=12, Length=16 Motorola，信号跨了哪些字节？**",
+              "MSB 在 Byte1 的 bit4，LSB 在 Byte2 的 bit5，占用 Byte1 后半 + Byte2 全 + Byte3 前半（Motorola 计数递减）"
+            ],
+            [
+              "**为什么改 DBC 必须同步网关路由表？**",
+              "新增信号默认为\"不路由\"，不加路由规则→目标网络 ECU 收不到→仪表/中控啥也不显示"
+            ],
+            [
+              "**Signal Group 和 Multiplexing 怎么区分？**",
+              "Signal Group = 组内信号同时有效、必须原子更新（轮速四轮）；Multiplexing = 组间信号互斥择一有效（车门/灯光二选一）"
+            ],
+            [
+              "**DBC 版本怎么管理？**",
+              "架构组维护；升版号；变更走评审；通知全组；测试前核对版本号"
+            ],
+            [
+              "**Value Table（VAL_）和 Signal 的 Min/Max 有什么关系？**",
+              "VAL_ 定义离散枚举值及语义；Min/Max 定义连续范围。超出 VAL_ 定义值但仍在 Min/Max 范围内→可能是 Invalid"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "十三、测试实战关联",
+      "icon": "🛠️",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "CAN Trace 解析"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "加载 DBC → CANoe Trace 中直接看到物理值信号名而非 hex 数字",
+            "测试前必确认 DBC 版本与 SUT 版本一致，否则满屏\"信号名错位\""
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "信号一致性测试"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "跨网信号（如 EMS 转速→网关→仪表）：源侧和目的侧分别用各自网络的 DBC 解析，对比值/周期/延迟",
+            "重点关注：网关转发后 Factor/Offset 是否被篡改（有些网关会重映射）"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "诊断测试"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "诊断相关报文的 DBC 中 `DiagState` 信号 → 用于判断 ECU 是否在诊断会话",
+            "$22 读 DID 的返回值需对照 ODX/CDD 诊断数据库中的 DID 定义验证；DBC 只描述应用报文信号"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "DBC 自动化解析"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "`cantools` 加载 DBC → pytest 用例中自动解码 CAN 报文 → 断言信号值",
+            "DBC 本身可以作为测试 Oracle——直接从 DBC 提取信号范围做边界值测试"
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "⚠️ 实战中常见严重问题"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "严重度",
+            "现象",
+            "根因+教训"
+          ],
+          "rows": [
+            [
+              "**信号 bit 位重叠**",
+              "严重",
+              "两个信号用了相同 bit 位→互相覆盖→车门状态错乱→自动落锁失效",
+              "DBC 发布前必须用 CANdb++ 的 Layout 视图逐 byte 检查"
+            ],
+            [
+              "**Invalid 值未定义**",
+              "严重",
+              "传感器故障返回 0xFF（8位）→ 255%→驾驶员被吓到停车",
+              "每个信号必须定义 Invalid 值 + 仪表端对 Invalid 的处理逻辑"
+            ],
+            [
+              "**DBC 版本不同步**",
+              "严重",
+              "开发改了 DBC→测试用旧版 DBC 解析→所有信号都错→假 Bug 一大片",
+              "DBC 变更必须走变更流程 + 邮件通知全组 + 测试前确认版本号"
+            ],
+            [
+              "**Motorola/Intel 标注错误**",
+              "严重",
+              "DBC 写 @1(Motorola) 实际 ECU 发的是 Intel→高低字节颠倒→所有解析值都错",
+              "拿到新版 DBC 先用已知特征值（如固定 0x1234）验证字节序"
+            ],
+            [
+              "**网关路由表漏配**",
+              "严重",
+              "DBC 新增信号→网关路由表未同步→信号跨不了网→仪表无显示",
+              "改 DBC=必须同步审网关路由，\"新增信号=空白路由\"是默认行为"
+            ],
+            [
+              "**Factor 选型过小**",
+              "中等",
+              "电压信号用 8bit→分辨率仅 0.1V→BMS 电量估算累积误差变大",
+              "精度需求决定 bit 长度：电压 10bit、电流 12bit"
+            ],
+            [
+              "**周期设定不当**",
+              "中等",
+              "重要信号设了 1000ms 周期→网关转发延迟→仪表显示滞后明显",
+              "安全信号 ≤ 10ms、显示信号 ≤ 50ms、状态信号 ≤ 100ms"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "⬅ 返回 [[MOC_车载测试]] | 继续 → [[25-车载自动化框架]]"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 8
+    },
+    {
+      "title": "飞书笔记：DBC 与信号工程",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "概念：can 总线的信号数据库文件，定义了总线系统中各个 ECU 所要发送和接受的报文以及每个报文所有比特值的定义"
+        },
+        {
+          "type": "paragraph",
+          "text": "作用：报文解析、信号定义与标准化、开发与测试、数据可视化与分析、自动化测试"
+        },
+        {
+          "type": "paragraph",
+          "text": "Raw value：Can 报文发到总线上的十六进制数据"
+        },
+        {
+          "type": "paragraph",
+          "text": "Physical value:信号所代表的物理量的值"
+        },
+        {
+          "type": "paragraph",
+          "text": "物理值（Physical value）=原始值（Raw value）× 加权系数（factor） + 偏移量（offset）"
+        },
+        {
+          "type": "paragraph",
+          "text": "计算得到的原始值在实际使用时需转换为十六进制数再发送到总线。"
+        },
+        {
+          "type": "paragraph",
+          "text": "ByteOrder：Motorola（大端模式）、Intel（小端模式）"
+        },
+        {
+          "type": "paragraph",
+          "text": "跨字节：大端模式-高位在前低位在后，小端-高位在后低位在前（高低位互换）"
+        },
+        {
+          "type": "paragraph",
+          "text": "msb：高位 lsb：低位"
+        },
+        {
+          "type": "paragraph",
+          "text": "1. 创建仿真工程文件夹，如：Demo\n2. 创建工程子文件，如：CANdb、Panel、Nodes、Log、Test\n3. 创建工程：点击 file==》点击 New==》点击保存==选择工程文件 Demo"
+        },
+        {
+          "type": "paragraph",
+          "text": "1. 创建 dbc 文件：点击 Tools ==》点击 CANdb++Editor ==》点击 file ==》点击 create databases ==》选择 dbc 数据库模版 ==》 保存到工程子文件 CANdb"
+        },
+        {
+          "type": "paragraph",
+          "text": "1. 添加仿真节点、报文、信号、环境变量（信号是数据帧中的数据段 data，报文即为数据帧，节点即为 ECU，通过 ECU 发送/接收数据帧实现数据通讯）"
+        },
+        {
+          "type": "paragraph",
+          "text": "1. 节点添加：选择 Network Nodes 右击 New 新建节点 Engine、Door、Display 并保存"
+        },
+        {
+          "type": "paragraph",
+          "text": "1. 报文添加：选择 Messages 右击 New 添加 EngineState、DoorStates 并设置属性 name、ID、DLC、GenMsgCycleTime"
+        },
+        {
+          "type": "paragraph",
+          "text": "1. 信号添加：选择 Signals 右击 New==》添加 EngineSpeed、OnOff、Door_L、Door_R 设置属性"
+        },
+        {
+          "type": "paragraph",
+          "text": "2. 分别设置信号与报文、报文与节点的关联：（EngineState 对应 EngineSpeed、OnOff 信号，Door 对应 Door_L、door_R 信号）（节点 Engine 发送端 Tx Messages 添加 EngineState 报文、节点 Door 发送端 Tx Messages 添加 DoorState 报文，接收端 Mapped Rx Sig 添加 EngineSpeed/OnOff 信号、节点 Display 接收端 Mapped Rx Sig 添加 Door_L/Door_R/EngineSpeed/OnOff 信号）"
+        },
+        {
+          "type": "paragraph",
+          "text": "1. 双击报文==》点击 signal==》点击 ADD 添加信号==》选择对应信号并确定"
+        },
+        {
+          "type": "paragraph",
+          "text": "1. 双击节点==》点击 Tx Messages==》点击 Add==》选择报文并确定"
+        },
+        {
+          "type": "paragraph",
+          "text": "3. 添加环境变量：选中 Environment variables 右击 New 新增==》设置 name、value、minimum、maximum 等==》确定提交"
+        },
+        {
+          "type": "paragraph",
+          "text": "1. 添加数值表（点击顶部菜单 value table==》弹框中右击 New==》设置定义名称及具体参数==》保存）"
+        },
+        {
+          "type": "paragraph",
+          "text": "Value table 数值表用来字符指定信号或环境变量的值所代表的含义（解释说明的作用）"
+        },
+        {
+          "type": "paragraph",
+          "text": "1. 导入工程数据库（在 simulation setup 中 Network-Can Network-Can-Databases==》右击 import Wizard==》选择 DBC 文件==》选择网络节点==》确定）"
+        }
+      ]
+    }
+  ],
+  "summary": "DBC 文件是 CAN 通信的\"字典\"——没有它，Trace 里看到的只是一堆十六进制数字；有了它，才知道 0x64 代表车速 100km/h。会读 DBC 是基本功，会设计 DBC 才是进阶。DBC 由网络管理/架构组统一维护，任何改动必须走版本管理和评审流程",
+  "prev_chapter": {
+    "num": 23,
+    "name": "CANoe-TestModule"
+  },
+  "next_chapter": {
+    "num": 25,
+    "name": "车载自动化框架"
+  }
+}

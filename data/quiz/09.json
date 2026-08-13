@@ -1,0 +1,1075 @@
+[
+  {
+    "id": "Q-09-00-01",
+    "chapterNum": 9,
+    "sectionIndex": 0,
+    "sectionTitle": "一、CAPL 是什么",
+    "module": "B",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "CAPL",
+      "仿真节点",
+      ".can"
+    ],
+    "stem": "关于 CAPL 的定位与运行方式，正确的描述是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Vector 为 CANoe/CANalyzer 设计的类 C 事件驱动语言，.can 文件编译后挂到仿真节点上运行，节点行为由脚本定义"
+      },
+      {
+        "key": "B",
+        "text": "一种嵌入式 C 方言，编译成 hex 后刷进 ECU 运行"
+      },
+      {
+        "key": "C",
+        "text": "用于描述报文与信号编解码规则的数据库语言，等价于 DBC"
+      },
+      {
+        "key": "D",
+        "text": "只能读取总线数据做统计分析，不能主动向总线发送报文"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节定义：CAPL（CAN Access Programming Language）是 Vector 为 CANoe/CANalyzer 设计的类 C 事件驱动语言，它让工具从『只会看总线的观察员』变成『能主动发帧、能响应交互的演员』；你写的 .can 文件编译后挂到某个仿真节点（Simulation Node）上运行，节点的行为就由这段脚本定义。B 错在运行位置——CAPL 跑在 PC 的 CANoe 里，不刷进 ECU；C 说的是 DBC；D 与『演员』的定位直接矛盾，CAPL 可以用 output() 主动发帧。",
+    "keyPoints": [
+      "CAPL = 类 C 事件驱动语言，服务于 CANoe/CANalyzer",
+      ".can 编译后挂仿真节点，定义节点行为",
+      "从观察员变演员：可主动发帧、可响应交互"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "一、CAPL 是什么·定义说明段"
+    },
+    "relatedTerms": [
+      "CANalyzer",
+      "Simulation Node",
+      "output()"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-00-02",
+    "chapterNum": 9,
+    "sectionIndex": 0,
+    "sectionTitle": "一、CAPL 是什么",
+    "module": "B",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "main函数",
+      "事件驱动",
+      "执行模型"
+    ],
+    "stem": "判断：CAPL 与标准 C 一样，需要写一个 main() 函数作为程序入口，测量启动后从 main() 开始顺序执行。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误。章节强调：CAPL 没有 main() 函数，程序靠『事件』触发——按键、定时器到点、收到某条报文、某系统变量变化等等，这就是事件驱动。理解这一点能直接避免新手最常见的困惑：『为什么我的代码没执行？』——因为它不在任何事件块里。写在 variables 之外、又不属于任何 on 事件的代码根本没有触发时机。因此写 CAPL 的第一步永远是问自己：这段逻辑应该由什么事件来触发？初始化放 on start，手动调试放 on key，周期行为放 on timer，响应总线放 on message。",
+    "keyPoints": [
+      "CAPL 无 main()，执行完全由事件触发",
+      "代码不在事件块里就永远不会执行",
+      "写脚本先想清楚触发事件是什么"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "一、CAPL 是什么·事件驱动说明（没有 main 函数）"
+    },
+    "relatedTerms": [
+      "on start",
+      "on key",
+      "事件驱动"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-01-01",
+    "chapterNum": 9,
+    "sectionIndex": 1,
+    "sectionTitle": "二、程序基本结构",
+    "module": "B",
+    "type": "single",
+    "cat": "故障定位",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Encoding",
+      "中文乱码",
+      "文件头"
+    ],
+    "stem": "同事的 CAPL 脚本编译后，Write 窗口和代码里的中文注释全变成乱码。最直接的原因是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "文件头缺少 /*@!Encoding:936*/ 编码声明"
+      },
+      {
+        "key": "B",
+        "text": "variables 区没有声明字符串变量"
+      },
+      {
+        "key": "C",
+        "text": "CANoe 版本过低，不支持中文"
+      },
+      {
+        "key": "D",
+        "text": "没有在 includes 中引入中文语言包"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "程序基本结构示例的第一行就是 /*@!Encoding:936*/，注释明确写着『指定源文件编码，中文注释必加，否则乱码』；常见坑清单里也把『中文乱码 → 文件头忘记 /*@!Encoding:936*/』列为第一条。936 是简体中文 GBK 代码页。这属于典型的『一行代码解决一类问题』：新建 .can 文件后第一件事就是把这行加上，可以省掉后面反复排查乱码的时间。B、C、D 都是编造的原因，CANoe 本身不需要语言包。",
+    "keyPoints": [
+      "/*@!Encoding:936*/ 是中文注释的必备文件头",
+      "936 = 简体中文 GBK 代码页",
+      "新建 .can 文件第一件事就是加这一行"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "二、程序基本结构·示例代码文件头 /*@!Encoding:936*/"
+    },
+    "relatedTerms": [
+      "GBK",
+      "includes",
+      "write()"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-01-02",
+    "chapterNum": 9,
+    "sectionIndex": 1,
+    "sectionTitle": "二、程序基本结构",
+    "module": "B",
+    "type": "multi",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "程序结构",
+      "variables",
+      "includes"
+    ],
+    "stem": "关于 CAPL 程序的基本结构，下列说法正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "includes 区用于复用其他 .can 文件中的函数与变量"
+      },
+      {
+        "key": "B",
+        "text": "variables 区用于声明报文、定时器、系统变量和自定义变量"
+      },
+      {
+        "key": "C",
+        "text": "事件块（on ...）是真正干活的代码所在地"
+      },
+      {
+        "key": "D",
+        "text": "CAPL Browser 左侧是代码区，右侧是事件/变量/函数树"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 对应结构清单的三条：includes 复用其他 .can 文件的函数与变量；variables 声明报文（如 message 0x100 msg）、定时器（如 msTimer myTimer）、系统变量与自定义变量；事件块才是真正干活的地方。加上文件头的编码声明，就构成 CAPL 源文件的四大组成部分。D 把 CAPL Browser 的布局说反了——左侧是事件/变量/函数树，右侧是代码区，编译后即可加载到节点。记住这个结构有个实际好处：审查别人的脚本时，先看 variables 就能大致判断这个节点会发哪些报文、有几个定时器。",
+    "keyPoints": [
+      "四大组成：文件头编码声明 / includes / variables / 事件块",
+      "variables 里声明 message、msTimer 等",
+      "CAPL Browser 左树右码，编译后加载到节点"
+    ],
+    "sourceRef": {
+      "kind": "list",
+      "label": "二、程序基本结构·四部分说明清单（文件头/includes/variables/事件块）"
+    },
+    "relatedTerms": [
+      "msTimer",
+      "message",
+      "CAPL Browser"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-01-03",
+    "chapterNum": 9,
+    "sectionIndex": 1,
+    "sectionTitle": "二、程序基本结构",
+    "module": "B",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "on start",
+      "初始化",
+      "测量"
+    ],
+    "stem": "示例代码中的 on start 事件块，其触发时机和典型用途是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "测量启动时执行一次，常用于初始化和打印日志"
+      },
+      {
+        "key": "B",
+        "text": "每收到一帧报文就执行一次，用于统计报文数量"
+      },
+      {
+        "key": "C",
+        "text": "CANoe 软件启动时执行，与是否开始测量无关"
+      },
+      {
+        "key": "D",
+        "text": "每个定时周期执行一次，用于周期发送报文"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "结构示例里 on start 的注释是『测量启动时执行一次』，示例内容是 write(『CAPL 已加载』)；事件类型表中也写明 on start 的触发时机是『测量启动』、典型用途是『初始化、打印日志』。要注意区分『CANoe 软件启动』与『测量启动（Start Measurement）』——on start 对应的是后者，每次点 Start 都会执行一次，这正好适合做变量初始化、启动周期定时器、打印脚本版本号等工作。B 是 on message，D 是 on timer。",
+    "keyPoints": [
+      "on start = 测量启动时执行一次",
+      "典型用途：初始化变量、启动定时器、打印日志",
+      "区分测量启动与软件启动"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "三、常用事件类型表·on start 行（测量启动 / 初始化、打印日志）"
+    },
+    "relatedTerms": [
+      "Start Measurement",
+      "write()",
+      "on timer"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-02-01",
+    "chapterNum": 9,
+    "sectionIndex": 2,
+    "sectionTitle": "三、常用事件类型",
+    "module": "B",
+    "type": "multi",
+    "cat": "参数记忆",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "事件类型",
+      "on message",
+      "on signal"
+    ],
+    "stem": "依据常用事件类型表，下列『事件—触发时机/用途』配对正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "on key 'x' —— 按下键盘 x 时触发，是手动触发动作的调试利器"
+      },
+      {
+        "key": "B",
+        "text": "on message 0x100 —— 收到 ID=0x100 的报文时触发，用于响应/记录/转发"
+      },
+      {
+        "key": "C",
+        "text": "on sysvar NS::sv —— 系统变量变化时触发，常用于面板控件联动"
+      },
+      {
+        "key": "D",
+        "text": "on signal Sig —— 每隔固定周期触发一次，用于周期发帧"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 三条与事件类型表逐行对应：on key 'x' 在按下键盘 x 时触发，被称为『调试利器』，因为不需要改代码就能手动触发一段逻辑；on message 0x100 在收到该 ID 报文时触发，可用来响应、记录或转发；on sysvar NS::sv 在系统变量变化时触发，是面板控件联动的入口。D 张冠李戴——on signal Sig 是在 DBC 信号更新时触发，用于基于信号值做逻辑；『每隔固定周期触发』的是 on timer t。六个常用事件（start/key/timer/message/sysvar/signal）建议整表背下来，是 CAPL 面试的送分题。",
+    "keyPoints": [
+      "on key 手动触发调试，on message 响应总线报文",
+      "on sysvar 面板联动，on signal 基于 DBC 信号值做逻辑",
+      "周期触发是 on timer，不是 on signal"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "三、常用事件类型表（on start/key/timer/message/sysvar/signal）"
+    },
+    "relatedTerms": [
+      "on timer",
+      "命名空间",
+      "DBC 信号"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-02-02",
+    "chapterNum": 9,
+    "sectionIndex": 2,
+    "sectionTitle": "三、常用事件类型",
+    "module": "B",
+    "type": "single",
+    "cat": "故障定位",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "on timer",
+      "setTimer",
+      "只发一帧"
+    ],
+    "stem": "某仿真节点用 on timer 发送周期报文，但实际运行时 Trace 里只出现了一帧就再无下文。最可能的原因是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "on timer 事件末尾没有再调用 setTimer(t, period) 复位定时器"
+      },
+      {
+        "key": "B",
+        "text": "定时器周期设置得太长，后续帧还没到时间"
+      },
+      {
+        "key": "C",
+        "text": "Trace 窗口开启了 Filter，把后续帧过滤掉了"
+      },
+      {
+        "key": "D",
+        "text": "报文变量必须在 on start 中声明，否则只能发一次"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节把这条列为新手 90% 的问题来源：『on timer 里的代码只执行一次！想要周期发送，必须在事件末尾再 setTimer(t, period) 复位自己，否则定时器只触发一帧。』CAPL 的 msTimer 是一次性定时器（one-shot），触发后即失效，与很多语言里的『周期定时器』语义不同，这正是最容易踩的认知差。B 不成立（只发一帧且再无下文说明定时器已停），C 属于显示层面且现象通常是一帧都看不到，D 是编造的规则。排查口诀：只发一帧先看 setTimer 有没有自复位。",
+    "keyPoints": [
+      "CAPL msTimer 是一次性定时器，触发后失效",
+      "周期发送必须在 on timer 末尾自复位 setTimer",
+      "『只发一帧』是最典型的 CAPL 新手故障"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "三、常用事件类型·on timer 必须自复位的提醒（只发一帧的原因）"
+    },
+    "relatedTerms": [
+      "msTimer",
+      "output()",
+      "周期报文"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-02-03",
+    "chapterNum": 9,
+    "sectionIndex": 2,
+    "sectionTitle": "三、常用事件类型",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "on sysvar",
+      "面板联动",
+      "命名空间"
+    ],
+    "stem": "面板上拖动一个滑块，希望 CAPL 立即把新值翻译成总线信号下发。应当在脚本中使用哪个事件，并注意什么？",
+    "options": [
+      {
+        "key": "A",
+        "text": "用 on sysvar NS::sv 事件，并确保控件绑定的系统变量命名空间与 on sysvar 中书写的完全一致"
+      },
+      {
+        "key": "B",
+        "text": "用 on message 事件，监听面板发出的报文"
+      },
+      {
+        "key": "C",
+        "text": "用 on key 事件，由测试人员每次拖动后按键确认"
+      },
+      {
+        "key": "D",
+        "text": "用 on start 事件，在测量开始时一次性读取滑块的所有可能取值"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "事件类型表中 on sysvar NS::sv 的触发时机是『系统变量变化』，典型用途正是『面板控件联动』；全仿真示例也用 on sysvar Engine::EngineSpeedEntry 响应滑块变化，再把 @this 赋给 $信号 下发总线。需要特别注意命名空间——常见坑清单里写着『面板不联动 → 控件绑定的系统变量命名空间（NS::sv）与 on sysvar 不一致』，即面板绑的是 Engine::EngineSpeedEntry 而脚本里写成别的命名空间，事件就永远不会触发。B 错在面板不发报文而是改系统变量；C、D 都不满足『立即联动』的要求。",
+    "keyPoints": [
+      "面板联动用 on sysvar，事件源是系统变量变化",
+      "命名空间 NS::sv 必须与面板绑定完全一致",
+      "事件内用 @this 取得刚变化的值"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "三、常用事件类型表·on sysvar NS::sv 行（系统变量变化 / 面板控件联动）"
+    },
+    "relatedTerms": [
+      "@this",
+      "Panel",
+      "系统变量"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-03-01",
+    "chapterNum": 9,
+    "sectionIndex": 3,
+    "sectionTitle": "四、信号、系统变量与环境变量",
+    "module": "B",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "$信号",
+      "@系统变量",
+      "语法前缀"
+    ],
+    "stem": "CAPL 中 $ 与 @ 两个前缀的区别是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "$ 操作 DBC 中的总线信号（会被编码成报文发出），@ 操作 CANoe 内部的系统变量/环境变量"
+      },
+      {
+        "key": "B",
+        "text": "$ 表示只读，@ 表示可读写，两者操作的都是 DBC 信号"
+      },
+      {
+        "key": "C",
+        "text": "$ 用于十六进制常量，@ 用于十进制常量"
+      },
+      {
+        "key": "D",
+        "text": "$ 操作系统变量，@ 操作 DBC 信号，与 CANoe 面板绑定顺序有关"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节讲得很直接：$ 操作的是『总线信号』（会被编码成报文发出），示例 $EngineState::EngineSpeed = 0；@ 操作的是『CANoe 内部的全局变量』——包括系统变量 System Variable（如 @Engine::EngineSpeedEntry，面板滑块值）和环境变量 Environment Variable（如 @EnvDoorState，早期交互变量），常用于面板交互与节点间解耦通信。D 正好把两者调换，是最常见的记混方式；面试速查表的标准答案就是一句『$ 是总线信号，@ 是系统/环境变量』。",
+    "keyPoints": [
+      "$ = DBC 总线信号，会编码进报文发到总线",
+      "@ = 系统变量/环境变量，CANoe 内部全局量",
+      "@ 常用于面板交互与节点间解耦通信"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "四、信号、系统变量与环境变量·前缀含义表（$ / @）"
+    },
+    "relatedTerms": [
+      "System Variable",
+      "Environment Variable",
+      "DBC"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-03-02",
+    "chapterNum": 9,
+    "sectionIndex": 3,
+    "sectionTitle": "四、信号、系统变量与环境变量",
+    "module": "B",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "反向",
+    "tags": [
+      "系统变量",
+      "总线信号",
+      "常见误解"
+    ],
+    "stem": "判断：在 CAPL 中写下 @Engine::EngineSpeedEntry = 3000; 后，转速信号就会被自动编码成报文发送到 CAN 总线上。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误。@ 开头的是系统变量，属于 CANoe 内部的全局变量，改它只会在 CANoe 内部产生一次变量变化事件，不会自动出现在总线上。只有写 $ 开头的 DBC 信号（如 $EngineState::EngineSpeed = 3000）才会被编码进报文发出。章节给出的标准套路正是两者的接力：面板控件绑定 @系统变量 → CAPL 用 on sysvar 事件捕获变化 → 在事件里把值赋给 $信号 下发到总线，这就是仿真节点『承上启下』的角色。常见坑清单里的『信号写不进去 → 分不清 $信号 与 @系统变量，或节点未激活』说的就是这个错误。",
+    "keyPoints": [
+      "改 @系统变量不会自动上总线",
+      "只有 $信号 会被编码成报文发送",
+      "面板 @ → on sysvar → $ 信号，是标准接力链路"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "四、信号、系统变量与环境变量·$ 与 @ 作用域说明段"
+    },
+    "relatedTerms": [
+      "on sysvar",
+      "$信号",
+      "节点激活"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-03-03",
+    "chapterNum": 9,
+    "sectionIndex": 3,
+    "sectionTitle": "四、信号、系统变量与环境变量",
+    "module": "B",
+    "type": "short",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "承上启下",
+      "面板",
+      "解耦"
+    ],
+    "stem": "请描述『面板控件 → 系统变量 → CAPL → 总线信号』这条承上启下的标准套路，并说明为什么不让面板直接绑定 DBC 信号。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题考察 $ 与 @ 的分工在工程上的意义，是理解仿真节点角色与面板联调机制的关键，也直接对应章节所说的『仿真节点承上启下的标准套路』。",
+    "keyPoints": [
+      "面板绑 @系统变量，CAPL 用 on sysvar 捕获",
+      "事件内把值转换/校验后赋给 $信号 下发总线",
+      "分层带来解耦：面板不依赖具体 DBC，逻辑可插入中间层"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "四、信号、系统变量与环境变量·$ 与 @ 分工与标准套路说明段"
+    },
+    "relatedTerms": [
+      "on sysvar",
+      "@this",
+      "Panel"
+    ],
+    "refAnswer": "【标准套路】①面板层：在 Panel 上放置滑块、开关、输入框等控件，控件绑定到 @系统变量（如 Engine::EngineSpeedEntry），用户操作只改变这个内部变量。②事件层：CAPL 中写 on sysvar Engine::EngineSpeedEntry 事件，系统变量一变化就触发，事件内用 @this 取到刚变化的值。③逻辑层：在事件里做条件判断与换算，例如章节示例先判断 if (@Engine::EngineStateSwitch)（引擎已开）才把值下发，避免熄火状态下仍然输出转速。④总线层：把处理后的值赋给 $信号（$EngineState::EngineSpeed = @this），CANoe 依据 DBC 把它编码进对应报文发送到总线。⑤回流：接收侧节点用 on message 收到报文后，再把解析出的 $信号 换算写回 @系统变量（如 @Engine::EngineSpeedDspMeter = $EngineState::EngineSpeed / 1000.0），驱动面板仪表显示，形成完整闭环。\n【为什么不让面板直接绑 DBC 信号】①解耦：面板只认系统变量，DBC 换版本、信号改名或改缩放系数时，只需改 CAPL 中间层，面板不用重做。②可插入逻辑：直接绑信号就只能做『所见即所得』的透传，无法加入前置条件判断、单位换算、限幅、故障注入等逻辑，而这些恰恰是仿真节点的价值所在。③跨节点通信：系统变量是 CANoe 内部全局量，多个节点、多个面板、Test Module 都能读写，天然适合做节点间解耦通信；DBC 信号则强绑定到具体报文与总线。④仿真与真实环境切换：切到 Real Bus 后总线信号由真实 ECU 产生，面板仍然可以通过系统变量读到显示值，环境切换对面板透明。"
+  },
+  {
+    "id": "Q-09-04-01",
+    "chapterNum": 9,
+    "sectionIndex": 4,
+    "sectionTitle": "五、实战：半仿真 vs 全仿真",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "半仿真",
+      "output",
+      "on key"
+    ],
+    "stem": "阅读半仿真示例代码：on key 's' { setTimer(doorTimer, 1000); } 与 on timer doorTimer { ... output(doormsg); setTimer(doorTimer, 1000); }。下列理解正确的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "按下键盘 s 启动 1s 定时器，定时器每次到点构造 DoorState 报文并用 output() 发到总线，末尾自复位形成周期发送"
+      },
+      {
+        "key": "B",
+        "text": "按下 s 立即发送一帧报文，定时器用于 1s 后停止发送"
+      },
+      {
+        "key": "C",
+        "text": "output(doormsg) 只是把报文写进 Write 窗口，并不真正发到总线"
+      },
+      {
+        "key": "D",
+        "text": "doormsg 是系统变量，需要用 @ 前缀访问才能赋值"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "按代码逐行读：on key 's' 是手动触发入口，按下 s 后 setTimer(doorTimer, 1000) 启动 1 秒定时器；on timer doorTimer 事件里声明 message DoorState doormsg 报文变量，给 doormsg.Door_L=1、doormsg.Door_R=1（左右门开），调用 output(doormsg) 把报文真正发到总线，最后再 setTimer 自复位形成 1s 周期发送。这就是『半仿真：CAPL 主动 output 报文』的完整链路。C 错在 output() 的作用（写 Write 窗口的是 write()），D 错在 doormsg 是报文变量而非系统变量，用点号访问其信号成员。",
+    "keyPoints": [
+      "on key 手动启动，on timer 周期执行",
+      "message 报文变量用点号赋值信号，output() 发到总线",
+      "末尾 setTimer 自复位才有周期性"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "五、实战·半仿真示例代码（on key 's' / on timer doorTimer / output）"
+    },
+    "relatedTerms": [
+      "write()",
+      "msTimer",
+      "DoorState"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-04-02",
+    "chapterNum": 9,
+    "sectionIndex": 4,
+    "sectionTitle": "五、实战：半仿真 vs 全仿真",
+    "module": "B",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "反向",
+    "tags": [
+      "全仿真",
+      "@this",
+      "位运算"
+    ],
+    "stem": "阅读全仿真示例代码，下列分析正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "on sysvar Engine::EngineSpeedEntry 中的 @this 表示刚刚变化的那个系统变量的当前值"
+      },
+      {
+        "key": "B",
+        "text": "代码先判断 @Engine::EngineStateSwitch（引擎已开）才把滑块值写入 $EngineState::EngineSpeed，属于前置条件保护"
+      },
+      {
+        "key": "C",
+        "text": "Display 节点在 on message EngineState 中把 $EngineState::EngineSpeed / 1000.0 写入 @Engine::EngineSpeedDspMeter 更新仪表"
+      },
+      {
+        "key": "D",
+        "text": "@EnvDoorState = this.Door_L + this.Door_R * 2 的取值 0/1/2/3 分别代表关/左开/右开/全开，是用位权编码两个开关量"
+      },
+      {
+        "key": "E",
+        "text": "on key 的 output(doormsg) 只有在 CANoe 联接了真实 VN 硬件时才会真正发出，Simulated Bus 模式下 output 无效"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "explanation": "四条全部正确，逐一对应全仿真示例：①@this 是 CAPL 在 on sysvar 事件中访问『当前触发变量值』的惯用写法；②if (@Engine::EngineStateSwitch) 是典型的前置条件保护，避免引擎未开时仍下发转速，这正是仿真节点比『直接绑信号透传』更有价值的地方；③接收侧 Display 节点在 on message EngineState 中做单位换算（除以 1000.0）后写回系统变量驱动仪表显示，完成从总线回流到面板的闭环；④this.Door_L + this.Door_R * 2 用位权 1 和 2 把两个布尔量压成一个 0~3 的编码，注释里写明 0 关、1 左、2 右、3 全开。这段代码浓缩了『面板→系统变量→信号→总线→信号→系统变量→显示』的整条链路。 E 错在把「仿真」当成「假装」：Simulated Bus 模式下 output() 照样把报文发到虚拟总线上，Trace 窗口能完整看到，其他仿真节点也能收到并触发 on message。没有硬件一样能把整条链路调通——这正是先在纯仿真环境验证脚本、再上台架的价值所在。",
+    "keyPoints": [
+      "@this = 当前触发的系统变量值",
+      "前置条件判断避免非法工况下发信号",
+      "接收侧换算后写回 @系统变量驱动显示，形成闭环"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "五、实战·全仿真示例代码（on sysvar / on message EngineState / on message DoorState）"
+    },
+    "relatedTerms": [
+      "on message",
+      "环境变量",
+      "位权编码"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-04-03",
+    "chapterNum": 9,
+    "sectionIndex": 4,
+    "sectionTitle": "五、实战：半仿真 vs 全仿真",
+    "module": "B",
+    "type": "short",
+    "cat": "工具操作",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "半仿真",
+      "全仿真",
+      "项目实践"
+    ],
+    "stem": "请对比半仿真与全仿真的实现方式、适用场景与优缺点，并说明实际项目中两者如何混合使用、何时切换到 Real Bus。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题综合本章半仿真/全仿真两段代码与章节结论段，考察从代码实现上升到项目策略的能力，是面试速查表『半仿真与全仿真区别』的展开版。",
+    "keyPoints": [
+      "半仿真 = CAPL 主动 output 周期报文，快速造数据",
+      "全仿真 = 响应面板控件联动信号与显示，完整模拟 ECU 逻辑",
+      "项目中混合使用，真实 ECU 到位后替换为 Real Bus"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "五、实战·半仿真与全仿真适用场景结论段"
+    },
+    "relatedTerms": [
+      "Real Bus",
+      "Panel",
+      "on sysvar"
+    ],
+    "refAnswer": "【实现方式】①半仿真：节点靠 CAPL 主动 output 报文。典型结构是 on key 启动定时器、on timer 里构造 message 变量、给信号成员赋固定值、output() 发出、末尾 setTimer 自复位形成周期发送。它不关心外部输入，只负责『把数据造出来』。②全仿真：节点响应外部交互并联动信号与显示。典型结构是 on sysvar 捕获面板控件变化（用 @this 取值），经条件判断与换算后写入 $信号 下发总线；接收侧再用 on message 解析信号、换算后写回 @系统变量驱动仪表显示；还可以用位运算把多个信号编码成一个环境变量供其他节点使用。\n【适用场景与优缺点】半仿真适合『快速造数据、验证接收端』：编写快、依赖少，几十行就能让仪表动起来；缺点是行为固定、没有内部逻辑，无法验证被测件在复杂工况下的响应。全仿真适合『完整模拟一个有逻辑的 ECU』：能表达状态机、前置条件、单位换算与异常处理，联调面板与 UI 也更真实；缺点是开发成本高，需要面板、系统变量、DBC 三方对齐，命名空间不一致等坑更多。\n【项目中的混合与切换】实际项目里两者常混合：整车网络中往往只有一部分 ECU 到位，就用半仿真把还没联调的节点先顶上，保证总线上该有的报文都在、被测件不会因缺帧进入失效保护；对被测件直接交互的关键节点（如网关、车身控制器）则做全仿真，以便注入各种工况组合验证逻辑。随着真实样件陆续到位，逐个把仿真节点在 Simulation Setup 中屏蔽掉、切到 Real Bus，让真实 ECU 接管，实现从纯仿真到半实物再到实车的平滑过渡。切换时要复核两点：一是 Channel Mapping 与波特率配置正确、Statistics 无错误帧；二是被替换的仿真节点确实已停止发送，避免与真实 ECU 发送同一 ID 造成总线冲突。"
+  },
+  {
+    "id": "Q-09-05-01",
+    "chapterNum": 9,
+    "sectionIndex": 5,
+    "sectionTitle": "六、Test Feature Set（TFS）判定函数族",
+    "module": "B",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "TFS",
+      "判别函数",
+      "报告函数"
+    ],
+    "stem": "依据 TFS 三类函数分类表，下列配对正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "判别类 —— TestStepPass / TestStepFail / TestCaseFail / TestSetVerdict，给出步骤、用例或模块的 pass/fail 判定"
+      },
+      {
+        "key": "B",
+        "text": "架构类 —— TestGroupBegin/End、TestCaseDescription、TestStep、TestInfoTable/Row，组织用例结构与结构化报告"
+      },
+      {
+        "key": "C",
+        "text": "报告类 —— TestReportAddSetupInfo、TestReportAddSUTInfo、TestCaseComment，记录测试环境、样品与备注等元信息"
+      },
+      {
+        "key": "D",
+        "text": "编译类 —— TestCompile / TestBuild，用于在运行前编译测试模块"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 与 TFS 分类表完全一致：判别类给判定（Step/Case/模块三个层级都有对应函数，TestSetVerdict 用于直接设定裁决结果）；架构类组织用例结构（分组、描述、步骤、信息表格）；报告类记录元信息（测试环境 Setup、被测样品 SUT、备注 Comment）。D 是虚构的——CAPL 的编译由 CAPL Browser/CANoe 完成，不存在 TestCompile 这类 TFS 函数。补充记忆：TFS 自 CANoe 5.0 起集成，是写 Test Module 的核心武器。",
+    "keyPoints": [
+      "TFS 三类：判别、架构、报告",
+      "TestSetVerdict 直接设定裁决结果",
+      "SUT = 被测样品信息，写入报告便于追溯"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "六、Test Feature Set·三类函数分类表（判别/架构/报告）"
+    },
+    "relatedTerms": [
+      "Test Module",
+      "SUT",
+      "TestInfoTable"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-05-02",
+    "chapterNum": 9,
+    "sectionIndex": 5,
+    "sectionTitle": "六、Test Feature Set（TFS）判定函数族",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "检测函数",
+      "Check Descriptions",
+      "回归测试"
+    ],
+    "stem": "TFS 配套的检测函数族（Check Descriptions）包含哪三类评估？",
+    "options": [
+      {
+        "key": "A",
+        "text": "Signal Evaluation（信号数值/周期/稳定性）、Message Evaluation（报文丢失/周期/DLC/错误帧）、Time Evaluation（连续帧/超时）"
+      },
+      {
+        "key": "B",
+        "text": "Voltage Evaluation、Current Evaluation、Temperature Evaluation"
+      },
+      {
+        "key": "C",
+        "text": "Syntax Check、Semantic Check、Coverage Check"
+      },
+      {
+        "key": "D",
+        "text": "DBC Check、CDD Check、ODX Check"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节明确列出检测函数族的三类：Signal Evaluation 评估信号的数值、周期与稳定性；Message Evaluation 评估报文丢失、周期、DLC 与错误帧；Time Evaluation 评估连续帧与超时。它们的价值在于把『人工看 Trace』变成『机器自动判定』，是回归测试的基础——人工比对无法覆盖长时间、多信号的连续监控，而检测函数可以在整个测试过程中持续盯着，一旦越界立刻记进报告。B、C、D 都不是 CANoe 的概念。",
+    "keyPoints": [
+      "三类检测：Signal / Message / Time Evaluation",
+      "覆盖数值、周期、稳定性、丢帧、DLC、错误帧、超时",
+      "把人工看 Trace 变成机器自动判定，是回归测试基础"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "六、Test Feature Set·检测函数族（Check Descriptions）说明段"
+    },
+    "relatedTerms": [
+      "DLC",
+      "错误帧",
+      "回归测试"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-05-03",
+    "chapterNum": 9,
+    "sectionIndex": 5,
+    "sectionTitle": "六、Test Feature Set（TFS）判定函数族",
+    "module": "B",
+    "type": "judge",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "TFS",
+      "CANoe 5.0",
+      "Test Module"
+    ],
+    "stem": "判断：Test Feature Set 自 CANoe 5.0 起集成，是一组专门用于自动化测试判定与报告的函数，也是编写 Test Module 的核心武器。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "T"
+    ],
+    "explanation": "正确。章节原文：『自 CANoe 5.0 起集成的 Test Feature Set，是一组专门用于自动化测试判定与报告的函数，是写 Test Module 的核心武器』，并按用途分为判别、架构、报告三类。理解 TFS 的定位很重要：普通 CAPL 脚本负责『做动作』（发帧、响应事件），TFS 负责『下结论并留痕』（pass/fail 判定 + 结构化报告）。没有 TFS，自动化测试就退化成一堆 write() 打印，既没有裁决也没有可归档的报告，无法满足 ASPICE 等过程要求。Test Module 的详细写法见第 23 章。",
+    "keyPoints": [
+      "TFS 自 CANoe 5.0 起集成，服务于自动化判定与报告",
+      "分判别、架构、报告三类函数",
+      "普通 CAPL 做动作，TFS 下结论并留痕"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "六、Test Feature Set（TFS）·定位与分类说明段"
+    },
+    "relatedTerms": [
+      "Test Module",
+      "ASPICE",
+      "TestStepPass"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-06-01",
+    "chapterNum": 9,
+    "sectionIndex": 6,
+    "sectionTitle": "七、常见坑与排错",
+    "module": "B",
+    "type": "single",
+    "cat": "故障定位",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "编译报错",
+      "includes",
+      "路径"
+    ],
+    "stem": "CAPL 脚本编译报错，依据常见坑清单，最应优先检查的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "includes 中引用的 .can 文件是否存在、路径是否正确"
+      },
+      {
+        "key": "B",
+        "text": "Trace 窗口是否处于暂停状态"
+      },
+      {
+        "key": "C",
+        "text": "总线波特率是否与 ECU 匹配"
+      },
+      {
+        "key": "D",
+        "text": "Logging 是否选择了 .blf 格式"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "常见坑清单中『编译报错 → includes 里引用的 .can 文件不存在或路径错』是编译期问题的首选排查项。区分编译期与运行期是排错的第一原则：编译报错说明脚本根本没加载成功，与总线、波特率、日志格式（B、C、D 都是运行期或环境问题）无关。工程实践建议：includes 尽量使用相对路径并把公共库放在工程固定目录下，这样 .cfg 连同脚本一起拷贝给别人时不会因绝对路径失效而编译失败。",
+    "keyPoints": [
+      "编译报错先查 includes 的文件存在性与路径",
+      "先区分编译期问题与运行期问题",
+      "公共 .can 用相对路径，便于工程整体交接"
+    ],
+    "sourceRef": {
+      "kind": "list",
+      "label": "七、常见坑与排错清单·编译报错条目"
+    },
+    "relatedTerms": [
+      "includes",
+      ".can",
+      ".cfg"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-06-02",
+    "chapterNum": 9,
+    "sectionIndex": 6,
+    "sectionTitle": "七、常见坑与排错",
+    "module": "B",
+    "type": "multi",
+    "cat": "故障定位",
+    "difficulty": "挑战",
+    "direction": "反向",
+    "tags": [
+      "排错",
+      "常见坑",
+      "根因"
+    ],
+    "stem": "依据常见坑与排错清单，下列『现象—根因』配对正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "中文乱码 —— 文件头忘记写 /*@!Encoding:936*/"
+      },
+      {
+        "key": "B",
+        "text": "节点只发一帧 —— on timer 末尾没有复位 setTimer"
+      },
+      {
+        "key": "C",
+        "text": "信号写不进去 —— 分不清 $信号 与 @系统变量，或节点未激活"
+      },
+      {
+        "key": "D",
+        "text": "面板不联动 —— 控件绑定的系统变量命名空间（NS::sv）与 on sysvar 中书写的不一致"
+      },
+      {
+        "key": "E",
+        "text": "面板控件全部灰掉 —— 因为 CANoe 未联接硬件接口，仿真模式下面板会被自动禁用"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "explanation": "四条全部正确，正是常见坑清单的前四条（第五条是编译报错→includes 路径问题）。把它们按排查层次整理成一张检查表会更好用：①编译期——中文乱码看编码声明、编译报错看 includes 路径；②发送侧——只发一帧看 setTimer 自复位，信号写不进去看是否误用 @ 代替 $、以及节点在 Simulation Setup 中是否被激活、当前是否处于 Real Bus 模式；③交互侧——面板不联动看系统变量命名空间是否与 on sysvar 完全一致。这套检查表能覆盖 CAPL 新手绝大多数问题，面试时能完整说出来会很加分。 E 是新手常见的甩锅方向：面板可用与否跟有没有硬件无关，Simulated Bus 模式下面板照常交互。控件真的不响应，八成是没启动 Measurement、控件没绑定系统变量，或者绑定的命名空间写错了。排错时先确认测量在跑，再查绑定，别一上来怀疑硬件。",
+    "keyPoints": [
+      "五大坑：乱码、只发一帧、信号写不进、面板不联动、编译报错",
+      "按编译期/发送侧/交互侧分层排查",
+      "节点未激活与 Real Bus 模式同样会导致发不出信号"
+    ],
+    "sourceRef": {
+      "kind": "list",
+      "label": "七、常见坑与排错清单（乱码/只发一帧/信号写不进/编译报错/面板不联动）"
+    },
+    "relatedTerms": [
+      "setTimer",
+      "命名空间",
+      "节点激活"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-07-01",
+    "chapterNum": 9,
+    "sectionIndex": 7,
+    "sectionTitle": "八、面试高频考点",
+    "module": "B",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "面试",
+      "周期发帧",
+      "自动化判定"
+    ],
+    "stem": "面试速查表中『怎么实现周期发帧』与『如何做自动化判定』的标准答案分别是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "on timer + 末尾 setTimer 自复位；TFS 的 TestStepPass/Fail 加检测函数"
+      },
+      {
+        "key": "B",
+        "text": "on message 循环转发；人工比对 Trace 后填写结论"
+      },
+      {
+        "key": "C",
+        "text": "on key 反复按键触发；用 write() 打印结果作为判定依据"
+      },
+      {
+        "key": "D",
+        "text": "在 on start 中用 for 循环连续 output；用 Logging 文件大小判断是否通过"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "面试速查表给出的正是这两句：『怎么实现周期发帧 —— on timer + 末尾 setTimer 自复位』『如何做自动化判定 —— TFS 的 TestStepPass/Fail + 检测函数』。同表另外三条也要一并记牢：CAPL 为什么没有 main（事件驱动，靠 on 事件触发）、$ 和 @ 的区别（$ 是总线信号，@ 是系统/环境变量）、半仿真与全仿真的区别（主动 output vs 响应控件联动信号）。D 的『在 on start 用 for 循环连续 output』是典型错误写法——会在一瞬间灌爆总线且阻塞事件处理，周期行为必须交给定时器。",
+    "keyPoints": [
+      "周期发帧 = on timer + 末尾 setTimer 自复位",
+      "自动化判定 = TFS 判定函数 + 检测函数族",
+      "禁止用 for 循环连续 output 模拟周期发送"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "八、面试高频考点表（无 main / $ 与 @ / 周期发帧 / 自动化判定 / 半仿真与全仿真）"
+    },
+    "relatedTerms": [
+      "msTimer",
+      "TestStepPass",
+      "事件驱动"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-09-07-02",
+    "chapterNum": 9,
+    "sectionIndex": 7,
+    "sectionTitle": "八、面试高频考点",
+    "module": "B",
+    "type": "short",
+    "cat": "概念辨析",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "面试综合",
+      "事件驱动",
+      "$与@"
+    ],
+    "stem": "面试官连问三题：『CAPL 为什么没有 main？』『$ 和 @ 有什么区别？』『你怎么用 CAPL 做自动化判定？』请给出一段完整、有条理的回答。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题把面试高频考点表的五个要点串成一段可直接使用的回答，覆盖执行模型、数据访问、自动化落地三个层次，是本章的收口题。",
+    "keyPoints": [
+      "无 main 的本质是事件驱动执行模型",
+      "$ 总线信号 / @ 系统与环境变量，配合 on sysvar 承上启下",
+      "自动化判定靠 TFS 判定函数 + 检测函数 + 结构化报告"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "八、面试高频考点表（五条要点汇总）"
+    },
+    "relatedTerms": [
+      "on sysvar",
+      "Test Feature Set",
+      "Test Module"
+    ],
+    "refAnswer": "【第一问：CAPL 为什么没有 main】因为 CAPL 是事件驱动语言，不是顺序执行语言。它挂在 CANoe 的仿真节点上，由 CANoe 的运行时统一调度：测量启动触发 on start，按键触发 on key，定时器到点触发 on timer，收到报文触发 on message，系统变量变化触发 on sysvar，DBC 信号更新触发 on signal。因此不需要也不存在一个统一入口 main()。实践推论是：任何不写在事件块里的代码都不会被执行；写脚本的第一步是先想清楚『这段逻辑该由哪个事件触发』。周期性行为必须交给 on timer 并在末尾自复位 setTimer，绝不能在事件里写死循环，否则会阻塞事件处理。\n【第二问：$ 和 @ 的区别】$ 前缀访问的是 DBC 中的总线信号，赋值后会被编码进对应报文发送到总线，例如 $EngineState::EngineSpeed = 3000；@ 前缀访问的是 CANoe 内部的全局变量，包括系统变量（如面板滑块绑定的 @Engine::EngineSpeedEntry）和环境变量（如 @EnvDoorState）。二者的标准协作方式是：面板控件绑 @系统变量 → CAPL 用 on sysvar 捕获变化并用 @this 取值 → 做条件判断与换算后写入 $信号 下发总线 → 接收节点用 on message 解析信号、换算后写回 @系统变量驱动仪表显示。这样分层的好处是解耦：DBC 变更只需改中间层，面板无感；也便于在中间层插入限幅、前置条件、故障注入等逻辑。常见错误是以为改 @系统变量就能上总线，或者把两个前缀写反，症状就是『信号写不进去』。\n【第三问：怎么做自动化判定】依托 Test Feature Set（自 CANoe 5.0 集成）在 Test Module 中落地：①用架构类函数组织结构——TestGroupBegin/End 分组、TestCaseDescription 写用例描述、TestStep 记录步骤、TestInfoTable/Row 输出信息表；②用判别类函数下结论——TestStepPass/TestStepFail 判定单步，TestCaseFail 判定用例，TestSetVerdict 直接设定裁决；③用检测函数族做持续自动校验——Signal Evaluation 校验信号数值/周期/稳定性，Message Evaluation 校验报文丢失/周期/DLC/错误帧，Time Evaluation 校验连续帧与超时，把『人工看 Trace』变成『机器自动判定』；④用报告类函数留痕——TestReportAddSetupInfo 记录测试环境、TestReportAddSUTInfo 记录被测样品、TestCaseComment 加备注，最终导出 HTML/XML 报告用于存档与追溯。这样一套下来，测试才具备可重复、可自动化、可归档三个特性。"
+  }
+]

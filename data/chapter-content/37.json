@@ -1,0 +1,581 @@
+{
+  "num": 37,
+  "slug": "系统性能测试",
+  "title": "系统性能测试",
+  "oneliner": "车机是嵌入式Android/Linux系统——冷启动要快、交互要流畅、内存不能越跑越少、CPU不能长期满载。测试核心：**启动快、操作流畅、长时间不老化、多任务不卡死**",
+  "sections": [
+    {
+      "title": "一、性能测试指标采集链路",
+      "icon": "📌",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "车机本质是嵌入式 Android / Linux 设备，和手机一样有冷启动 / 内存 / CPU / 帧率，但要 7×24 在车里跑、同时带 HMI + 仪表 + 音频。测试盯四件事：冷启动快、操作流畅、长时间不泄漏、多任务不卡死。老化测试（连续 72h）是车机的必修课。",
+          "_enh": "concept"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "                   采集层                           分析层                     判定层\n\n  ┌──────────┐   ┌──────────┐                                    ┌──────────────┐\n  │ 冷启动    │   │ adb shell│   ──→ CSV时序数据                │ 启动<15s     │\n  │ 计时      │   │ logcat   │       (冷启动时间/帧率/CPU...)    │             │\n  └──────────┘   └──────────┘                                    └──────────────┘\n                        │\n  ┌──────────┐   ┌──────┴───┐   ┌──────────┐   ┌──────────┐     ┌──────────────┐\n  │ UI交互   │ → │ Systrace │ → │ Perfetto │ → │ 帧耗时   │ →   │ Jank<5/min   │\n  │ 操作录制  │   │ /Perfetto│   │ Trace视  │   │ 分析     │     │ 掉帧<3帧     │\n  └──────────┘   └──────────┘   │ 图分析   │   └──────────┘     └──────────────┘\n                                └──────────┘\n  ┌──────────┐   ┌──────────┐                                    ┌──────────────┐\n  │ 长时间    │   │ dumpsys  │   ──→ 前后对比diff               │ 内存增长    │\n  │ 压力测试  │   │ meminfo  │       (hprof转MAT分析)           │ <200MB/12h  │\n  └──────────┘   └──────────┘                                    └──────────────┘\n\n  ┌──────────┐   ┌──────────┐                                    ┌──────────────┐\n  │ Monkey   │   │ dropbox  │   ──→ ANR/Crash统计              │ 0 ANR       │\n  │ 随机操作  │   │ /data/   │                                    │ 0 Crash     │\n  └──────────┘   │ anr/     │                                    └──────────────┘\n                 └──────────┘"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：车机性能测试=采集+分析+判定。关键工具链：`dumpsys meminfo`(内存)→`systrace/perfetto`(帧率+CPU)→Monkey(稳定性)→`top`(CPU占用)。场景不是单功能跑，而是模拟真实使用：导航+音乐+蓝牙电话同时运行。"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": false,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "二、冷启动与应用启动",
+      "icon": "⚡",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "冷启动测试"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "冷启动时序：\n\n  上电 ──→ Bootloader ──→ Kernel启动 ──→ init进程 ──→ System Server ──→ Launcher可操作\n   0s        0.5s-1s        2s-4s           5s-7s          8s-12s             <15s目标\n   \n  T0: KL15上电信号                          T1: 主界面完全渲染可触摸操作\n  │                                         │\n  └──────────── 冷启动时间(T1-T0) ──────────┘"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "测试维度",
+            "方法",
+            "标准参考"
+          ],
+          "rows": [
+            [
+              "冷启动",
+              "KL15上电→计时到Launcher可操作(图标可点击)",
+              "<15s (Android车机典型值)"
+            ],
+            [
+              "热启动/休眠唤醒",
+              "熄火短时休眠→点火唤醒→计时到可操作",
+              "<2s"
+            ],
+            [
+              "连续启停",
+              "冷启动→热启动交替50次",
+              "0次启动失败"
+            ],
+            [
+              "低电压启动",
+              "电池电压降至9V→冷启动",
+              "成功启动，无异常"
+            ],
+            [
+              "高温/低温启动",
+              "-30℃ / 60℃ 环境→冷启动",
+              "成功启动，无异常"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "应用启动速度"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "应用",
+            "测试方法",
+            "冷启动标准",
+            "热启动标准"
+          ],
+          "rows": [
+            [
+              "导航",
+              "桌面图标→地图首页显示",
+              "<3s",
+              "<1s"
+            ],
+            [
+              "音乐",
+              "桌面图标→歌曲列表显示",
+              "<2s",
+              "<1s"
+            ],
+            [
+              "电话",
+              "桌面图标→拨号盘可操作",
+              "<1.5s",
+              "<0.5s"
+            ],
+            [
+              "车辆设置",
+              "桌面图标→设置首页",
+              "<1.5s",
+              "<0.5s"
+            ],
+            [
+              "倒车影像",
+              "挂R档→画面显示",
+              "<2s (另见[[38-倒车影像测试]])",
+              "<1s"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：冷启动优化的关键瓶颈：Bootloader启动时间+Kernel解压+System Server初始化+Launcher首帧渲染。测试时关注各阶段耗时占比，System Server阶段通常是最大瓶颈。"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "三、流畅度：帧率与卡顿",
+      "icon": "⚡",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "帧率与卡顿指标"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "  VSYNC信号线(60Hz=16.67ms/帧)：\n  60fps ─────────────────────────────────────────────\n  30fps ──┬──────┬──────┬──────┬──────┬──────┬──────\n          │      │      │      │      │      │\n       正常帧  正常帧   掉帧    Jank   恢复帧  正常帧\n                  (超16.67ms)  (>3帧)"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "指标",
+            "定义",
+            "采集方法",
+            "标准"
+          ],
+          "rows": [
+            [
+              "帧率(FPS)",
+              "每秒渲染帧数",
+              "`dumpsys gfxinfo framestats`",
+              "地图≥30fps、主界面≥60fps"
+            ],
+            [
+              "Jank",
+              "掉帧>3帧(超过VSYNC 3个周期)",
+              "Perfetto GPU Queue",
+              "<5次/分钟"
+            ],
+            [
+              "帧耗时",
+              "单帧渲染时间",
+              "Perfetto -> Frame Timeline",
+              "P95<16.67ms(60fps线)"
+            ],
+            [
+              "滑动流畅度",
+              "列表/地图滑动的帧率稳定性",
+              "Systrace滑动操作区域",
+              "全程≥50fps"
+            ],
+            [
+              "过渡动画掉帧",
+              "页面切换动画帧率",
+              "Perfetto追踪过渡动画",
+              "无丢帧"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "流畅度测试场景"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "测试场景",
+            "操作",
+            "关注指标"
+          ],
+          "rows": [
+            [
+              "地图3D导航",
+              "3D城市模式缩放/旋转",
+              "帧率/卡顿/花屏"
+            ],
+            [
+              "列表滑动",
+              "通讯录/歌曲列表快速滑动",
+              "帧率稳定性/白块"
+            ],
+            [
+              "多任务切换",
+              "导航→音乐→电话→设置来回切",
+              "切换动画流畅/animation hover"
+            ],
+            [
+              "语音+导航并发",
+              "唤醒语音+导航运行",
+              "两者帧率均不跌破30fps"
+            ],
+            [
+              "倒车影像+雷达",
+              "挂R档→倒车影像+雷达叠加",
+              "画面帧率≥30fps"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "四、内存性能与泄漏",
+      "icon": "🔬",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "内存监控"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "监控维度",
+            "工具/命令",
+            "判定标准"
+          ],
+          "rows": [
+            [
+              "系统空闲内存",
+              "`adb shell dumpsys meminfo`(Total RAM-Free)",
+              "空闲≥40%总内存"
+            ],
+            [
+              "各进程PSS",
+              "`dumpsys meminfo <包名>`",
+              "导航<800MB，Launcher<200MB，SystemUI<300MB"
+            ],
+            [
+              "Native Heap",
+              "`dumpsys meminfo` Native Heap列",
+              "无明显持续增长"
+            ],
+            [
+              "Graphics内存",
+              "GPU内存分配",
+              "导航GPU<200MB"
+            ],
+            [
+              "Dalvik/ART Heap",
+              "Java堆大小",
+              "不超过堆上限"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "内存老化测试"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "测试流程(模拟长期使用)：\n  \n  循环执行以下步骤，持续12小时：\n  ┌─────────────────────────────────────────────┐\n  │ 1. 打开导航→规划路线→3D导航 30分钟           │\n  │ 2. 播放蓝牙音乐 15分钟                        │\n  │ 3. 拨打/接听蓝牙电话 5分钟                     │\n  │ 4. 操作车辆设置(空调/灯光) 5分钟               │\n  │ 5. 语音助手交互 5分钟                          │\n  │ 6. 熄火休眠→上电唤醒 (模拟停车再启动)          │\n  └─────────────────────────────────────────────┘\n              ↓ 每30分钟采样一次dumpsys meminfo\n              ↓ 对比前后PSS增长\n\n  判定：12h后总PSS增长<200MB，无FC/ANR"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：内存泄漏核心是GC Root引用链分析。`dumpsys meminfo`看趋势→拿到可疑进程hprof→MAT(OQL)查Retained Size最大的对象→找到GC Root→定位代码中未释放的引用(Activity引用/Handler/Listener未注销)。"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "五、CPU/GPU与多任务并发",
+      "icon": "🎯",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "CPU监控"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "监控内容",
+            "工具",
+            "标准"
+          ],
+          "rows": [
+            [
+              "总体CPU占用",
+              "`adb shell top -n 1`",
+              "空闲使用<10%CPU；导航+音乐<50%"
+            ],
+            [
+              "单核峰值",
+              "Systrace/Perfetto CPU Usage",
+              "任何单核<90%持续>5s"
+            ],
+            [
+              "各进程CPU",
+              "`top -b -o %CPU`",
+              "单个APP<30%总CPU"
+            ],
+            [
+              "中断/内核态占比",
+              "`/proc/stat`",
+              "中断时间占比<10%"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "多任务并发场景"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "并发组合",
+            "操作",
+            "通过标准"
+          ],
+          "rows": [
+            [
+              "导航+音乐+电话",
+              "3D导航+蓝牙音乐+来电接听",
+              "CPU<60%，帧率>30fps，通话清晰"
+            ],
+            [
+              "导航+语音+雷达",
+              "导航中→语音唤醒→倒车",
+              "三者不互相阻塞，无ANR"
+            ],
+            [
+              "导航+CarPlay+音乐",
+              "导航+C音乐+切歌操作",
+              "GPU<80%，帧率>30fps"
+            ],
+            [
+              "4应用轮切",
+              "导航→音乐→电话→设置→导航",
+              "切换流畅，应用未被杀(LMK)"
+            ],
+            [
+              "满负载Monkey",
+              "导航+音乐+Monkey随机操作",
+              "0 ANR，0 Crash，无Watchdog重启"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "六、面试高频考点",
+      "icon": "🎯",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "必会基础"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "你要能说出来的"
+          ],
+          "rows": [
+            [
+              "**冷启动怎么测**",
+              "KL15上电→计时到Launcher可操作(图标可点击)→自动检测首帧渲染时间→重复10次取中位数→<15s"
+            ],
+            [
+              "**内存泄漏怎么排查**",
+              "dumpsys meminfo长时间监控→对比PSS增长趋势→hprof导出→MAT分析GC Root→定位未释放对象"
+            ],
+            [
+              "**Monkey怎么用**",
+              "`adb shell monkey -p 包名 -v 20000 --throttle 200`→收集ANR(/data/anr/)和Crash(dropbox)→目标：0 ANR 0 Crash"
+            ],
+            [
+              "**帧率怎么采**",
+              "`dumpsys gfxinfo`→Perfetto GPU Queue→分析每帧耗时→Jank=超过3个VSYNC周期(>50ms)未完成渲染"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "进阶加分项"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "高分回答思路"
+          ],
+          "rows": [
+            [
+              "**ANR根因定位**",
+              "从`/data/anr/traces.txt`读主线程堆栈→区分Input Dispatch超时(5s)/Broadcast超时(10s)/Service超时(20s)→定位阻塞的函数调用链"
+            ],
+            [
+              "**Systrace vs Perfetto**",
+              "Systrace=Android系统级Trace；Perfetto=新一代，支持更长录制(几分钟)+SQL查询+Browsing UI。优先用Perfetto"
+            ],
+            [
+              "**车机长时间老化测试设计**",
+              "模拟真实用户循环(导航→音乐→电话→设置→休眠唤醒)→12~48h→关注内存/PSS/Crash/Native crash→判断是否有累积性劣化"
+            ],
+            [
+              "**LMK策略验证**",
+              "模拟低内存→触发Low Memory Killer→验证杀的优先级(空进程→后台→Service→前台APP)→确保关键进程不被误杀"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "七、测试实战关联",
+      "icon": "🛠️",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "与导航联测"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "导航3D渲染+2h连续导航→内存增长<100MB→帧率>30fps→CPU<50%"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "与CarPlay联测"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "CarPlay+导航+音乐+电话 4h连续→dumpsys meminfo监控→PSS增长<200MB→0 ANR"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "与倒车影像联测"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "导航中反复挂R档20次→GPU内存不增长→冷/热切换出图延迟不劣化"
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "⚠️ 实战中常见严重问题"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "严重度",
+            "现象",
+            "根因+教训"
+          ],
+          "rows": [
+            [
+              "**导航内存泄漏致满卡死**",
+              "严重",
+              "导航2h后→车机卡死→Watchdog强制重启",
+              "Activity引用被静态变量持有→GC无法回收→内存持续增长→LMK杀进程→但进程重启后泄漏重现→恶性循环。MAT分析定位GC Root"
+            ],
+            [
+              "**冷启动超30s**",
+              "严重",
+              "上电→长时间黑屏→System Server初始化卡住",
+              "某个开机自启动Service阻塞主线程→延迟获取锁(Wakelock)或等硬件就绪超时。Systrace找出初始化耗时Top"
+            ],
+            [
+              "**Monkey跑出50+ ANR**",
+              "严重",
+              "Monkey随机操作→大量ANR→应用无响应",
+              "主线程做了IO/网络操作→阻塞超5s→Input ANR。所有IO必须放子线程"
+            ],
+            [
+              "**倒车影像帧率跌到10fps**",
+              "中等",
+              "挂R档→卡顿画面→图像不流畅",
+              "渲染线程与主Activity争抢CPU→未设置独立线程优先级→帧率断崖"
+            ],
+            [
+              "**48h老化后可用内存<5%**",
+              "严重",
+              "长时间不掉电→空闲内存从40%→3%→系统变慢",
+              "Native层内存泄漏(FD泄漏/Surface未释放)→单靠dumpsys meminfo可能看不到→需要配合`/proc/pid/smaps`和`lsof`分析"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "⬅ 返回 [[MOC_车载测试]] | 继续 → [[38-倒车影像测试]]"
+        },
+        {
+          "type": "blockquote",
+          "style": "lab",
+          "text": "🧪 动手实验：跑一次连续 2 小时的内存泄漏初筛\n环境：车机 + adb + 电脑。\n步骤：① adb shell dumpsys meminfo 记录初始 PSS；② 循环操作（进导航→退→进音乐→退→语音）每 10 分钟记一次；③ 观察 PSS 是否单调上升不回收。\n预期结果：2 小时内常驻进程内存平稳，无持续上涨。\n常见失败：只测单次启动内存，漏了「反复进出同一应用」的累积泄漏——这才是实车半年后卡顿的根因。",
+          "_enh": "lab"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 3
+    }
+  ],
+  "summary": "车机是嵌入式Android/Linux系统——冷启动要快、交互要流畅、内存不能越跑越少、CPU不能长期满载。测试核心：**启动快、操作流畅、长时间不老化、多任务不卡死**",
+  "prev_chapter": {
+    "num": 36,
+    "name": "CarPlay-Carlife"
+  },
+  "next_chapter": {
+    "num": 38,
+    "name": "倒车影像测试"
+  }
+}

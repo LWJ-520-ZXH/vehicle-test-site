@@ -1,0 +1,385 @@
+{
+  "num": 10,
+  "slug": "Python+CAN",
+  "title": "Python + CAN",
+  "oneliner": "不用 CANoe 也能玩 CAN！Python `python-can` + 几百块的 USB-CAN 设备，就能快速编写自动化测试脚本。灵活、低成本、可集成CI——CANoe的补充，不是替代",
+  "sections": [
+    {
+      "title": "一、环境搭建",
+      "icon": "📌",
+      "content_blocks": [
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# 安装 python-can\npip install python-can\n\n# 按硬件选装驱动\npip install python-can[pcan]      # PCAN-USB\npip install python-can[serial]    # 串口CAN（ZCAN/USBCAN等）\npip install python-can[neovi]     # Intrepid neoVI\n\n# DBC解析（推荐）\npip install cantools"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": false,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "二、核心API",
+      "icon": "🔑",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "收发基础"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "import can\n\n# === 初始化 ===\nbus = can.interface.Bus(\n    channel='PCAN_USBBUS1',   # 通道名（设备管理器中查看）\n    bustype='pcan',           # 接口类型: pcan/socketcan/serial/vector\n    bitrate=500000            # 波特率 500Kbps\n)\n\n# === 发送 ===\nmsg = can.Message(\n    arbitration_id=0x123,         # CAN ID\n    data=[0x01, 0x02, 0x03, 0x04],  # 8字节数据\n    is_extended_id=False,         # 标准帧(False) / 扩展帧(True)\n    is_fd=False                   # CAN 2.0(False) / CAN FD(True)\n)\nbus.send(msg)\n\n# === 接收（阻塞） ===\nmsg = bus.recv(timeout=1.0)   # 1秒超时\nif msg:\n    print(f\"ID=0x{msg.arbitration_id:X}, Data={msg.data.hex(' ')}\")\n    print(f\"Timestamp={msg.timestamp}, Channel={msg.channel}\")\n\n# === 接收（非阻塞回调） ===\ndef on_message(msg):\n    print(f\"收到: {msg}\")\n\nnotifier = can.Notifier(bus, [on_message])\n# ... 程序继续运行 ...\nnotifier.stop()  # 停止监听\n\n# === 清理 ===\nbus.shutdown()"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": false,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "三、cantools：DBC解析利器",
+      "icon": "📖",
+      "content_blocks": [
+        {
+          "type": "code",
+          "language": "python",
+          "code": "import cantools\n\n# 加载 DBC\ndb = cantools.database.load_file('Demo.dbc')\n\n# === 编码：物理值 → CAN数据 ===\nspeed_signal = db.get_message_by_name('VehSpeed')\ndata = speed_signal.encode({'VehSpeed': 80})   # 80km/h → CAN bytes\nprint(data.hex())  # '00 50' (取决于DBC定义)\n\n# === 解码：CAN数据 → 物理值 ===\ndecoded = speed_signal.decode(bytes.fromhex('00 50'))\nprint(decoded)  # {'VehSpeed': 80}\n\n# === 遍历所有报文和信号 ===\nfor msg in db.messages:\n    print(f\"报文: ID=0x{msg.frame_id:X}, {msg.name}\")\n    for sig in msg.signals:\n        print(f\"  信号: {sig.name}, bit={sig.start}~{sig.start+sig.length}, \"\n              f\"factor={sig.scale}, offset={sig.offset}, unit={sig.unit}\")"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": false,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "四、DBC报文发送/接收（完整封装）",
+      "icon": "📖",
+      "content_blocks": [
+        {
+          "type": "code",
+          "language": "python",
+          "code": "import can\nimport cantools\n\nclass CANAutomation:\n    def __init__(self, db_path, channel='PCAN_USBBUS1', bitrate=500000):\n        self.db = cantools.database.load_file(db_path)\n        self.bus = can.interface.Bus(channel=channel, bustype='pcan', bitrate=bitrate)\n    \n    def send_signal(self, msg_name, signal_dict):\n        \"\"\"按信号名发送\"\"\"\n        msg_def = self.db.get_message_by_name(msg_name)\n        data = msg_def.encode(signal_dict)\n        msg = can.Message(arbitration_id=msg_def.frame_id, data=data)\n        self.bus.send(msg)\n        print(f\"发送 {msg_name}: {signal_dict}\")\n    \n    def recv_signal(self, msg_name, timeout=1.0):\n        \"\"\"等待接收指定报文并解码\"\"\"\n        msg_def = self.db.get_message_by_name(msg_name)\n        msg = self.bus.recv(timeout=timeout)\n        if msg and msg.arbitration_id == msg_def.frame_id:\n            return msg_def.decode(msg.data)\n        return None\n    \n    def listen_forever(self):\n        \"\"\"持续打印所有报文的解析结果\"\"\"\n        for msg in self.bus:\n            try:\n                decoded = self.db.decode_message(msg.arbitration_id, msg.data)\n                print(f\"ID=0x{msg.arbitration_id:X} {decoded}\")\n            except:\n                print(f\"ID=0x{msg.arbitration_id:X} 未知报文: {msg.data.hex()}\")\n\n# 使用\nca = CANAutomation('Demo.dbc')\nca.send_signal('EngineData', {'EngineSpeed': 3000, 'EngineTemp': 90})"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": false,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "五、自动化测试框架",
+      "icon": "🎯",
+      "content_blocks": [
+        {
+          "type": "code",
+          "language": "python",
+          "code": "import time\n\nclass TestRunner:\n    def __init__(self, automation):\n        self.ca = automation\n        self.passed = 0\n        self.failed = 0\n    \n    def assert_signal(self, msg_name, signal_name, expected, tolerance=0):\n        decoded = self.ca.recv_signal(msg_name, timeout=2.0)\n        if decoded is None:\n            print(f\"FAIL: {msg_name}.{signal_name} 超时未收到\")\n            self.failed += 1\n            return\n        actual = decoded[signal_name]\n        if abs(actual - expected) <= tolerance:\n            print(f\"PASS: {msg_name}.{signal_name} = {actual} (期望{expected})\")\n            self.passed += 1\n        else:\n            print(f\"FAIL: {msg_name}.{signal_name} = {actual} ≠ {expected}\")\n            self.failed += 1\n    \n    def summary(self):\n        total = self.passed + self.failed\n        print(f\"\\n{'='*40}\")\n        print(f\"测试完成: {self.passed}/{total} PASS, {self.failed} FAIL\")\n\n# === 实战用例：仪表转速显示验证 ===\ndef test_engine_speed_display():\n    ca = CANAutomation('Demo.dbc')\n    runner = TestRunner(ca)\n    \n    # 用例1: 转速显示验证\n    ca.send_signal('EngineData', {'EngineSpeed': 2000})\n    time.sleep(0.5)\n    runner.assert_signal('EngineData', 'EngineSpeed', 2000, tolerance=5)\n    \n    # 用例2: 边界值\n    ca.send_signal('EngineData', {'EngineSpeed': 0})\n    time.sleep(0.5)\n    runner.assert_signal('EngineData', 'EngineSpeed', 0)\n    \n    runner.summary()"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": false,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "六、CAN FD 支持",
+      "icon": "🚀",
+      "content_blocks": [
+        {
+          "type": "code",
+          "language": "python",
+          "code": "# python-can 支持 CAN FD\nimport can\n\nbus = can.interface.Bus(channel='PCAN_USBBUS1', bustype='pcan',\n                        bitrate=500000,\n                        fd=True,              # 启用FD\n                        data_bitrate=2000000)  # 数据段2Mbps\n\nmsg = can.Message(\n    arbitration_id=0x123,\n    data=bytes(range(64)),   # 64字节数据\n    is_fd=True,              # FD帧\n    bitrate_switch=True      # BRS=1，数据段加速\n)\nbus.send(msg)"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": false,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "七、信号记录与回放",
+      "icon": "📶",
+      "content_blocks": [
+        {
+          "type": "code",
+          "language": "python",
+          "code": "# === 记录：CAN Trace → CSV ===\nimport csv\n\nbus = can.interface.Bus(channel='PCAN_USBBUS1', bustype='pcan', bitrate=500000)\nwith open('trace.csv', 'w', newline='') as f:\n    writer = csv.writer(f)\n    writer.writerow(['timestamp', 'id', 'data', 'dlc'])\n    for msg in bus:\n        writer.writerow([msg.timestamp, hex(msg.arbitration_id),\n                         msg.data.hex(), msg.dlc])\n\n# === 回放：CSV → CAN ===\nimport csv, time\n\nwith open('trace.csv') as f:\n    reader = csv.DictReader(f)\n    prev_ts = None\n    for row in reader:\n        if prev_ts:\n            time.sleep((float(row['timestamp']) - prev_ts) / 1000)\n        msg = can.Message(\n            arbitration_id=int(row['id'], 16),\n            data=bytes.fromhex(row['data']),\n            dlc=int(row['dlc'])\n        )\n        bus.send(msg)\n        prev_ts = float(row['timestamp'])"
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": false,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "八、常用设备",
+      "icon": "💡",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "设备",
+            "价格",
+            "CAN FD",
+            "通道",
+            "接口",
+            "适合"
+          ],
+          "rows": [
+            [
+              "**CANable (candleLight)**",
+              "~100",
+              "✅",
+              "1CAN",
+              "USB",
+              "学习/个人使用"
+            ],
+            [
+              "**ZCAN USBCAN-2A**",
+              "~500",
+              "❌",
+              "2CAN",
+              "USB",
+              "入门自动化"
+            ],
+            [
+              "**PCAN-USB**",
+              "~1800",
+              "✅",
+              "1CAN",
+              "USB",
+              "专业自动化"
+            ],
+            [
+              "**Kvaser Leaf**",
+              "~2500",
+              "✅",
+              "1CAN",
+              "USB",
+              "工业级"
+            ],
+            [
+              "**Intrepid neoVI**",
+              "数万",
+              "✅",
+              "多路",
+              "USB/ETH",
+              "整车级"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "九、面试高频考点",
+      "icon": "🎯",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "必会基础"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "回答"
+          ],
+          "rows": [
+            [
+              "**python-can做什么**",
+              "通用CAN接口库，`can.Bus()` 统一封装不同品牌硬件驱动，`send()` 收发 `can.Message`"
+            ],
+            [
+              "**cantools干什么**",
+              "DBC解析库：`load_file()` 加载DBC → `encode()` 物理值→CAN bytes → `decode()` CAN bytes→物理值"
+            ],
+            [
+              "**recv() vs Notifier**",
+              "`bus.recv(timeout=N)` 阻塞等待单帧，`can.Notifier` 注册回调非阻塞持续监听"
+            ],
+            [
+              "**怎么发一条CAN报文**",
+              "`msg = can.Message(arbitration_id=0x123, data=[0x01,0x02,...])` → `bus.send(msg)`"
+            ],
+            [
+              "**怎么指定CAN卡**",
+              "`can.interface.Bus(bustype='pcan'/'socketcan'/'vector'/'serial', channel='...', bitrate=500000)`"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "进阶加分项"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "回答"
+          ],
+          "rows": [
+            [
+              "**CAN FD怎么发**",
+              "`is_fd=True + bitrate_switch=True + data_bitrate=2000000`，data 最长 64 bytes"
+            ],
+            [
+              "**和CANoe比优势/劣势**",
+              "优势：免费/灵活/可集成CI/做离线分析/不依赖Vector License；劣势：无面板/无CAPL事件驱动/无内置测试报告/诊断需另写协议栈"
+            ],
+            [
+              "**怎么做成 CI 自动化**",
+              "pytest + python-can + cantools → `assert expected == decoded['Signal']` → `pytest --junit-xml=report.xml` → Jenkins/GitLab CI 自动判断 Pass/Fail"
+            ],
+            [
+              "**python-can 不支持但常用的场景**",
+              "大量信号并行监听（GIL限制）→ 建议用多进程 `multiprocessing` 分通道各建Bus；离线 .blf 解析 → 用 `python-can` 的 `BLFReader` 或 `can.Player`"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "十、测试实战关联",
+      "icon": "🛠️",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "Python 自动化回归测试（CI/CD 集成）"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "# pytest 用例示例\nimport pytest\nfrom can_automation import CANAutomation\n\n@pytest.fixture\ndef ca():\n    return CANAutomation('Demo.dbc', channel='PCAN_USBBUS1')\n\ndef test_engine_speed_valid_range(ca):\n    ca.send_signal('EngineData', {'EngineSpeed': 3000})\n    decoded = ca.recv_signal('EngineData', timeout=1.0)\n    assert decoded is not None, \"未收到 EngineData 报文\"\n    assert 0 <= decoded['EngineSpeed'] <= 8000, f\"转速越界: {decoded['EngineSpeed']}\"\n\ndef test_gear_position(ca):\n    for gear, expected in [('P', 0), ('R', 1), ('N', 2), ('D', 3)]:\n        ca.send_signal('GearStatus', {'GearPosition': expected})\n        decoded = ca.recv_signal('GearStatus', timeout=0.5)\n        assert decoded['GearPosition'] == expected"
+        },
+        {
+          "type": "h3",
+          "text": "离线 .blf 日志分析"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "import can\n\n# 读取 CANoe 录制的 .blf 文件\nreader = can.BLFReader('trace.blf')\nfor msg in reader:\n    if msg.arbitration_id == 0x100:\n        print(f\"t={msg.timestamp:.3f}s, data={msg.data.hex()}\")"
+        },
+        {
+          "type": "h3",
+          "text": "Python 批量信号验证（大量报文轮询）"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "# 用 cantools 遍历 DBC 所有信号，发一帧收一帧验证\nfor msg_def in db.messages:\n    signals = {s.name: (s.minimum or 0) for s in msg_def.signals}\n    ca.send_signal(msg_def.name, signals)\n    time.sleep(0.1)\n    decoded = ca.recv_signal(msg_def.name)\n    if decoded is None:\n        print(f\"WARN: {msg_def.name} 无响应\")"
+        },
+        {
+          "type": "h3",
+          "text": "Python + CAN 做压力测试"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "循环 `bus.send()` 高频发包 → 用另一个 `can.Bus` 实例在另一通道接收 → 统计丢帧率和延迟",
+            "批量修改信号值（0 → 最大值 → 0）→ 监测 ECU 是否异常复位或进入保护模式"
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "⚠️ 实战中常见严重问题"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "严重度",
+            "现象",
+            "根因+教训"
+          ],
+          "rows": [
+            [
+              "**bus.recv()阻塞忘设timeout**",
+              "中等",
+              "总线上没有报文→recv()永久阻塞→Python进程卡死",
+              "必须设recv(timeout=1.0)，或用Notifier回调模式"
+            ],
+            [
+              "**DBC解析ID不匹配**",
+              "中等",
+              "DBC标准帧→总线跑扩展帧→decode失败抛异常",
+              "加载DBC后先确认frame_id范围是否匹配实际CAN ID"
+            ],
+            [
+              "**Python脚本发错信号**",
+              "严重",
+              "Python脚本自动化跑压力测试→不小心发了$11 01硬复位→ECU重启→台架全部离线",
+              "自动化脚本必须加\"安全开关\"——执行前确认目标ECU和信号值范围"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "⬅ 返回 [[09-CAPL脚本]] | 继续 → [[11-ZCANpro]]"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "面试官问“为什么测试工程师要会 Python”时，别只说“自动化”。要讲清：Python 在车载里主要做 报文脚本生成 / 回放、DBC 信号批量校验、台架数据后处理，以及用 python-can 在没有 CANoe 授权时也能发帧。能举一个你用脚本替代手工点点的例子，比背库名更加分。"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 2
+    }
+  ],
+  "summary": "不用 CANoe 也能玩 CAN！Python `python-can` + 几百块的 USB-CAN 设备，就能快速编写自动化测试脚本。灵活、低成本、可集成CI——CANoe的补充，不是替代",
+  "prev_chapter": {
+    "num": 9,
+    "name": "CAPL脚本"
+  },
+  "next_chapter": {
+    "num": 11,
+    "name": "ZCANpro"
+  }
+}

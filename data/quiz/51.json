@@ -1,0 +1,771 @@
+[
+  {
+    "id": "Q-51-00-01",
+    "chapterNum": 51,
+    "sectionIndex": 0,
+    "sectionTitle": "一、DBC 是什么",
+    "module": "A",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "DBC",
+      "通信矩阵",
+      "文本文件"
+    ],
+    "stem": "关于 DBC（Database CAN）的性质，下列描述正确的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "一个文本格式文件，描述整车的 CAN 通信矩阵"
+      },
+      {
+        "key": "B",
+        "text": "一段烧录到 ECU 里的二进制固件镜像"
+      },
+      {
+        "key": "C",
+        "text": "CANoe 专用的工程配置文件，换工具就不能用"
+      },
+      {
+        "key": "D",
+        "text": "只描述 UDS 诊断服务的数据库文件"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "本节原文给出的定义是：DBC（Database CAN）是一个文本格式文件，描述整车的 CAN 通信矩阵——有哪些报文（Message）、每条报文里有哪些信号（Signal）、信号在字节里的位置、怎么换算成真实值（如 km/h）。所以 A 正确。B 完全错位，DBC 不进 ECU，它是给工具和工程师看的描述文件；C 错在专用性，原文明确说 CANoe、CANalyzer、甚至很多 ECU 配置工具都吃 DBC，它是事实上的通用格式，开源的 cantools 同样能解析；D 把 DBC 和诊断数据库搞混了，UDS 诊断服务的描述用的是 CDD/ODX 那一套，DBC 管的是应用层的周期与事件报文通信。理解 DBC 是文本文件这一点有实际意义：它可以用文本编辑器直接打开查看，能进版本管理系统做 diff，也就能追溯某个信号是哪一版改的、谁改的。项目上信号定义变更引发的争议，多数就是靠比对两版 DBC 的差异来定责的。",
+    "keyPoints": [
+      "DBC 是文本文件，描述整车 CAN 通信矩阵",
+      "内容含报文、信号、位置与换算关系",
+      "多种工具通用，可纳入版本管理做 diff"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "一、DBC 是什么·首段（DBC 的定义）"
+    },
+    "relatedTerms": [
+      "DBC",
+      "报文",
+      "信号",
+      "CAN"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-51-00-02",
+    "chapterNum": 51,
+    "sectionIndex": 0,
+    "sectionTitle": "一、DBC 是什么",
+    "module": "A",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "DBC 作用",
+      "物理值",
+      "十六进制"
+    ],
+    "stem": "判断：没有 DBC 时总线上的数据就是一堆 16 进制；有了 DBC，工具能直接显示车速等于 65.3 km/h。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "T"
+    ],
+    "explanation": "正确，这是本节的核心结论，也是整章的立意。CAN 总线本身只负责把若干字节从一个节点搬到另一个节点，它不携带任何语义——同样是 0x28 0x02 这两个字节，可能是车速，也可能是水温，取决于收发双方事先约定好的解释规则，而这套规则就写在 DBC 里。所以 DBC 的角色是翻译字典：它指明某个 ID 的报文里第几位到第几位是哪个信号、用什么字节序拼、乘多少加多少变成物理量。第 50 章讲 CANoe 时也印证过同一件事：Trace 里只有 ID 没有名字，就是因为没导入 DBC。实际工作中这个认知决定了你在项目初期该先要什么——很多新人接到任务先问设备在哪，其实更该先向项目组索取正确版本的 DBC 与通信矩阵。没有它，你抓再多数据也只能对着十六进制发呆，写不出任何基于信号的判定，做出来的记录别人也复现不了。",
+    "keyPoints": [
+      "CAN 只搬字节，语义靠 DBC 约定",
+      "DBC 是把原始字节翻译成物理值的字典",
+      "接任务先索取正确版本的 DBC"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "一、DBC 是什么·第二段（没有 DBC，总线上的数据就是一堆 16 进制）"
+    },
+    "relatedTerms": [
+      "DBC",
+      "信号",
+      "物理值"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-51-01-01",
+    "chapterNum": 51,
+    "sectionIndex": 1,
+    "sectionTitle": "二、报文 Message",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Message",
+      "ID",
+      "优先级"
+    ],
+    "stem": "按本节的报文字段表，字段 ID 的含义与示例是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "报文标识符（决定优先级），例子为 0x17C"
+      },
+      {
+        "key": "B",
+        "text": "数据长度（字节），例子为 8"
+      },
+      {
+        "key": "C",
+        "text": "发送间隔（ms），例子为 10ms / 100ms"
+      },
+      {
+        "key": "D",
+        "text": "哪个 ECU 发出，例子为 EMS"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "本节表格逐行给出了 Message 的五个字段：ID 是报文标识符，决定优先级，例子 0x17C；DLC 是数据长度，单位字节，例子 8；周期是发送间隔，单位毫秒，例子 10ms 或 100ms；发送节点表示哪个 ECU 发出，例子 EMS；信号列表指该报文携带的信号，如车速、转速、油门等。所以 A 正确，B、C、D 分别是 DLC、周期和发送节点的含义，属于同表其他行。这里要特别理解 ID 决定优先级这句话：CAN 采用非破坏性仲裁，ID 数值越小优先级越高，总线忙时小 ID 的报文能先发出去。所以做时序敏感的测试时，看到某个功能偶发延迟，除了查发送周期，也要看这条报文的 ID 优先级是否偏低、总线负载是不是过高。实际排查一个信号问题的第一步永远是查 DBC：确认它在哪个 ID 里、由谁发、周期多少，这三条信息定下来，抓包与分析才有方向。",
+    "keyPoints": [
+      "ID 是报文标识符并决定仲裁优先级",
+      "示例 ID 为 0x17C，DLC 示例为 8",
+      "ID 越小优先级越高，影响总线时序"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "二、报文 Message·字段/含义/例子表第 1 行"
+    },
+    "relatedTerms": [
+      "报文",
+      "CAN",
+      "DBC"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-51-01-02",
+    "chapterNum": 51,
+    "sectionIndex": 1,
+    "sectionTitle": "二、报文 Message",
+    "module": "A",
+    "type": "multi",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "Message 字段",
+      "DLC",
+      "发送节点"
+    ],
+    "stem": "关于 DBC 中报文 Message 的字段含义，下列说法正确的有：",
+    "options": [
+      {
+        "key": "A",
+        "text": "DLC 表示数据长度，单位是字节，示例值为 8"
+      },
+      {
+        "key": "B",
+        "text": "周期表示发送间隔，单位毫秒，如 10ms 或 100ms"
+      },
+      {
+        "key": "C",
+        "text": "发送节点表示该报文由哪个 ECU 发出，如 EMS"
+      },
+      {
+        "key": "D",
+        "text": "ID 用来标明报文中各信号的起始位"
+      },
+      {
+        "key": "E",
+        "text": "信号列表指的是该报文可以被哪些 ECU 接收"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 与本节字段表一致。D 错在把报文层和信号层混在一起：ID 是报文标识符，决定优先级，而起始位 StartBit 是信号的属性，在下一节的 Signal 参数表里，一条报文里的多个信号各有各的 StartBit。E 错在方向：信号列表指的是该报文携带哪些信号，比如车速、转速、油门，而不是接收方清单；接收节点在完整的通信矩阵里是另一维信息。这两个错项很典型：新手看 DBC 时容易分不清哪些属性挂在报文上、哪些挂在信号上。记忆方法是按层次划分——报文层管的是这一帧什么时候由谁发、发多长（ID、DLC、周期、发送节点），信号层管的是这一帧里的数据怎么拆、怎么算（StartBit、Length、ByteOrder、Factor、Offset）。实际测试排查时，报文层的问题表现为丢帧、周期抖动、节点不发；信号层的问题表现为帧在但数值不对，两类现象对应的排查动作完全不同。",
+    "keyPoints": [
+      "报文层字段：ID、DLC、周期、发送节点、信号列表",
+      "StartBit 属信号层，不是报文层属性",
+      "信号列表指携带的信号，不是接收方清单"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "二、报文 Message·字段/含义/例子五行表"
+    },
+    "relatedTerms": [
+      "报文",
+      "信号",
+      "DBC 节点"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-51-01-03",
+    "chapterNum": 51,
+    "sectionIndex": 1,
+    "sectionTitle": "二、报文 Message",
+    "module": "A",
+    "type": "judge",
+    "cat": "实战应用",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "周期报文",
+      "事件报文",
+      "测试准备"
+    ],
+    "stem": "判断：车速这类报文属于周期报文（如 10ms 一帧），开门触发的报文属于事件报文；测功能之前应先搞清楚被测信号在哪个 ID、什么周期。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "T"
+    ],
+    "explanation": "正确，与本节末段完全一致。周期报文按固定间隔不停发送，接收方靠它维持对车辆状态的持续感知，一旦超时未收到就要判定信号失效；事件报文只在状态变化时发一帧，比如开门、按键，平时总线上根本看不到。区分这两类对测试设计的影响很直接：测周期报文时，重点是周期是否稳定、有无丢帧、超时后接收方是否进入安全处理；测事件报文时，重点是触发条件是否覆盖完整、会不会漏发或重复发、以及丢了这一帧之后状态还能不能靠后续机制纠正。而先搞清信号在哪个 ID、什么周期，则是所有分析工作的前置动作——不知道 ID 就没法在 Trace 里设过滤，不知道周期就没法判断到底是丢帧还是本来就不发。实际踩坑最多的场景是：测试员盯着 Trace 说信号不刷新，其实那是一条事件报文，不动作当然不发，白白折腾半天。",
+    "keyPoints": [
+      "周期报文按固定间隔发，事件报文触发才发",
+      "两类报文的测试关注点不同",
+      "测前先确认信号所在 ID 与周期"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "二、报文 Message·表后段落（周期报文 vs 事件报文）"
+    },
+    "relatedTerms": [
+      "报文",
+      "周期",
+      "信号"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-51-02-01",
+    "chapterNum": 51,
+    "sectionIndex": 2,
+    "sectionTitle": "三、信号 Signal 的关键参数",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "换算公式",
+      "Factor",
+      "Offset"
+    ],
+    "stem": "DBC 中信号从原始值换算到物理值的公式是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "物理值 = 原始值 × Factor + Offset"
+      },
+      {
+        "key": "B",
+        "text": "物理值 = (原始值 + Offset) × Factor"
+      },
+      {
+        "key": "C",
+        "text": "物理值 = 原始值 × Offset + Factor"
+      },
+      {
+        "key": "D",
+        "text": "物理值 = 原始值 ÷ Factor + Offset"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "本节给出的换算公式是：物理值 = 原始值(raw) × Factor + Offset，例如车速 raw 等于 653，Factor 等于 0.1，Offset 等于 0，物理值就是 65.3 km/h。所以 A 正确。B 把加法和乘法的顺序调换了，这是最常见的错误写法，一旦 Offset 不为零，算出来的结果会差一个 Offset 乘 Factor 的量；C 把两个系数的位置互换，量纲直接就不对；D 用除法代替乘法，同样与定义不符。理解这三个量的物理意义比死记公式更牢靠：Factor 表示每 1 个 bit 的原始值代表多少物理量，也就是分辨率，Factor 越小精度越高；Offset 是零点平移，常见于温度类信号，比如原始值 0 对应零下四十度。工作中这条公式的高频用途是手工核对：Trace 里显示的物理值和你按字节手算的结果对不上时，先用它反推 raw，再回头查字节序或起止位是否定义错了，这样能快速判断问题出在数据库还是被测件。",
+    "keyPoints": [
+      "物理值 = 原始值 × Factor + Offset",
+      "Factor 是分辨率，Offset 是零点平移",
+      "手算反推 raw 可定位定义错误"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "三、信号 Signal 的关键参数·换算公式段落"
+    },
+    "relatedTerms": [
+      "信号",
+      "DBC",
+      "物理值"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-51-02-02",
+    "chapterNum": 51,
+    "sectionIndex": 2,
+    "sectionTitle": "三、信号 Signal 的关键参数",
+    "module": "A",
+    "type": "single",
+    "cat": "实战应用",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "物理值计算",
+      "Factor 0.1",
+      "车速"
+    ],
+    "stem": "某车速信号的 Factor = 0.1、Offset = 0（与本节示例一致）。若按字节序拼好后得到的原始值 raw = 1000，则该信号的物理值为：",
+    "options": [
+      {
+        "key": "A",
+        "text": "10.0 km/h"
+      },
+      {
+        "key": "B",
+        "text": "100.0 km/h"
+      },
+      {
+        "key": "C",
+        "text": "653.0 km/h"
+      },
+      {
+        "key": "D",
+        "text": "1000.0 km/h"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "套用本节公式：物理值 = 原始值 × Factor + Offset = 1000 × 0.1 + 0 = 100.0 km/h，选 B。本节原示例是 raw 等于 653、Factor 等于 0.1、Offset 等于 0，得到 65.3 km/h，两者是同一套参数，只是换了个原始值。A 是把 Factor 当成了 0.01 或多除了一次十；C 是把示例里的 653 直接抄了过来，属于没读题；D 是完全忽略 Factor，直接把 raw 当物理值，这也是新手看 Trace 时最容易犯的错——看到一个四位数就以为车速上千。做这类计算题一定要盯住原文那句提醒：raw 是已经按字节序拼好的整数，不是直接看字节。也就是说，先按 Intel 或 Motorola 规则把跨字节的 bit 拼成一个整数，再代入公式，顺序不能颠倒。实际工作中反过来用得更多：期望车速 100 km/h，就反推 raw 等于 100 除以 0.1 等于 1000，再按字节序填进数据场，用 IG 或脚本发出去验证接收方显示是否正确。",
+    "keyPoints": [
+      "代入公式：1000 × 0.1 + 0 = 100.0",
+      "raw 必须先按字节序拼好再代入",
+      "反向可由期望物理值推算 raw 构造激励"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "三、信号 Signal 的关键参数·换算公式与车速示例（raw=653，Factor=0.1）"
+    },
+    "relatedTerms": [
+      "信号",
+      "物理值",
+      "字节序"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-51-02-03",
+    "chapterNum": 51,
+    "sectionIndex": 2,
+    "sectionTitle": "三、信号 Signal 的关键参数",
+    "module": "A",
+    "type": "multi",
+    "cat": "概念辨析",
+    "difficulty": "挑战",
+    "direction": "反向",
+    "tags": [
+      "Signal 参数",
+      "raw 定义",
+      "反向辨析"
+    ],
+    "stem": "关于 DBC 中信号 Signal 的关键参数，下列说法错误的有：",
+    "options": [
+      {
+        "key": "A",
+        "text": "StartBit 表示信号从第几个 bit 开始"
+      },
+      {
+        "key": "B",
+        "text": "Length 表示信号占多少 bit"
+      },
+      {
+        "key": "C",
+        "text": "Factor 表示该信号能取到的最大值"
+      },
+      {
+        "key": "D",
+        "text": "raw 可以直接按数据字节的顺序读出来，不必考虑字节序"
+      },
+      {
+        "key": "E",
+        "text": "ByteOrder 的取值为 Intel（小端）或 Motorola（大端）"
+      }
+    ],
+    "answer": [
+      "C",
+      "D"
+    ],
+    "explanation": "A、B、E 都与本节参数表一致，是正确说法。C 错：Factor 是精度，表示每 1 bit 代表多少物理量，信号的取值范围由最小值与最大值两个参数描述，两者不是一回事。D 错得更隐蔽，也更容易在实际工作中造成事故——本节明确提醒，raw 是已经按字节序拼好的整数，不是直接看字节。对于只占 8 bit 且不跨字节的信号，直接读确实碰巧对得上；但只要信号是 12 bit、16 bit 这类跨字节的，Intel 和 Motorola 的拼法完全不同，直接按字节顺序读出来的数会与真实 raw 相差很远，代进公式后物理值自然离谱。这也是为什么本章把字节序单列一节称为最易错。实际排查时有个快速自检法：如果某个信号平时数值正常，一旦超过一个字节能表示的范围就跳变或翻倍，多半就是字节序理解或配置错了，而不是被测件真的发了怪数据。",
+    "keyPoints": [
+      "Factor 是精度，取值范围由最小/最大值描述",
+      "raw 必须按字节序拼好，不能直接读字节",
+      "跨字节信号的字节序错误会导致数值离谱"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "三、信号 Signal 的关键参数·参数/含义表 + 换算公式段"
+    },
+    "relatedTerms": [
+      "信号",
+      "字节序",
+      "DBC"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-51-03-01",
+    "chapterNum": 51,
+    "sectionIndex": 3,
+    "sectionTitle": "四、字节序：Intel vs Motorola（最易错）",
+    "module": "A",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Intel",
+      "Motorola",
+      "大小端"
+    ],
+    "stem": "同一个 16 位信号放进字节流时，Intel 与 Motorola 两种字节序的区别是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Intel 是小端，低字节在前；Motorola 是大端，高字节在前"
+      },
+      {
+        "key": "B",
+        "text": "Intel 是大端，高字节在前；Motorola 是小端，低字节在前"
+      },
+      {
+        "key": "C",
+        "text": "两者只影响信号名的显示方式，不影响解析出来的数值"
+      },
+      {
+        "key": "D",
+        "text": "Intel 只能用于 8 位信号，Motorola 只能用于 16 位以上信号"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "本节原文：同一个 16 位信号，放在字节流里有两种排法，Intel（小端，低字节在前）和 Motorola（大端，高字节在前）。所以 A 正确。B 是把两者对调，这正是新手最高频的记忆错误，很多人凭感觉觉得 Intel 应该是高位在前，结果一路错到底；记忆锚点可以是 Intel 处理器传统上用小端，Motorola 处理器用大端，把厂商和端序绑定记忆就不容易翻车。C 严重低估了后果，本节紧接着就说 DBC 里 ByteOrder 标错，工具算出的物理值就完全不对；D 是凭空发明的限制，字节序与信号位宽没有绑定关系，只是对不跨字节的短信号来说两种排法的结果碰巧相同，所以问题往往在长信号上才暴露。实际项目里字节序错误的典型症状是：低速段数值看着还行，一到高速段就跳变或者数值大得离谱，因为高位字节被放错了位置。遇到这种现象，先怀疑字节序，比怀疑被测件靠谱得多。",
+    "keyPoints": [
+      "Intel 小端，低字节在前",
+      "Motorola 大端，高字节在前",
+      "字节序错会导致物理值完全不对"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "四、字节序：Intel vs Motorola（最易错）·首段"
+    },
+    "relatedTerms": [
+      "字节序",
+      "Intel",
+      "Motorola",
+      "信号"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-51-03-02",
+    "chapterNum": 51,
+    "sectionIndex": 3,
+    "sectionTitle": "四、字节序：Intel vs Motorola（最易错）",
+    "module": "A",
+    "type": "single",
+    "cat": "故障定位",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "ByteOrder 标错",
+      "物理值异常",
+      "图形视图"
+    ],
+    "stem": "若 DBC 里某信号的 ByteOrder 标反了，会产生什么后果？本节建议如何确认？",
+    "options": [
+      {
+        "key": "A",
+        "text": "报文完全发不出去，需要重新配置波特率"
+      },
+      {
+        "key": "B",
+        "text": "工具算出的物理值完全不对；不确定时可用 CANoe 的 DBC 编辑器切到图形视图，对照数据字节验证"
+      },
+      {
+        "key": "C",
+        "text": "只是信号名显示异常，物理值不受影响，可以忽略"
+      },
+      {
+        "key": "D",
+        "text": "会导致该报文的 DLC 自动变化，需要修改报文长度"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "本节写得很明确：DBC 里 ByteOrder 标错，工具算出的物理值就完全不对，这是新手最常见的坑；不确定就用 CANoe 的 DBC 编辑器切到图形视图，对照数据字节验证。所以 B 正确。A 混淆了层次，字节序属于数据库对数据场的解释规则，跟报文能不能发出去无关，报文照发不误，只是解出来的数不对；C 的说法与原文直接冲突，也是最危险的态度，因为物理值不对却没人察觉，很可能一路带到测试报告里；D 属于无中生有，DLC 由报文定义决定，不会因为信号字节序而自动变化。这里最值得学的是那个验证方法：与其在脑子里推演位编号，不如切到图形或位图视图，直接看这个信号占了 8 字节矩阵里的哪几格，再拿一帧真实数据对照手算一遍。实际工作中确认字节序的黄金标准始终是端到端验证：发一个已知 raw，看接收端显示的物理值是否等于预期，对得上才算定义正确。",
+    "keyPoints": [
+      "ByteOrder 标错导致物理值完全不对",
+      "报文仍能正常收发，问题在解析层",
+      "用 DBC 编辑器图形视图对照数据字节验证"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "四、字节序：Intel vs Motorola（最易错）·首段与判断口诀段"
+    },
+    "relatedTerms": [
+      "字节序",
+      "DBC",
+      "物理值",
+      "CANoe"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-51-03-03",
+    "chapterNum": 51,
+    "sectionIndex": 3,
+    "sectionTitle": "四、字节序：Intel vs Motorola（最易错）",
+    "module": "A",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "反向",
+    "tags": [
+      "MSB0",
+      "LSB0",
+      "位编号"
+    ],
+    "stem": "判断：按本节说明，Motorola 采用 LSB0 位编号（从字节 0 的最低位开始数），Intel 采用 MSB0 位编号（从字节 0 的最高位开始数）。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误，两者被对调了。本节原文是：Motorola 用 MSB0 位编号（从字节 0 的最高位开始数），Intel 用 LSB0（从字节 0 的最低位开始数）。这和上一题的大小端记忆是一致的——Motorola 是大端体系，位编号也从高位起算；Intel 是小端体系，位编号从低位起算。之所以要把位编号单独拎出来，是因为它直接决定你怎么理解 StartBit 这个数字：同样写 StartBit 等于 8，在两种编号体系下指向的物理位置并不相同，跨字节信号尤其容易算歪。本节给出的判断口诀是看 DBC 里信号的 StartBit 和是否跨字节，不确定时就切到 DBC 编辑器的图形视图对照验证。实际工作中不建议纯靠心算：一是不同工具展示位编号的方式还有差异，二是手算一旦错了很难自查。稳妥流程是图形视图确认位置，再发一帧已知数据做端到端验证，两步都过才敢下结论。",
+    "keyPoints": [
+      "Motorola 用 MSB0，从字节 0 最高位起数",
+      "Intel 用 LSB0，从字节 0 最低位起数",
+      "位编号体系决定 StartBit 的实际指向"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "四、字节序：Intel vs Motorola（最易错）·判断口诀段（MSB0 与 LSB0）"
+    },
+    "relatedTerms": [
+      "字节序",
+      "StartBit",
+      "Motorola",
+      "Intel"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-51-04-01",
+    "chapterNum": 51,
+    "sectionIndex": 4,
+    "sectionTitle": "五、实操：看一份真实 DBC",
+    "module": "A",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "DBC Editor",
+      "图形视图",
+      "实操步骤"
+    ],
+    "stem": "按本节实操步骤，看懂一份真实 DBC 的正确做法包括：",
+    "options": [
+      {
+        "key": "A",
+        "text": "用 CANoe 的 DBC Editor 或免费工具（如 Vector 的 CANdb++ Demo）打开一份 DBC"
+      },
+      {
+        "key": "B",
+        "text": "展开 Messages 选一条报文，查看 Signals 列表与每个信号的 StartBit/Length/ByteOrder"
+      },
+      {
+        "key": "C",
+        "text": "切到图形或位图视图，直观看到信号在 8 字节里的位置"
+      },
+      {
+        "key": "D",
+        "text": "必须先把被测 ECU 刷成最新固件，DBC 才能正确打开"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 对应本节四步实操的前三步，第四步是在 Trace 里加载该 DBC，发收一帧确认信号能正确解码。D 是编造的前置条件：DBC 是一个独立的文本描述文件，用编辑器打开它跟 ECU 固件版本没有任何关系，甚至不需要连接任何硬件。这个错项针对的是一种常见的心理障碍——新人总觉得学 DBC 必须有车有台架，其实只要拿到一份 DBC 文件和一个免费的编辑器就能开始练，这也是本节特意点出 CANdb++ Demo 的原因。四步的设计逻辑是从静态到动态：先看结构（有哪些报文和信号），再看布局（信号占哪几个 bit），最后做验证（发一帧看解码对不对）。前两步只是读定义，第四步才是把定义和真实数据对上，也是唯一能证明你理解正确的一步。实际接手新项目时，我通常会按这四步过一遍核心报文，顺便记下关键信号的 ID、周期和换算系数，后面写脚本、设过滤都用得上。",
+    "keyPoints": [
+      "用 DBC Editor 或 CANdb++ Demo 打开文件",
+      "先看 Signals 的 StartBit/Length/ByteOrder",
+      "图形视图看位置，Trace 收发帧做验证"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "五、实操：看一份真实 DBC·四步操作列表"
+    },
+    "relatedTerms": [
+      "DBC",
+      "CANoe",
+      "信号",
+      "Trace"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-51-04-02",
+    "chapterNum": 51,
+    "sectionIndex": 4,
+    "sectionTitle": "五、实操：看一份真实 DBC",
+    "module": "A",
+    "type": "short",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "验证流程",
+      "字节序确认",
+      "端到端"
+    ],
+    "stem": "请按本节步骤描述验证一个信号定义是否正确的完整流程，并说明当你不确定该信号字节序时应该怎么办。",
+    "options": [],
+    "answer": [],
+    "explanation": "这道题考的是把读定义和验证结果连成闭环的能力。只会打开 DBC 看参数，属于纸上谈兵；只会在 Trace 里看数，又说不清数值为什么不对。本节四步的价值就在于把两者串起来：静态看结构与布局，动态发帧验解码。字节序不确定时，本章给的官方做法是切到图形视图对照数据字节验证，第四节还配了一个动手实验——把同一个信号的 ByteOrder 分别切成 Intel 和 Motorola，发同样的原始数据看物理值差多少，用现象反推定义。这种用实验代替心算的思路，在实际工作中比背口诀可靠得多。",
+    "keyPoints": [
+      "四步：打开 DBC、看信号参数、图形视图、Trace 验证",
+      "字节序不确定时切图形视图对照数据字节",
+      "可切换 Intel/Motorola 发同一数据做对比实验"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "五、实操：看一份真实 DBC·四步操作列表 + 四、字节序节的 lab 实验"
+    },
+    "relatedTerms": [
+      "DBC",
+      "字节序",
+      "Trace",
+      "信号"
+    ],
+    "refAnswer": "一、验证信号定义的完整流程\n1. 打开数据库：用 CANoe 的 DBC Editor 或免费的 CANdb++ Demo 打开这份 DBC；\n2. 定位报文与信号：展开 Messages 选中目标报文，查看它的 Signals 列表，逐项确认每个信号的 StartBit、Length、ByteOrder，以及 Factor、Offset 和最小最大值；\n3. 看布局：切到图形或位图视图，直观确认该信号占据 8 字节矩阵中的哪几个 bit，重点看它是否跨字节；\n4. 动态验证：在 Trace 里加载这份 DBC，发一帧或收一帧真实数据，确认信号能被正确解码，显示的物理值与按公式手算的结果一致。四步都通过，才能说这个定义是对的。\n二、字节序不确定时怎么办\n1. 不要靠心算推位编号。先切到 DBC 编辑器的图形视图，对照数据字节看信号实际落在哪几格，这是本章给出的标准做法；\n2. 做对比实验：找一个含 16 位以上信号的报文，把 ByteOrder 分别设成 Intel 和 Motorola，发同一个原始数据，观察两种设置下物理值差多少，用可见的现象反推哪种是对的；\n3. 用已知量做端到端验证：按期望物理值反推 raw（raw = (物理值 - Offset) ÷ Factor），构造一帧发出去，看接收端显示是否等于预期；\n4. 记住判断依据：Motorola 用 MSB0 位编号，从字节 0 的最高位开始数；Intel 用 LSB0，从字节 0 的最低位开始数。跨字节信号才是容易出错的地方，短信号两种排法结果可能碰巧相同，不能作为验证样本。"
+  },
+  {
+    "id": "Q-51-05-01",
+    "chapterNum": 51,
+    "sectionIndex": 5,
+    "sectionTitle": "六、动手：自己定义一条车速信号",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "动手实验",
+      "VehicleSpeed",
+      "信号定义"
+    ],
+    "stem": "本节动手实验要求新建一条报文并在其中定义车速信号，下列哪一组参数与实验要求完全一致？",
+    "options": [
+      {
+        "key": "A",
+        "text": "报文 ID=0x200、DLC=8、周期=20ms；信号 VehicleSpeed，StartBit=0，Length=12，ByteOrder=Intel，Factor=0.1，Offset=0，单位 km/h"
+      },
+      {
+        "key": "B",
+        "text": "报文 ID=0x17C、DLC=8、周期=10ms；信号 VehicleSpeed，StartBit=0，Length=16，ByteOrder=Motorola，Factor=1，Offset=0"
+      },
+      {
+        "key": "C",
+        "text": "报文 ID=0x200、DLC=2、周期=100ms；信号 VehicleSpeed，StartBit=8，Length=12，ByteOrder=Intel，Factor=0.01，Offset=0"
+      },
+      {
+        "key": "D",
+        "text": "报文 ID=0x100、DLC=8、周期=20ms；信号 VehicleSpeed，StartBit=0，Length=12，ByteOrder=Motorola，Factor=0.1，Offset=0"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "实验的完整参数是：新建 Message，ID 等于 0x200，DLC 等于 8，周期 20ms；在其中新建 Signal，名称 VehicleSpeed，StartBit 等于 0，Length 等于 12，ByteOrder 为 Intel，Factor 等于 0.1，Offset 等于 0，单位 km/h。所以 A 完全一致。B 用的是第二节报文字段表里的示例 ID 0x17C，长度与字节序也都不对；C 把 DLC、周期、StartBit 和 Factor 全改了，其中 DLC 等于 2 尤其致命——12 bit 的信号从第 0 位起算至少要占到第 2 个字节，DLC 只有 2 虽然勉强放得下，但与实验要求不符，实际配置时若 DLC 小于信号所需字节数，工具会直接报错；D 把 ID 记成了第 50 章 CAPL 示例里的 0x100，字节序也写成了 Motorola。这类参数题看着琐碎，但正是动手做实验时最容易出错的地方：任何一项填错，最后 Trace 里显示的物理值都不会是预期的 65.3，反而让人怀疑是工具问题。做实验前把参数抄一遍再逐项核对，是很值得养成的习惯。",
+    "keyPoints": [
+      "报文：ID=0x200，DLC=8，周期 20ms",
+      "信号：StartBit=0，Length=12，Intel，Factor=0.1",
+      "参数任一项填错都会导致解码值不符预期"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "六、动手：自己定义一条车速信号·lab 实验参数说明"
+    },
+    "relatedTerms": [
+      "DBC",
+      "信号",
+      "字节序",
+      "报文"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-51-05-02",
+    "chapterNum": 51,
+    "sectionIndex": 5,
+    "sectionTitle": "六、动手：自己定义一条车速信号",
+    "module": "A",
+    "type": "short",
+    "cat": "实战应用",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "全流程",
+      "IG 发帧",
+      "解码排查"
+    ],
+    "stem": "结合本节动手实验，写出「信号定义 → 加载 → 解码」的完整流程；说明用 IG 发 raw=653 的一帧时 Trace 应显示什么，若显示结果不对应当如何排查。",
+    "options": [],
+    "answer": [],
+    "explanation": "这道题是本章的收口题，把前面五节的知识点全部串起来：Message 与 Signal 的字段、换算公式、字节序、DBC 编辑器操作、以及第 50 章学到的 IG 发帧与 Trace 观察。实验的目标原文写得很清楚——亲手走一遍信号定义、加载、解码全流程。评分重点不在流程复述得多完整，而在排查思路是否分层：先确认发出去的帧对不对，再确认数据库有没有生效，最后才怀疑信号参数本身。实际工作中定位解码异常几乎都是这个顺序，跳过前两步直接改 DBC 参数，很容易把原本正确的定义改坏，反而制造出新问题。",
+    "keyPoints": [
+      "流程：定义信号、加载到 CANoe、IG 发帧、看解码",
+      "raw=653 时 Trace 应显示 65.3 km/h",
+      "排查按帧、数据库、信号参数三层依次确认"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "六、动手：自己定义一条车速信号·lab 实验（发 raw=653 看是否显示 65.3 km/h）"
+    },
+    "relatedTerms": [
+      "DBC",
+      "信号",
+      "Trace",
+      "CANoe"
+    ],
+    "refAnswer": "一、完整流程\n1. 定义：在 DBC 编辑器里新建 Message（ID=0x200，DLC=8，周期=20ms），在其下新建 Signal，名称 VehicleSpeed，StartBit=0，Length=12，ByteOrder=Intel，Factor=0.1，Offset=0，单位 km/h；\n2. 保存并加载：保存 DBC，把它加载到 CANoe 的对应网络上（Tools 里的数据库工具或 Simulation Setup 添加），必要时把信号拖到 Trace 或 Graphics 窗口；\n3. 发帧：启动测量，用 IG（Interactive Generators）构造一帧 ID=0x200 的报文，让 VehicleSpeed 的原始值为 653；\n4. 解码：在 Trace 中观察该报文，Name 列应显示报文名，信号处应显示 653 × 0.1 + 0 = 65.3 km/h；在 Graphics 里还能看到这条信号的曲线。\n二、结果不对时的排查顺序\n1. 先看帧：Trace 里有没有这一帧 0x200，DLC 是否为 8，数据字节是不是你填的值。没有帧就先查通道映射与测量是否启动，这属于链路问题；\n2. 再看数据库：Name 列是否显示报文名。若仍是纯数字 ID，说明 DBC 没有真正挂到当前网络上，只是打开了文件，需要重新添加；\n3. 最后看信号参数：能解码但数值不对时，按三点核对——Factor/Offset 是否填错（数值成比例偏大或偏小多半是 Factor 的问题）；StartBit 与 Length 是否写错（数值范围明显不合理）；ByteOrder 是否标反（低值正常、高值跳变是典型症状），可切到图形视图对照数据字节，或把 Intel 与 Motorola 各试一次做对比验证。\n三、结论\n只有当发出的 raw 与显示的物理值满足换算公式时，才能确认这条信号定义正确，这也是端到端验证的意义。"
+  }
+]

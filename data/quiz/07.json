@@ -1,0 +1,1310 @@
+[
+  {
+    "id": "Q-07-00-01",
+    "chapterNum": 7,
+    "sectionIndex": 0,
+    "sectionTitle": "一、法规背景",
+    "module": "A",
+    "type": "single",
+    "cat": "标准合规",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "OBD-II",
+      "标准",
+      "SAE J2012"
+    ],
+    "stem": "根据法规背景中的标准对照表，专门用于定义 DTC（故障码）的标准是哪一个？",
+    "options": [
+      {
+        "key": "A",
+        "text": "ISO 15031 —— OBD-II 的国际标准"
+      },
+      {
+        "key": "B",
+        "text": "SAE J1979 —— OBD-II 的服务模式定义"
+      },
+      {
+        "key": "C",
+        "text": "SAE J2012 —— DTC 定义"
+      },
+      {
+        "key": "D",
+        "text": "GB 18352.6-2016 —— 国六标准（含 OBD 要求）"
+      }
+    ],
+    "answer": [
+      "C"
+    ],
+    "explanation": "章节标准表把四份文件的分工写得很清楚：ISO 15031 是 OBD-II 的国际标准总纲；SAE J1979 定义 10 种服务模式（$01~$0A）；SAE J2012 专门定义 DTC，也就是 P0301 这类故障码的编码规则；GB 18352.6-2016 是中国的国六标准，其中包含 OBD 要求。记忆口诀：J1979 管『怎么问』（模式），J2012 管『答什么』（故障码）。EOBD、JOBD 也都基于 ISO 15031，所以跨市场大同小异。",
+    "keyPoints": [
+      "ISO 15031 = OBD-II 国际标准总纲",
+      "SAE J1979 = 服务模式定义；SAE J2012 = DTC 定义",
+      "GB 18352.6-2016 = 国六标准（含 OBD 要求）"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "法规背景·标准对照表（ISO 15031 / SAE J1979 / SAE J2012 / GB 18352.6-2016）"
+    },
+    "relatedTerms": [
+      "EOBD",
+      "JOBD",
+      "国六"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-00-02",
+    "chapterNum": 7,
+    "sectionIndex": 0,
+    "sectionTitle": "一、法规背景",
+    "module": "A",
+    "type": "multi",
+    "cat": "标准合规",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "国六",
+      "远程OBD",
+      "T-BOX"
+    ],
+    "stem": "面试官问『国六的 OBD 比欧六严格在哪？』，依据章节说法，正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "排放阈值更低"
+      },
+      {
+        "key": "B",
+        "text": "监控项目更多，增加了 GPF 颗粒捕集器、NOx 等"
+      },
+      {
+        "key": "C",
+        "text": "要求远程 OBD——车厂必须通过 T-BOX 上传排放数据到监管平台"
+      },
+      {
+        "key": "D",
+        "text": "要求所有 OBD 读取操作先通过 UDS $27 安全访问解锁"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "章节『面试说』给出三条标准答案：①排放阈值更低；②监控项目更多（增加 GPF 颗粒捕集器、NOx 等）；③远程 OBD，车厂必须通过 T-BOX 把排放数据上传到监管平台——这一条是国六最有中国特色的部分，也是最容易被漏答的加分项。D 是把 OBD 和 UDS 弄混了：OBD 的定位是环保部门、年检站、维修厂都能直接读，安全要求栏明确是『无（直接读）』，$27 安全访问属于 UDS。",
+    "keyPoints": [
+      "国六三大严格点：阈值更低、监控项更多、远程 OBD 上传",
+      "远程 OBD 依托 T-BOX 上传监管平台",
+      "OBD 无安全访问，$27 是 UDS 的服务"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "法规背景·面试说（国六 OBD 比欧六严格在哪）"
+    },
+    "relatedTerms": [
+      "GPF",
+      "NOx",
+      "GB 18352.6-2016"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-00-03",
+    "chapterNum": 7,
+    "sectionIndex": 0,
+    "sectionTitle": "一、法规背景",
+    "module": "A",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "EOBD",
+      "JOBD",
+      "ISO 15031"
+    ],
+    "stem": "判断：EOBD（欧洲）、JOBD（日本）与美系 OBD-II 是三套互不相通的独立技术体系，接口、协议、DTC 格式完全不同。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误。演进图末尾那句注释就是答案：EOBD、JOBD、国六 OBD『都基于 ISO 15031，大同小异』。真正『各厂接口不同、各厂协议不同、各厂 DTC 不同』的是 OBD-I 时代（1991 年前）；从 1996 年 OBD-II 开始才统一为 16 针接口、ISO 15031 标准和 P0xxx 通用 DTC 格式。这也是为什么一把几百块的通用扫描仪能读遍大众、丰田、吉利——统一是 OBD-II 最大的价值。",
+    "keyPoints": [
+      "OBD-I 时代才是各厂各自为政",
+      "OBD-II/EOBD/JOBD/国六 OBD 都基于 ISO 15031",
+      "统一 16 针接口 + 统一 P0xxx DTC 格式"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "法规背景·OBD-II 演进图（OBD-I → OBD-II → EOBD/JOBD → 国六 OBD）"
+    },
+    "relatedTerms": [
+      "OBD-I",
+      "ISO 15031",
+      "P0xxx"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-01-01",
+    "chapterNum": 7,
+    "sectionIndex": 1,
+    "sectionTitle": "二、10 种服务模式（Service/Mode $01~$0A）",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "OBD口",
+      "SAE J1962",
+      "针脚"
+    ],
+    "stem": "SAE J1962 定义的 16 针 OBD-II 诊断口中，承载 CAN_H 与 CAN_L（ISO 15765-4）的是哪两个针脚？",
+    "options": [
+      {
+        "key": "A",
+        "text": "针 6 = CAN_H，针 14 = CAN_L"
+      },
+      {
+        "key": "B",
+        "text": "针 7 = CAN_H，针 15 = CAN_L"
+      },
+      {
+        "key": "C",
+        "text": "针 4 = CAN_H，针 5 = CAN_L"
+      },
+      {
+        "key": "D",
+        "text": "针 16 = CAN_H，针 8 = CAN_L"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "针脚图给出关键四组：针 6 = CAN_H、针 14 = CAN_L（ISO 15765-4，现在 99% 的车走这一路，500K/250K）；针 7 = K-Line（ISO 9141-2，只在老车上见）；针 4 = 车身地、针 5 = 信号地；针 16 = 常电 KL30（+12V）。搭台架第一件事就是量针 16 有没有 12V 常电、针 4/5 接地好不好，否则扫描仪根本上不了电。B 混淆了老车的 K-Line 针脚，D 把电源针当成了信号针。",
+    "keyPoints": [
+      "针 6/14 = CAN_H/CAN_L（ISO 15765-4）",
+      "针 7 = K-Line（老车 ISO 9141-2）",
+      "针 16 = 常电 +12V，针 4/5 = 车身地/信号地"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "OBD-II 诊断口 16 针（SAE J1962）针脚定义图"
+    },
+    "relatedTerms": [
+      "ISO 15765-4",
+      "K-Line",
+      "KL30"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-01-02",
+    "chapterNum": 7,
+    "sectionIndex": 1,
+    "sectionTitle": "二、10 种服务模式（Service/Mode $01~$0A）",
+    "module": "A",
+    "type": "single",
+    "cat": "协议流程",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "模式$0A",
+      "永久DTC",
+      "清码"
+    ],
+    "stem": "用 $04 清除故障码后，仍然清不掉、需要 ECU 自证修复才会消失的故障码，应该用哪个模式读取？",
+    "options": [
+      {
+        "key": "A",
+        "text": "$03 确认 DTC"
+      },
+      {
+        "key": "B",
+        "text": "$07 待定 DTC"
+      },
+      {
+        "key": "C",
+        "text": "$0A 永久 DTC"
+      },
+      {
+        "key": "D",
+        "text": "$02 冻结帧"
+      }
+    ],
+    "answer": [
+      "C"
+    ],
+    "explanation": "模式表里 $0A 的描述就是『读清不掉的故障码』：存在 NVM 里，$04 清不掉，ECU 自证修复后才自动清除。它的设计目的是防止年检前清码作弊。对照另外三个：$03 读的是已确认 DTC（如 P0301），$04 一清就没；$07 读的是当前/上一个驾驶循环检测到但还没确认的待定 DTC；$02 读的是故障那一刻的数据快照。三兄弟 $03/$07/$0A 的区分是 OBD 部分最高频的考点。",
+    "keyPoints": [
+      "$0A 永久 DTC 存 NVM，$04 清不掉",
+      "存在意义：防年检前清码作弊",
+      "$03 已确认 / $07 待定 / $0A 永久，三者层级不同"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "10 种服务模式表（$01~$0A）·$0A 永久 DTC 行"
+    },
+    "relatedTerms": [
+      "NVM",
+      "$04 清除DTC",
+      "$07 待定DTC"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-01-03",
+    "chapterNum": 7,
+    "sectionIndex": 1,
+    "sectionTitle": "二、10 种服务模式（Service/Mode $01~$0A）",
+    "module": "A",
+    "type": "multi",
+    "cat": "参数记忆",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "服务模式",
+      "$09",
+      "$06"
+    ],
+    "stem": "根据 10 种服务模式表，下列描述正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "$02 冻结帧使用与 $01 相同的 PID，但带的是 DTC 触发时刻的上下文数据"
+      },
+      {
+        "key": "B",
+        "text": "$07 读的是当前或上一个驾驶循环检测到、但尚未确认的 DTC"
+      },
+      {
+        "key": "C",
+        "text": "$09 读车辆信息，PID $02 对应 VIN，PID $04 对应标定 ID"
+      },
+      {
+        "key": "D",
+        "text": "$05 氧传感器测试在 CAN 总线上仍是主力模式，$06 只做补充"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 都能在模式表里逐字找到：$02 冻结帧『同 $01 的 PID，但带 DTC 触发的上下文』；$07 待定 DTC『当前/上一个循环检测到但未确认』；$09 车辆信息『PID $02→VIN、PID $04→标定 ID』，还有 CVN 校验值。D 正好说反了——表中 $05 明确标注『CAN 总线上已弃用（合并到 $06）』，现在催化器效率、氧传感器响应时间这些非连续监控结果都从 $06 读。$08 组件测试则是唯一能『主动执行动作』的 OBD 模式（驱动碳罐电磁阀、开关 EGR）。",
+    "keyPoints": [
+      "$02 = $01 的 PID + 故障时刻上下文",
+      "$07 待定 DTC 尚未确认；$09 读 VIN/标定 ID/CVN",
+      "$05 在 CAN 上已弃用，被 $06 取代"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "10 种服务模式表（$01~$0A）·模式/名称/作用/典型 PID"
+    },
+    "relatedTerms": [
+      "VIN",
+      "CVN",
+      "$08 组件测试"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-01-04",
+    "chapterNum": 7,
+    "sectionIndex": 1,
+    "sectionTitle": "二、10 种服务模式（Service/Mode $01~$0A）",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "PID",
+      "$0C",
+      "换算公式"
+    ],
+    "stem": "诊断仪发送 $01 $0C 读取发动机转速，ECU 返回数据字节 A=0x1B、B=0x58。依据 PID 速查表的公式，实际转速是多少？",
+    "options": [
+      {
+        "key": "A",
+        "text": "1750 rpm"
+      },
+      {
+        "key": "B",
+        "text": "7000 rpm"
+      },
+      {
+        "key": "C",
+        "text": "3500 rpm"
+      },
+      {
+        "key": "D",
+        "text": "875 rpm"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "PID 速查表中 $0C 发动机转速的公式是 (A×256+B)/4。代入 A=0x1B=27、B=0x58=88：(27×256+88)/4 = (6912+88)/4 = 7000/4 = 1750 rpm。B 是忘了除以 4 的典型错误，C 是误用除以 2，D 是多除了一次。同表还要一起记：$05 冷却液温度 = A-40（所以 0x00 代表 -40℃ 而不是 0℃）、$0D 车速 = A（直接就是 km/h）、$04 负荷和 $11 节气门 = A/2.55（把 0~255 映射成 0~100%）。做 OBD 一致性测试时，就是靠这些公式把原始字节换算成工程值，再和仪表显示做『三方对照』。",
+    "keyPoints": [
+      "$0C 转速公式 = (A×256+B)/4，本题得 1750 rpm",
+      "$05 水温 = A-40，存在 -40 偏移",
+      "$04/$11 = A/2.55，把 0~255 映射为百分比"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "$01 常用 PID 速查表（$04/$05/$0C/$0D/$11/$1F 公式）"
+    },
+    "relatedTerms": [
+      "PID $0D",
+      "PID $05",
+      "工程值换算"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-01-05",
+    "chapterNum": 7,
+    "sectionIndex": 1,
+    "sectionTitle": "二、10 种服务模式（Service/Mode $01~$0A）",
+    "module": "A",
+    "type": "single",
+    "cat": "协议流程",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "功能寻址",
+      "0x7DF",
+      "正响应"
+    ],
+    "stem": "对照模式-PID 查询交互图：诊断仪发出 $01 $0D 请求车速，ECM 回复 $41 $0D $50。下列说法正确的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "请求用功能寻址 CAN ID 0x7DF 发出，ECM 用 0x7E8 响应，$41 = $01+$40，0x50 表示 80 km/h"
+      },
+      {
+        "key": "B",
+        "text": "请求用物理寻址 0x7E0 发出，$41 是错误响应码，0x50 表示 50 km/h"
+      },
+      {
+        "key": "C",
+        "text": "$41 是下一条请求的模式号，0x50 是校验和"
+      },
+      {
+        "key": "D",
+        "text": "OBD 的正响应等于请求模式加 $80，所以 $01 的正响应应该是 $81"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "交互图里三处细节要同时记住：①请求走功能寻址 CAN ID 0x7DF（一条广播问所有支持 OBD 的 ECU），ECM 用 0x7E8 响应；②正响应 = 请求模式 + $40，规律和 UDS 完全一致，所以 $01→$41、$03→$43、$04→$44；③数据字节 0x50 = 十进制 80，PID $0D 车速公式就是 A，因此是 80 km/h。D 的 +$80 是 UDS 里否定响应 $7F 的记忆干扰，OBD 正响应偏移永远是 +$40。",
+    "keyPoints": [
+      "功能寻址请求 0x7DF，ECM 响应 0x7E8",
+      "正响应 = 请求模式 + $40（$01→$41）",
+      "PID $0D 车速直接取 A，0x50 = 80 km/h"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "模式-PID 查询交互图（0x7DF 请求 / 0x7E8 响应 / +$40 规律）"
+    },
+    "relatedTerms": [
+      "物理寻址",
+      "UDS 正响应",
+      "PID $0D"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-01-06",
+    "chapterNum": 7,
+    "sectionIndex": 1,
+    "sectionTitle": "二、10 种服务模式（Service/Mode $01~$0A）",
+    "module": "A",
+    "type": "judge",
+    "cat": "协议流程",
+    "difficulty": "进阶",
+    "direction": "反向",
+    "tags": [
+      "CAN-TP",
+      "OBD帧",
+      "ISO 15765-2"
+    ],
+    "stem": "判断：OBD-II 的请求和响应与 UDS 一样，普遍需要 CAN-TP（ISO 15765-2）做多帧分段传输。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误。章节在交互图后明确点出：『OBD 帧固定 8 字节、数据量小，不用 CAN-TP 分段』。因为 $01 读一个 PID 通常只回几个字节，一个单帧就装得下。真正需要 CAN-TP 分段的是 UDS 场景——比如 $19 02 读一长串 DTC、$22 读大块 DID、$36 传刷写数据，这些动辄几十上百字节，必须用首帧 FF、流控帧 FC、连续帧 CF 来传。注意例外理解：$09 读 VIN（17 字节）在实际实现中确实会用多帧，但 OBD 的设计基调是『小数据、单帧为主』，这也是它比 UDS 简单的原因之一。",
+    "keyPoints": [
+      "OBD 帧固定 8 字节、数据量小，以单帧为主",
+      "CAN-TP（ISO 15765-2）主要服务于 UDS 的大数据量场景",
+      "OBD 简单 = 无分段、无安全访问、无刷写"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "模式-PID 交互图后的说明（正响应 = 请求模式 + $40，不用 CAN-TP 分段）"
+    },
+    "relatedTerms": [
+      "单帧 SF",
+      "流控帧 FC",
+      "ISO 15765-2"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-02-01",
+    "chapterNum": 7,
+    "sectionIndex": 2,
+    "sectionTitle": "三、DTC 格式完整解析",
+    "module": "A",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "DTC",
+      "P0301",
+      "编码规则"
+    ],
+    "stem": "故障码 P0301 的四个字段含义，正确的解读是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "P = 动力总成，0 = ISO 通用码，3 = 点火/失火，01 = 1 缸失火"
+      },
+      {
+        "key": "B",
+        "text": "P = 车身，0 = 厂商自定义，3 = 变速箱，01 = 第 1 个故障"
+      },
+      {
+        "key": "C",
+        "text": "P = 底盘，0 = 待定码，3 = 燃油计量，01 = 1 号传感器"
+      },
+      {
+        "key": "D",
+        "text": "P = 动力总成，0 = 厂商自定义，3 = 辅助排放，01 = 1 缸缺缸"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "按 DTC 格式拆解图逐位读：第 1 个字符是域，P=动力总成（Powertrain）、C=底盘、B=车身、U=网络通信；第 2 位是码类型，0=ISO 通用（P0xxx）、1=制造商自定义（P1xxx）、2=ISO 通用（P2xxx）、3=制造商预留；第 3 位是子系统，0~2=燃油/空气计量、3=点火/失火、4=辅助排放、5=车速/怠速、6=电脑输出电路、7~9=变速箱；第 4~5 位是具体故障，01=1 缸。所以 P0301 = 动力总成 + ISO 通用 + 点火失火 + 1 缸 = 1 缸失火。D 错在把第 2 位的 0 说成厂商自定义（那是 1）。",
+    "keyPoints": [
+      "第 1 位域：P 动力/C 底盘/B 车身/U 网络",
+      "第 2 位类型：0、2 = ISO 通用，1 = 厂商自定义",
+      "第 3 位子系统：3 = 点火/失火；第 4~5 位 = 具体故障"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "DTC 格式完整解析·P0301 逐位拆解图"
+    },
+    "relatedTerms": [
+      "P0420",
+      "SAE J2012",
+      "P1xxx"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-02-02",
+    "chapterNum": 7,
+    "sectionIndex": 2,
+    "sectionTitle": "三、DTC 格式完整解析",
+    "module": "A",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "DTC域",
+      "U0100",
+      "跨品牌一致性"
+    ],
+    "stem": "依据 DTC 四大域说明表，下列 DTC 与其含义对应正确的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "U0100 = 与 ECM/PCM 通信丢失，属于网络通信域"
+      },
+      {
+        "key": "B",
+        "text": "C0035 = 驾驶员气囊电阻超标，属于车身域"
+      },
+      {
+        "key": "C",
+        "text": "B0001 = 左前轮速传感器故障，属于底盘域"
+      },
+      {
+        "key": "D",
+        "text": "P0420 = 与网关通信超时，属于动力总成域"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "对照表逐条核对：U（Network）=网络通信，示例 U0100 = 与 ECM/PCM 通信丢失，A 正确。B 和 C 把示例对调了——C0035 是左前轮速传感器（底盘 Chassis），B0001 是驾驶员气囊电阻超标（车身 Body）。D 的 P0420 实际是催化器效率低，属于排放相关故障，不是通信超时。补充一个高频延伸点：P0xxx/P2xxx 是 ISO 通用码，跨品牌一致，P0301 在大众和丰田上都是 1 缸失火；而 B、C 开头的车身/底盘 DTC 各厂自定义的比例更高，读码时必须结合 OEM 的 DTC 手册。",
+    "keyPoints": [
+      "U = 网络通信，U0100 = 与 ECM/PCM 通信丢失",
+      "C = 底盘（C0035 轮速），B = 车身（B0001 气囊）",
+      "P0/P2 通用跨品牌一致，B/C 域厂商自定义更多"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "DTC 四大域说明表（P/C/B/U 及示例）"
+    },
+    "relatedTerms": [
+      "P0420",
+      "C0035",
+      "B0001"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-02-03",
+    "chapterNum": 7,
+    "sectionIndex": 2,
+    "sectionTitle": "三、DTC 格式完整解析",
+    "module": "A",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "Status Byte",
+      "MIL",
+      "Confirmed"
+    ],
+    "stem": "判断：只要 DTC 状态字节的 bit3（confirmedDTC）置 1，仪表上的 MIL 故障灯就一定会点亮。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误，这正是章节标注的『最大陷阱』。bit3 = confirmedDTC 表示故障已多次检测到、正式存入 NVM；bit7 = MIL 请求才是『请求点亮故障灯』，两者是状态字节里相互独立的两个 bit，由 OEM 策略决定是否联动。实际会出现两种反直觉情况：①某些 Confirmed DTC 不亮灯，例如催化器效率低于内部阈值但还没超法规限值；②某些 Pending DTC 就亮灯，例如严重失火可能烧催化器，必须立刻警告驾驶员。测试时要分别核对『DTC 是否存储』和『MIL 是否点亮』两条预期，不能用一个结果推另一个。",
+    "keyPoints": [
+      "bit3 = 已确认存储，bit7 = MIL 请求点灯",
+      "两者独立判断，联动关系由 OEM 策略定义",
+      "测试用例需分别验证存储与点灯"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "面试陷阱题：Confirmed DTC 和 MIL 亮灯是一回事吗"
+    },
+    "relatedTerms": [
+      "Pending DTC",
+      "P0420",
+      "OEM 策略"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-02-04",
+    "chapterNum": 7,
+    "sectionIndex": 2,
+    "sectionTitle": "三、DTC 格式完整解析",
+    "module": "A",
+    "type": "multi",
+    "cat": "参数记忆",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "Status Byte",
+      "bit定义",
+      "$19 02"
+    ],
+    "stem": "关于 DTC Status Byte 的 8 个 bit，下列说法正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "bit0 testFailed 表示本次监控周期测试失败，反映当前这一轮的监控结果"
+      },
+      {
+        "key": "B",
+        "text": "bit2 pendingDTC 表示故障第一次出现、还没确认，可能是偶发"
+      },
+      {
+        "key": "C",
+        "text": "bit4 testNotCompleteSinceLastClear 在 $04 清码后置 1，跑完驾驶循环才回到 0"
+      },
+      {
+        "key": "D",
+        "text": "bit1 testFailedThisOpCycle 只要当前测试 Pass 就会立刻清零"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "对照状态字节表：bit0 testFailed 是『本次监控周期测试失败』，属于瞬时结果；bit2 pendingDTC 是第一次出现、还未确认的待定码；bit4 testNotCompleteSinceLastClear 在清码后置 1，必须跑完驾驶循环让监控器完成一次才回到 0——它正是『清完码年检过不了』的技术根源。D 错在把 bit1 的语义说反了：bit1 testFailedThisOpCycle 是历史标记，本驾驶循环内只要失败过一次就保持为 1，即使当前 Pass 也不会清零，要等下一个驾驶循环才复位。顺带记住这个状态字节来自 UDS 的 $19 02 响应，是 OBD 与 UDS 相通的高频考点。",
+    "keyPoints": [
+      "bit0 瞬时结果，bit1 本循环历史标记（Pass 也不清）",
+      "bit2 待定 / bit3 已确认 / bit7 MIL 请求",
+      "bit4 清码后置 1，跑完驾驶循环才回 0"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "DTC Status Byte 8 个 bit 定义表（testFailed ~ MIL 请求）"
+    },
+    "relatedTerms": [
+      "$19 02",
+      "驾驶循环",
+      "NVM"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-02-05",
+    "chapterNum": 7,
+    "sectionIndex": 2,
+    "sectionTitle": "三、DTC 格式完整解析",
+    "module": "A",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Drive Cycle",
+      "Trip",
+      "Warm-up Cycle"
+    ],
+    "stem": "关于 Trip、Drive Cycle、Warm-up Cycle 三个概念，下列定义正确的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Trip 是满足冷启动条件的行程，Drive Cycle 不要求冷启动"
+      },
+      {
+        "key": "B",
+        "text": "Drive Cycle 是满足冷启动条件的 Trip，是 Trip 的子集"
+      },
+      {
+        "key": "C",
+        "text": "Warm-up Cycle 指冷却液温度从 <70℃ 升到 >100℃ 的一个 Trip"
+      },
+      {
+        "key": "D",
+        "text": "三者是同义词，只是不同标准里的不同叫法"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "概念对照表定义得很精确：Trip = 发动机启动到熄火，不要求冷启动条件；Drive Cycle = 满足冷启动条件的 Trip，因此是 Trip 的子集；Warm-up Cycle = 冷却液温度从 <50℃ 升到 >70℃ 的一个 Trip。A 把 Trip 和 Drive Cycle 说反了，C 的温度门限记错了（是 50→70℃ 不是 70→100℃）。而冷启动条件本身也有量化标准：冷却液温度 <50℃ 且冷却液温度与进气温度差 <6℃。这三个概念是理解就绪状态和 DTC 老化/自愈逻辑的基础——比如很多 OEM 规定连续 3 个 Drive Cycle 无故障才把 Confirmed DTC 降级。",
+    "keyPoints": [
+      "Trip ⊃ Drive Cycle，后者额外要求冷启动条件",
+      "冷启动条件：水温 <50℃ 且水温与进气温差 <6℃",
+      "Warm-up Cycle：水温 <50℃ 升到 >70℃"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "驾驶循环概念对照表（Trip / Drive Cycle / Warm-up Cycle）"
+    },
+    "relatedTerms": [
+      "冷启动",
+      "监控器",
+      "DTC 自愈"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-02-06",
+    "chapterNum": 7,
+    "sectionIndex": 2,
+    "sectionTitle": "三、DTC 格式完整解析",
+    "module": "A",
+    "type": "short",
+    "cat": "故障定位",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "驾驶循环",
+      "监控器",
+      "年检"
+    ],
+    "stem": "一位车主每天只开 5 分钟短途买菜，从不跑高速，车辆本身没有任何故障灯，但年检时 OBD 检测却过不了。请结合驾驶循环与监控器触发条件，解释原因，并给出让他通过年检的建议。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题考察『驾驶循环 → 监控器完成 → 就绪状态』这条因果链，是章节中『年检不过的元凶』一节的核心逻辑，也是维修厂最常遇到的真实投诉。",
+    "keyPoints": [
+      "年检看的是就绪状态而非有没有故障灯",
+      "各监控器有各自苛刻的触发工况",
+      "短途行驶跑不完监控器，需按 OEM 驾驶循环补跑"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "驾驶循环（Drive Cycle）与各监控器触发条件表"
+    },
+    "relatedTerms": [
+      "就绪状态",
+      "催化器效率监控",
+      "蒸发系统监控"
+    ],
+    "refAnswer": "①年检 OBD 检测的判定依据不是『有没有故障码/故障灯』，而是排放相关监控器的就绪状态（$01 PID $01 返回的 4 字节，每个 bit=0 才代表该监控器已完成检测）。车没故障但监控器没跑完，一样判定不合格。②每个监控器都有各自苛刻的触发条件：失火检测需要怠速→3000rpm 加速→匀速巡航；催化器效率需要车速 >80km/h 的高速巡航持续 ≥5 分钟；氧传感器需要怠速+巡航组合；蒸发系统需要冷启动 + 燃油液位 15%~85% + 匀速；EGR 需要中速巡航+减速滑行。③一个驾驶循环通常无法完成所有监控器，一般需要 2~3 个完整驾驶循环；而每天 5 分钟短途，既达不到冷启动后的持续巡航时间，也达不到高速工况，导致催化器、蒸发系统等监控器永远处于『未完成』(bit=1)，年检必挂。④建议：按 OEM 提供的标准驾驶循环补跑——冷车启动（水温 <50℃ 且与进气温差 <6℃）后，依次完成怠速暖机、加速、80km/h 以上高速巡航 5~10 分钟、中速巡航与减速滑行，保持油量在 15%~85%，重复 2~3 个驾驶循环；跑完后用 OBD 工具读 $01 PID $01 确认所有排放相关监控器 bit=0（就绪）再去年检。⑤特别提醒：年检前不要清码，$04 清码会把所有就绪位重新置 1，等于前功尽弃。"
+  },
+  {
+    "id": "Q-07-03-01",
+    "chapterNum": 7,
+    "sectionIndex": 3,
+    "sectionTitle": "四、冻结帧",
+    "module": "A",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "冻结帧",
+      "$02",
+      "故障复现"
+    ],
+    "stem": "关于冻结帧（Freeze Frame）的定义与读取方式，正确的说法是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "冻结帧是故障发生那一瞬间的发动机状态快照，用模式 $02 读取，可还原故障工况辅助复现"
+      },
+      {
+        "key": "B",
+        "text": "冻结帧是把当前总线报文暂停显示的功能，用模式 $01 读取"
+      },
+      {
+        "key": "C",
+        "text": "冻结帧记录故障发生后 10 秒内的连续数据流，用模式 $07 读取"
+      },
+      {
+        "key": "D",
+        "text": "冻结帧是 ECU 内部的刷写日志，用模式 $0A 读取"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节定义原话：『当故障发生时，ECU 记录下那一瞬间的发动机状态，就是冻结帧——相当于故障的快照』，读取模式是 $02。它的价值在于还原故障发生时的工况，辅助问题复现——比如示例中记录的是转速 3200rpm、车速 78km/h、水温 92℃、负荷 45%、节气门 38%、里程 56823km、运行时间 1247 秒，工程师照着这组工况就能有针对性地复现 P0301。注意它是『一瞬间的单点快照』而不是 C 说的连续数据流，这是最常见的误解。",
+    "keyPoints": [
+      "冻结帧 = 故障触发瞬间的单点工况快照",
+      "用 $02 读取，PID 体系与 $01 相同",
+      "作用：还原故障工况，辅助复现与定位"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "四、冻结帧·定义说明（故障发生瞬间的快照）"
+    },
+    "relatedTerms": [
+      "$01 实时数据",
+      "P0301",
+      "问题复现"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-03-02",
+    "chapterNum": 7,
+    "sectionIndex": 3,
+    "sectionTitle": "四、冻结帧",
+    "module": "A",
+    "type": "multi",
+    "cat": "参数记忆",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "冻结帧",
+      "PID",
+      "工况"
+    ],
+    "stem": "依据章节给出的冻结帧记录示例（发动机 3200rpm 检测到 1 缸失火），冻结帧中会被记录下来的内容包括（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "PID $0C 转速 3200rpm、PID $0D 车速 78km/h、PID $05 水温 92℃"
+      },
+      {
+        "key": "B",
+        "text": "PID $04 负荷 45%、PID $11 节气门 38%"
+      },
+      {
+        "key": "C",
+        "text": "触发的故障码 P0301、里程 56823km、运行时间 1247 秒"
+      },
+      {
+        "key": "D",
+        "text": "故障发生前后各 30 秒的 CAN 总线全量报文录制"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "示例框里逐行列出的就是 A、B、C 三组内容：转速/车速/水温/负荷/节气门这几个 $01 PID 的瞬时值，加上触发的故障码 P0301、里程和运行时间。D 是把冻结帧和 CANoe 的 Logging/Replay 混为一谈——冻结帧存在 ECU 内部、容量极小，只能存单点工况的若干 PID，不可能录全量报文；要做总线全量录制得靠 CANoe 的 .blf 日志（见 08 章）。测试冻结帧时的标准做法是：注入故障 → 确认 DTC 产生 → 用 $02 读冻结帧，逐项核对 PID 完整性与数值合理性。",
+    "keyPoints": [
+      "冻结帧内容 = 若干关键 PID 瞬时值 + DTC + 里程/运行时间",
+      "容量极小，不是总线报文录制",
+      "测试要点：注入故障→确认 DTC→$02 读冻结帧完整性"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "冻结帧记录示例（P0301 触发时的 PID 快照框图）"
+    },
+    "relatedTerms": [
+      "PID $0C",
+      "PID $11",
+      "故障注入"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-04-01",
+    "chapterNum": 7,
+    "sectionIndex": 4,
+    "sectionTitle": "五、就绪状态（Readiness）",
+    "module": "A",
+    "type": "judge",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "就绪状态",
+      "PID $01",
+      "年检"
+    ],
+    "stem": "判断：$01 PID $01 返回的就绪状态字节中，某监控器对应的 bit = 1 表示该监控器已经检测完成、处于就绪状态。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误，而且这是章节特意提醒『和直觉相反』的地方：每个 bit = 0 表示已完成检测（就绪），= 1 表示未完成检测。年检 OBD 的要求是所有排放相关监控器必须处于『完成』状态，也就是相应 bit 全为 0。$01 PID $01 返回的 4 字节里包含 Catalyst Monitor Bank1、Catalyst Heater Monitor、Evap System Monitor、Secondary Air System Monitor、A/C Refrigerant、O2 Sensor Monitor、O2 Heater Monitor、EGR System Monitor 等监控项。记忆方法：把 bit 理解为『还欠着的作业』——欠着就是 1，交了就是 0。",
+    "keyPoints": [
+      "bit=0 已完成（就绪），bit=1 未完成",
+      "年检要求所有排放相关监控器 bit=0",
+      "监控项含催化器、蒸发、氧传感器、EGR 等"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "就绪状态·$01 PID $01 返回 4 字节 bit 位图说明"
+    },
+    "relatedTerms": [
+      "Catalyst Monitor",
+      "Evap System",
+      "驾驶循环"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-04-02",
+    "chapterNum": 7,
+    "sectionIndex": 4,
+    "sectionTitle": "五、就绪状态（Readiness）",
+    "module": "A",
+    "type": "short",
+    "cat": "故障定位",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "清码",
+      "就绪状态",
+      "年检"
+    ],
+    "stem": "维修厂常有这样的操作：年检前先用 $04 把故障码全清掉『图个干净』，结果车辆反而当场检测不通过。请解释这一现象的技术原因，并说明正确的年检前准备流程。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题串联就绪状态、清码副作用、驾驶循环与永久 DTC 四个知识点，是章节『进阶加分项』里的经典面试题。",
+    "keyPoints": [
+      "$04 清码会同时重置就绪状态位",
+      "就绪位重置后必须跑完整驾驶循环才回 0",
+      "永久 DTC（$0A）清不掉，专门防清码作弊"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "面试高频考点·进阶加分项（为什么清完码年检反而过不了）"
+    },
+    "relatedTerms": [
+      "$0A 永久DTC",
+      "Drive Cycle",
+      "MIL"
+    ],
+    "refAnswer": "①技术原因：模式 $04 的作用范围不只是故障码，它会同时清除 DTC、冻结帧和就绪状态。清码后，所有排放相关监控器的就绪位被重新置 1（未完成），而年检 OBD 的合格判据恰恰是『所有排放相关监控器 bit=0（已完成）』，因此刚清完码的车必然处于『未就绪』状态，当场判不合格。②更进一步，$04 也清不掉永久 DTC（$0A）：永久 DTC 存放在 NVM 中，法规设计它的目的就是防止年检前清码作弊，只有 ECU 连续自检确认故障真的修复后才会自动清除。所以『清码掩盖故障』这条路在国六 OBD 上是走不通的。③正确的年检前准备流程：先用 $03/$07/$0A 读出确认码、待定码和永久码，把真实故障修复到位；修复后再决定是否清码，如果清了，必须按 OEM 规定的驾驶循环把监控器重新跑完（通常需要 2~3 个完整驾驶循环，含冷启动、加速、80km/h 以上高速巡航、中速巡航与减速滑行）；出发前用 OBD 工具读 $01 PID $01 确认所有就绪位为 0、$0A 无永久码、MIL 灯灭，再去年检。④测试工程师视角的教训：刷完 ECU、换过电池同样会导致就绪位全部置 1，所以在排放相关测试的用例里，『清码/断电 → 重新跑驾驶循环 → 复核就绪状态』必须作为固定收尾步骤。"
+  },
+  {
+    "id": "Q-07-05-01",
+    "chapterNum": 7,
+    "sectionIndex": 5,
+    "sectionTitle": "六、vs UDS 深度对比",
+    "module": "A",
+    "type": "multi",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "OBD vs UDS",
+      "ISO 14229",
+      "安全访问"
+    ],
+    "stem": "根据 OBD-II 与 UDS 的深度对比表，下列说法正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "OBD-II 是法规强制、所有量产车必装；UDS 是可选的，但主流车企都用"
+      },
+      {
+        "key": "B",
+        "text": "OBD-II 有 10 种模式、主要覆盖发动机与排放；UDS 有 26 种服务、覆盖全车所有 ECU"
+      },
+      {
+        "key": "C",
+        "text": "OBD-II 无安全要求可直接读；UDS 有 $27 安全访问"
+      },
+      {
+        "key": "D",
+        "text": "OBD-II 以物理寻址为主，UDS 以功能寻址为主"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "对比表逐行核对：强制力——OBD 法规强制、UDS 可选；服务数量——10 种模式 vs 26 种服务；数据范围——主要发动机/排放 vs 全车所有 ECU；安全要求——无（直接读）vs 有（$27 安全访问）。D 正好说反：表中寻址一行写的是 OBD『功能寻址为主』（所以用 0x7DF 广播问），UDS 是『物理寻址 + 功能寻址』并用。还可以顺带记住：OBD 标准是 ISO 15031/SAE J1979，UDS 是 ISO 14229；工具上 OBD 几百块的通用扫描仪就够，UDS 要 CANoe/ODIS/原厂诊断仪。",
+    "keyPoints": [
+      "OBD 法规强制管排放，UDS 车企自用管全生命周期",
+      "10 种模式 vs 26 种服务；无安全访问 vs $27",
+      "OBD 功能寻址为主，UDS 物理+功能寻址"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "六、vs UDS 深度对比表（强制力/目的/服务数量/安全要求/寻址等）"
+    },
+    "relatedTerms": [
+      "ISO 14229",
+      "$27 安全访问",
+      "0x7DF"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-05-02",
+    "chapterNum": 7,
+    "sectionIndex": 5,
+    "sectionTitle": "六、vs UDS 深度对比",
+    "module": "A",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "刷写",
+      "$34/$36/$37",
+      "OBD能力边界"
+    ],
+    "stem": "某工程师想给发动机 ECU 刷写一版新程序，同事说『插 OBD 口就能刷』。依据章节内容，最准确的说法是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "OBD-II 协议本身不具备刷写能力，刷写要走 UDS 的 $34/$36/$37；OBD 口只是提供了 CAN 物理通道"
+      },
+      {
+        "key": "B",
+        "text": "OBD-II 的 $08 组件测试就是刷写服务，可以直接写入程序"
+      },
+      {
+        "key": "C",
+        "text": "OBD-II 支持刷写，但必须先用 $27 安全访问解锁"
+      },
+      {
+        "key": "D",
+        "text": "OBD-II 只要在 $04 清码后进入编程会话即可刷写"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "对比表『刷写能力』一行写得很直白：OBD-II 是 ❌，UDS 是 ✅；面试考点表也强调『OBD 不能刷写 ECU，刷写走 UDS（$34/$36/$37）』。这里要分清两个层面：物理层面上刷写确实常常从 OBD 诊断口（针 6/14 的 CAN）接入，但协议层面用的是 UDS 服务链（$10 进编程会话 → $27 安全访问 → $34 请求下载 → $36 数据传输 → $37 退出传输 → $31 校验），和 OBD 的 10 种模式毫无关系。B 的 $08 只是主动驱动碳罐电磁阀、开关 EGR 这类组件动作；C、D 更是把 UDS 的会话与安全访问硬安到 OBD 头上——OBD 根本没有会话和安全访问概念。",
+    "keyPoints": [
+      "OBD 无刷写能力，刷写属于 UDS $34/$36/$37",
+      "OBD 口只是物理接入点，协议层是两回事",
+      "OBD 无会话控制、无 $27 安全访问"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "面试高频考点·进阶加分项（OBD 能刷写 ECU 吗）"
+    },
+    "relatedTerms": [
+      "$34 请求下载",
+      "编程会话",
+      "$08 组件测试"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-06-01",
+    "chapterNum": 7,
+    "sectionIndex": 6,
+    "sectionTitle": "七、测试实战关联",
+    "module": "A",
+    "type": "single",
+    "cat": "故障定位",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "故障注入",
+      "P0135",
+      "DTC触发验证"
+    ],
+    "stem": "在 OBD 测试场景表的『DTC 触发验证』一项中，断开氧传感器后的预期故障码是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "P0301 —— 1 缸失火"
+      },
+      {
+        "key": "B",
+        "text": "P0135 —— 氧传感器加热故障"
+      },
+      {
+        "key": "C",
+        "text": "P0420 —— 催化器效率低"
+      },
+      {
+        "key": "D",
+        "text": "P0520 —— 机油压力传感器电路故障"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "测试场景表原文：『DTC 触发验证 —— 断开氧传感器 → 预期 P0135（氧传感器加热故障）』。这类用例的通用套路是『注入一个确定的物理故障 → 比对一个确定的预期 DTC』，是排放诊断测试最基本的正向验证方法。其余选项在本章各有出处但对应别的故障：P0301 是 1 缸失火（用于冻结帧示例），P0420 是催化器效率低（用于讲 Confirmed ≠ MIL），P0520 是机油压力传感器电路故障（亿恒项目实战）。同表还要记住其他四个场景：$01 读实时数据对比仪表值、$02 读冻结帧完整性、$04 清码后检查就绪状态重置、完成驾驶循环后用 $01 PID $01 确认所有 Monitor 就绪。",
+    "keyPoints": [
+      "断开氧传感器 → 预期 P0135 氧传感器加热故障",
+      "DTC 触发验证 = 注入确定故障 + 比对确定预期码",
+      "OBD 五大测试场景：实时数据/冻结帧/清码/DTC触发/就绪状态"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "OBD 测试场景表（读实时数据/读冻结帧/清DTC/DTC触发验证/就绪状态）"
+    },
+    "relatedTerms": [
+      "故障注入",
+      "P0520",
+      "就绪状态"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-06-02",
+    "chapterNum": 7,
+    "sectionIndex": 6,
+    "sectionTitle": "七、测试实战关联",
+    "module": "A",
+    "type": "short",
+    "cat": "故障定位",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "实战案例",
+      "P0520",
+      "机油压力告警"
+    ],
+    "stem": "请复述章节中『机油压力告警测试』的完整实战流程（从故障注入到判定合格），并说明每一步分别验证了什么。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题考察一条完整的 OBD 测试闭环：故障注入 → 现象观察 → DTC 验证 → 恢复 → 清码 → 状态复核，是面试中回答『你做过什么排放/诊断测试』的标准模板。",
+    "keyPoints": [
+      "闭环六步：注入→观察→读码→恢复→清码→复核",
+      "同时验证仪表告警与 OBD 故障码两条链路",
+      "恢复与清码后必须复核状态，避免污染后续用例"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "亿恒项目实战回忆·机油压力告警测试"
+    },
+    "relatedTerms": [
+      "P0520",
+      "$04 清码",
+      "三方对照"
+    ],
+    "refAnswer": "完整流程为六步：①故障注入——拔掉机油压力传感器线束，模拟传感器电路开路故障；验证的是被测系统对硬件故障的检出能力。②现象观察——预期仪表点亮机油报警灯；验证的是从 ECU 判定到仪表告警显示这条人机交互链路是否打通。③OBD 读码——用 OBD 工具读取，预期报 P0520（机油压力传感器电路故障）；验证的是 DTC 判定逻辑与故障码映射是否与设计一致（P=动力总成、0=ISO 通用、5=车速/怠速类子系统、20=具体故障）。④实车验证——在实车上确认 DTC 确实产生，而不只是在台架仿真环境下成立；验证的是台架结论在整车环境的一致性。⑤恢复与清码——接线恢复后用 $04 清码；验证的是故障消失后系统能否正常复位，同时避免残留故障码污染后续测试用例。⑥状态复核——确认就绪状态恢复、告警灯熄灭，判定用例合格；验证清码副作用被正确处理。补充说明：这套流程本质上是『三方对照』的完整版——传感器真实物理状态、仪表显示、OBD 读数三者必须相互印证；如果出现仪表亮灯但无 DTC、或有 DTC 但仪表不亮，就要进一步查 DTC 状态字节的 bit3（Confirmed）与 bit7（MIL 请求）以及 OEM 的点灯策略。"
+  },
+  {
+    "id": "Q-07-07-01",
+    "chapterNum": 7,
+    "sectionIndex": 7,
+    "sectionTitle": "八、面试高频考点",
+    "module": "A",
+    "type": "single",
+    "cat": "标准合规",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "P0/P1/P2",
+      "通用码",
+      "厂商自定义"
+    ],
+    "stem": "面试官问『P0、P1、P2 开头的故障码有什么区别？』，正确回答是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "P0 和 P2 是 ISO 通用码、跨品牌一致，P1 是厂商自定义码"
+      },
+      {
+        "key": "B",
+        "text": "P0 是通用码，P1 和 P2 都是厂商自定义码"
+      },
+      {
+        "key": "C",
+        "text": "P0 是待定码，P1 是确认码，P2 是永久码"
+      },
+      {
+        "key": "D",
+        "text": "三者只是故障严重程度不同，P2 最严重"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "面试考点表原文：『P0/P2 = ISO 通用码（跨品牌一致），P1 = 厂商自定义』，DTC 拆解图里也标了第 2 位的四种取值：0=ISO 通用（P0xxx）、1=制造商自定义（P1xxx）、2=ISO 通用（P2xxx）、3=制造商预留（P3xxx）。P2 的出现是因为 P0 段编号不够用了，所以又开了一段通用码。实践含义：遇到 P0/P2 码可以直接查通用手册，跨品牌解释一致；遇到 P1 码必须找对应 OEM 的诊断手册，不同品牌同一个 P1 码含义可能完全不同。C 把码类型和 DTC 状态（待定/确认/永久）混为一谈，是典型错误。",
+    "keyPoints": [
+      "第 2 位 0/2 = ISO 通用，1 = 厂商自定义，3 = 厂商预留",
+      "P2 是 P0 编号不够后新增的通用段",
+      "P1 码必须查 OEM 手册，不能跨品牌套用"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "面试高频考点·进阶加分项（P0/P1/P2 码区别）"
+    },
+    "relatedTerms": [
+      "P3xxx",
+      "SAE J2012",
+      "DTC 格式"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-07-02",
+    "chapterNum": 7,
+    "sectionIndex": 7,
+    "sectionTitle": "八、面试高频考点",
+    "module": "A",
+    "type": "multi",
+    "cat": "标准合规",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "永久DTC",
+      "$0A",
+      "防作弊"
+    ],
+    "stem": "关于永久 DTC（模式 $0A）『为什么清不掉』，下列说法正确的有（多选）：",
+    "options": [
+      {
+        "key": "A",
+        "text": "存储在 NVM 中，$04 清码指令对它无效"
+      },
+      {
+        "key": "B",
+        "text": "设计目的是防止年检前清码作弊"
+      },
+      {
+        "key": "C",
+        "text": "只有 ECU 连续自检通过、确认故障真的修复后才会自动清除"
+      },
+      {
+        "key": "D",
+        "text": "必须用 UDS 的 $14 服务并配合 $27 安全访问才能强制清除"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 三条正是面试考点表对 $0A 的完整解释：『防年检前清码作弊：存 NVM，ECU 连续自检通过才自动清』，模式表也标注它是『读清不掉的故障码，$04 清不掉』。D 是似是而非的陷阱：永久 DTC 的法规意图就是不给任何外部指令留后门，如果能用 UDS 强清，整个防作弊设计就失效了；$14 能清的是 UDS 侧的常规 DTC，不是法规定义的永久码。理解这一点也有助于回答另一个高频题——『为什么修完车永久码还在？』答案是要再跑若干个驾驶循环，让 ECU 自己确认故障不再出现。",
+    "keyPoints": [
+      "$0A 永久 DTC 存 NVM，任何清码指令都无效",
+      "立法意图：堵住年检前清码作弊的漏洞",
+      "只能由 ECU 连续自检通过后自动清除"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "面试高频考点·进阶加分项（永久 DTC $0A 为什么清不掉）"
+    },
+    "relatedTerms": [
+      "NVM",
+      "$14 清除诊断信息",
+      "驾驶循环"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-07-07-03",
+    "chapterNum": 7,
+    "sectionIndex": 7,
+    "sectionTitle": "八、面试高频考点",
+    "module": "A",
+    "type": "short",
+    "cat": "故障定位",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "实战问题",
+      "就绪状态",
+      "MIL策略"
+    ],
+    "stem": "章节列出了两个『实战中常见严重问题』：①刷完 ECU/换电池后年检 OBD 检测不通过；②P0420 催化器效率低已存储但 MIL 灯不亮。请分别给出根因分析与处置措施。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题整合了就绪状态机制与 DTC 状态字节两大核心知识点，对应章节末尾的『实战中常见严重问题』表，是本章收口性的综合题。",
+    "keyPoints": [
+      "问题①根因：刷写/断电重置就绪位，需重跑驾驶循环",
+      "问题②根因：bit3 Confirmed ≠ bit7 MIL 请求，由 OEM 策略决定",
+      "处置：分别复核 $01 PID $01 就绪位与 OEM 点灯策略"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "⚠️ 实战中常见严重问题表（就绪状态不全过不了年检 / 催化器效率低告警不亮灯）"
+    },
+    "relatedTerms": [
+      "$01 PID $01",
+      "DTC Status Byte",
+      "P0420"
+    ],
+    "refAnswer": "【问题①：就绪状态不全过不了年检（严重）】现象：刷完 ECU 或换过电池后，所有 Monitor 显示未完成，年检 OBD 检测不通过。根因：ECU 刷写、断电会清空监控器的历史检测结果，就绪状态位全部被置 1（未完成）；而年检判据要求所有排放相关监控器 bit=0（已完成），与车辆有没有故障无关。处置措施：必须按 OEM 规定的驾驶循环完整跑一遍（含冷启动、加速、高速巡航、中速巡航与减速滑行，通常 2~3 个循环），跑完后用 OBD 工具读 $01 PID $01，确认所有排放相关就绪位为 0，再安排年检；测试流程上应把『刷写/断电后重跑驾驶循环并复核就绪状态』写入标准收尾步骤。教训：不要在年检前做任何清码或断电操作。\n【问题②：催化器效率低告警不亮灯（中等）】现象：P0420 已存储在 ECU 中，但 MIL 灯不亮，用户毫无察觉，车辆持续排放超标。根因：DTC 状态字节中 bit3（confirmedDTC，已确认存储）与 bit7（MIL 请求，请求点亮故障灯）是两个相互独立的 bit，是否点灯完全由 OEM 的点灯策略决定——某些 Confirmed DTC（如效率略低于内部阈值但未超法规限值）故意不点灯，某些 Pending DTC（如严重失火）反而立刻点灯。处置措施：读 $19 02 或对应 OBD 数据确认 bit3 与 bit7 的实际取值，向 OEM 索取该 DTC 的点灯策略文档进行比对；若策略要求点灯而实车未点，判为缺陷并提单；若策略本就不点灯，则需在测试用例中把『存储』与『点灯』拆成两条独立预期，避免误判。"
+  }
+]

@@ -1,0 +1,2837 @@
+{
+  "num": 6,
+  "slug": "UDS诊断",
+  "title": "UDS 诊断 ⭐核心",
+  "oneliner": "UDS（ISO 14229）是车载诊断的\"通用语言\"——诊断仪发SID+参数，ECU回SID+$40(肯定)或$7F(否定)，能读数据、读清故障码、安全解锁、刷写固件，6大类26种服务覆盖ECU全生命周期",
+  "sections": [
+    {
+      "title": "一、协议定位",
+      "icon": "📌",
+      "content_blocks": [
+        {
+          "type": "code",
+          "language": "",
+          "code": "ISO 14229 只定义了应用层和会话层，不管物理层/链路层怎么传。\n\nOSI 七层模型：\n┌─────────────────────┐\n│ 7 应用层 ← UDS在这里  │  ← $10/$22/$19/$2E... 等26种服务\n├─────────────────────┤\n│ 6 表示层             │\n├─────────────────────┤\n│ 5 会话层 ← 也在这里   │  ← 诊断会话、安全状态、时序管理\n├─────────────────────┤\n│ 4 传输层 ← CAN-TP    │  ← ISO 15765-2：单帧/多帧分段传输\n├─────────────────────┤\n│ 3 网络层             │\n├─────────────────────┤\n│ 2 数据链路层          │  ← CAN/LIN/FlexRay/以太网 都可以\n├─────────────────────┤\n│ 1 物理层             │\n└─────────────────────┘"
+        },
+        {
+          "type": "h3",
+          "text": "ISO 14229 子协议族"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "标准",
+            "内容"
+          ],
+          "rows": [
+            [
+              "ISO 14229-1",
+              "应用层服务定义（SID清单、请求响应格式）"
+            ],
+            [
+              "ISO 14229-2",
+              "**会话层**（时序参数P2/P2*、S3定时器）"
+            ],
+            [
+              "ISO 14229-3",
+              "CAN实现 ← 最常用"
+            ],
+            [
+              "ISO 14229-4",
+              "FlexRay实现"
+            ],
+            [
+              "ISO 14229-5",
+              "以太网(DoIP)实现"
+            ],
+            [
+              "ISO 14229-6",
+              "K-Line实现"
+            ],
+            [
+              "ISO 14229-7",
+              "LIN实现"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "二、完整服务速查表（6大类26种）",
+      "icon": "🔑",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "⭐ = 面试必考/测试高频 | ✅ = 日常工作用"
+        },
+        {
+          "type": "h3",
+          "text": "1）诊断通信管理"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "SID",
+            "名称",
+            "作用",
+            "热度"
+          ],
+          "rows": [
+            [
+              "**$10**",
+              "诊断会话控制",
+              "切换默认/编程/扩展会话",
+              "⭐"
+            ],
+            [
+              "**$11**",
+              "ECU复位",
+              "软复位/硬复位",
+              "⭐"
+            ],
+            [
+              "**$27**",
+              "安全访问",
+              "Seed & Key 解锁",
+              "⭐"
+            ],
+            [
+              "**$28**",
+              "通信控制",
+              "关闭/开启ECU的非诊断通信"
+            ],
+            [
+              "**$3E**",
+              "待机握手（Tester Present）",
+              "保持非默认会话不超时（重置S3定时器）",
+              "✅"
+            ],
+            [
+              "**$83**",
+              "访问时间参数",
+              "修改时序参数"
+            ],
+            [
+              "**$84**",
+              "安全数据传输",
+              "加密通信"
+            ],
+            [
+              "**$85**",
+              "DTC设置控制",
+              "暂停/恢复DTC记录",
+              "✅"
+            ],
+            [
+              "**$86**",
+              "事件响应",
+              "事件触发响应"
+            ],
+            [
+              "**$87**",
+              "链路控制",
+              "切换波特率（刷写前提速）"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "2）数据传输（0x20系列）"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "SID",
+            "名称",
+            "作用",
+            "热度"
+          ],
+          "rows": [
+            [
+              "**$22**",
+              "按ID读数据",
+              "读DID（如VIN=0xF190、软件版本=0xF188）",
+              "⭐"
+            ],
+            [
+              "**$23**",
+              "按地址读内存",
+              "读指定内存地址",
+              "✅"
+            ],
+            [
+              "**$24**",
+              "按ID读缩放数据",
+              "读DID+比例因子"
+            ],
+            [
+              "**$2A**",
+              "周期读数据",
+              "设置周期上报DID"
+            ],
+            [
+              "**$2C**",
+              "动态定义DID",
+              "临时定义复合DID"
+            ],
+            [
+              "**$2E**",
+              "按ID写数据",
+              "写DID（配置VIN、标定参数）",
+              "⭐"
+            ],
+            [
+              "**$3D**",
+              "按地址写内存",
+              "写指定内存地址"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "3）存储数据传输"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "SID",
+            "名称",
+            "作用",
+            "热度"
+          ],
+          "rows": [
+            [
+              "**$14**",
+              "清除诊断信息",
+              "清DTC",
+              "⭐"
+            ],
+            [
+              "**$19**",
+              "读DTC信息",
+              "读故障码+快照+扩展数据",
+              "⭐"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "4）输入输出控制（0x20系列）"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "SID",
+            "名称",
+            "作用",
+            "热度"
+          ],
+          "rows": [
+            [
+              "**$2F**",
+              "输入输出控制",
+              "控制ECU的输出（点亮故障灯、驱动继电器）",
+              "✅"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "5）例程控制（0x30系列）"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "SID",
+            "名称",
+            "作用",
+            "热度"
+          ],
+          "rows": [
+            [
+              "**$31**",
+              "例程控制",
+              "执行ECU内部函数（自检、擦除内存、校验）",
+              "⭐"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "6）上传下载（0x30系列）"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "SID",
+            "名称",
+            "作用",
+            "热度"
+          ],
+          "rows": [
+            [
+              "**$34**",
+              "请求下载",
+              "刷写前握手，ECU准备接收",
+              "⭐"
+            ],
+            [
+              "**$35**",
+              "请求上传",
+              "读取大块数据（如Flash dump）"
+            ],
+            [
+              "**$36**",
+              "数据传输",
+              "分段传输刷写数据",
+              "⭐"
+            ],
+            [
+              "**$37**",
+              "请求退出传输",
+              "刷写完校验并退出",
+              "⭐"
+            ],
+            [
+              "**$38**",
+              "请求文件传输",
+              "文件方式刷写"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "三、核心服务详解",
+      "icon": "⚡",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "下面按诊断服务逐一详解：每个服务先讲「是什么 / 怎么用」（服务级），再列其子功能（Sub-function）的十六进制取值与含义。覆盖 $10/$27/$19/$31 四大核心服务，以及 $11/$2F/$28/$3E/$85 等高频服务，可完整满足测试与面试需求。"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "$10 诊断会话控制"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "三种会话模式：\n\n默认会话($10 01)  扩展会话($10 03)   编程会话($10 02)\n     ↑                  ↑                   ↑\n 上电默认           安全诊断             刷写固件\n 功能受限           解锁后可用          最高权限\n $22读标准DID      $2E写数据、          $34/$36/$37\n                   $31例程控制         刷写流程\n                   $27解锁先决"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "特性",
+            "默认",
+            "扩展",
+            "编程"
+          ],
+          "rows": [
+            [
+              "进入条件",
+              "上电/复位自动",
+              "先默认→显式切换",
+              "先扩展→显式切换"
+            ],
+            [
+              "S3超时(典型5秒)",
+              "❌ 不适用（默认会话就是超时后的归宿）",
+              "✅ 无诊断请求超时→退回默认会话",
+              "✅ 通常也需$3E维持（部分Bootloader刷写期间禁用S3）"
+            ],
+            [
+              "$3E心跳维持",
+              "✅",
+              "✅",
+              "✅"
+            ],
+            [
+              "$22读数据",
+              "受限",
+              "全部",
+              "全部"
+            ],
+            [
+              "$2E写数据",
+              "❌",
+              "✅(解锁后)",
+              "✅"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "paragraph",
+          "text": "会话切换：默认→扩展可直接切；进入编程会话（0x02）多数 OEM 要求先进入扩展（0x03），即 默认→扩展→编程。进入非默认会话后需周期性发 $3E 保活，否则 S3server 超时（默认 5s）自动回默认会话。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "子功能 (Hex)",
+            "会话名称",
+            "用途 / 说明"
+          ],
+          "rows": [
+            [
+              "0x01",
+              "defaultSession 默认会话",
+              "上电/复位后默认进入；仅可用基础服务（$22/$19/$3E 等），多数写/例程被锁"
+            ],
+            [
+              "0x02",
+              "programmingSession 编程会话",
+              "刷写用；开放 $34/$35/$36/$37 下载相关服务"
+            ],
+            [
+              "0x03",
+              "extendedDiagnosticSession 扩展诊断会话",
+              "解锁 $2E/$2F/$27/$31 等扩展服务（日常工作主用）"
+            ],
+            [
+              "0x04–0x3F",
+              "vehicleManufacturerSpecific",
+              "车辆制造商自定义会话"
+            ],
+            [
+              "0x40–0x5F",
+              "systemSupplierSpecific",
+              "系统/零部件供应商自定义会话"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "$27 安全访问（Seed & Key）"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "Tester                            ECU\n  │                                │\n  │──$27 01 (请求种子)───────────→ │  \"请给我解锁钥匙\"\n  │                                │\n  │←──$67 01 AA BB CC DD ────────│  \"种子是0xAABBCCDD\"\n  │                                │\n  │  Tester用算法算出Key:           │\n  │  Key = f(Seed, 安全算法)        │\n  │                                │\n  │──$27 02 EE FF 00 11 ────────→ │  \"这是我的钥匙\"\n  │                                │\n  │←──$67 02 ────────────────────│  \"钥匙正确，已解锁\"\n  │          (否定→NRC $35无效钥匙)  │"
+        },
+        {
+          "type": "blockquote",
+          "text": "<面试说>种子是和时间相关的伪随机数，密钥通过安全算法（如 CRC+异或、AES 等）计算。如果发错密钥 → NRC 0x35（无效密钥），需要等 ECU 规定的延迟后才能重试，防止暴力破解。"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "子功能 (Hex)",
+            "方向",
+            "含义"
+          ],
+          "rows": [
+            [
+              "0x01",
+              "Tester→ECU",
+              "requestSeed 第 1 级（请求种子）"
+            ],
+            [
+              "0x02",
+              "Tester→ECU",
+              "sendKey 第 1 级（发送密钥）"
+            ],
+            [
+              "0x03",
+              "Tester→ECU",
+              "requestSeed 第 2 级"
+            ],
+            [
+              "0x04",
+              "Tester→ECU",
+              "sendKey 第 2 级"
+            ],
+            [
+              "…",
+              "…",
+              "奇数为 requestSeed、偶数为 sendKey，每对对应一个安全级别（最高约 0x7E/2=63 级）"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "奇数=请求种子，偶数=发送密钥。密钥由种子经 OEM 安全算法（CRC+异或、AES 等）算出。错密钥→NRC 0x35（无效密钥）；连续失败超限→NRC 0x36（超限）→进入延时锁定 NRC 0x37（时间延迟）。"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "$19 读DTC信息：远超\"读故障码\""
+        },
+        {
+          "type": "svc-cards",
+          "title": "$19 子服务详解卡",
+          "items": [
+            {
+              "code": "$19 01",
+              "name": "按状态掩码读 DTC 数量",
+              "badge": "常用",
+              "question": "有多少个当前故障？",
+              "request": "19 01 <DTCStatusMask>",
+              "response": "59 01 <AvailabilityMask> <Format> <CountH> <CountL>",
+              "scene": "诊断仪首页的“当前故障数”",
+              "note": "Format 0x00=OBD 5字符码，0x04=UDS DTC"
+            },
+            {
+              "code": "$19 02",
+              "name": "按状态掩码读 DTC 列表",
+              "badge": "常用",
+              "question": "当前故障是哪些？",
+              "request": "19 02 <DTCStatusMask>",
+              "response": "59 02 <AvailabilityMask> [DTC(3B) Status(1B)]*",
+              "scene": "日常读码最常用",
+              "note": "无匹配 DTC 时正响应数组为空 ≠ NRC，用例需判断数组长度"
+            },
+            {
+              "code": "$19 03",
+              "name": "读快照标识",
+              "badge": "快照",
+              "question": "哪些 DTC 存了快照？",
+              "request": "19 03",
+              "response": "59 03 [DTC(3B) RecordNum(1B)]*",
+              "scene": "避免盲发 $19 04",
+              "note": "RecordNumber 0x00 表示“全部记录”"
+            },
+            {
+              "code": "$19 04",
+              "name": "按 DTC 读快照记录",
+              "badge": "排障",
+              "question": "故障发生时各信号值？",
+              "request": "19 04 <DTC(3B)> <RecordNum>",
+              "response": "59 04 <DTC(3B)> <RecordNum> [DID+Data]*",
+              "scene": "先 $19 02 定位 DTC，再看故障瞬间工况",
+              "note": "RecordNum 从 $19 03 响应获取，写 0x00 读该 DTC 全部快照；常见 DID：F1 90 车速、F1 91 转速、F1 0C 冷却液温度"
+            },
+            {
+              "code": "$19 06",
+              "name": "读扩展数据",
+              "badge": "扩展",
+              "question": "故障发生的次数/里程/时间？",
+              "request": "19 06 <DTC(3B)> <ExtRecordNum>",
+              "response": "59 06 <DTC(3B)> <RecordNum> [Data]*",
+              "scene": "判断故障是偶发还是顽固",
+              "note": "0x00=全部，0x01-0x8F=OEM 定义；含 occurrence/aging/faultPending counter；ExtRecordNum 含义由 OEM 规范定义"
+            },
+            {
+              "code": "$19 0A",
+              "name": "读所有支持的 DTC",
+              "badge": "回归测试",
+              "question": "这个 ECU 能报哪些故障？",
+              "request": "19 0A",
+              "response": "59 0A <AvailabilityMask> [DTC(3B) Status(1B)]*",
+              "scene": "确认 DTC 清单完整性 / 回归测试",
+              "note": "确保新增功能对应的 DTC 确实被 ECU 支持"
+            },
+            {
+              "code": "$19 0C",
+              "name": "读首个确认 DTC",
+              "badge": "注意语义",
+              "question": "首个/最近确认的 DTC？",
+              "request": "19 0C",
+              "response": "59 0C [DTC(3B) Status(1B)]*",
+              "scene": "最近一次 testFailed 的 DTC（reportMostRecentTestFailedDTC）",
+              "note": "“一键全读”是诊断仪 UI 层把 $19 02+04+06 打包，不是 0C 标准语义"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "上表中的 `<RecordNum>` 与 `<ExtRecordNum>` 是请求参数，不是响应里自动多出来的字段：$19 04 的 `<RecordNum>` 是快照记录号，通常先用 $19 03 查某 DTC 有哪些快照记录，再指定具体记录号读取；写 0x00 表示读取该 DTC 的全部快照。$19 06 的 `<ExtRecordNum>` 是扩展数据记录号，由 OEM 定义，写 0x00 表示读取该 DTC 的全部扩展数据。"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "掩码 DTCStatusMask 是 $19 01/02 的核心。bit0=testFailed（当前失败）、bit3=Confirmed DTC（已确认）、bit4=testNotCompleteSinceLastClear（清码后未检测）。常见用法：0x01 读当前故障、0x08 读已确认故障、0xFF 读全部。"
+        },
+        {
+          "type": "paragraph",
+          "text": "理解了每种子服务的语义后，再看它们的响应结构。7 个子服务虽然都以 0x59 开头，但按子功能回声可分为几类：① 01 只返回计数；② 02/0A 是 DTC 列表（02 按状态掩码过滤并带 AvailabilityMask 回声，0A 列出所有支持的 DTC、不带掩码）；③ 0C 返回最近一次 testFailed 的 DTC（单条）；④ 03 把状态位换成快照记录号；⑤ 04/06 则是单 DTC 加变长数据（快照/扩展数据）。下图用色块把 $19 02 的请求、响应和真实报文拆分画清楚："
+        },
+        {
+          "type": "h4",
+          "text": "$19 02 报文：字节级拆解视图"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/uds-19-response-structures.svg?v=20260808e",
+          "alt": "$19 02 请求/响应字节结构与真实报文拆分示意图",
+          "caption": "$19 02 请求、响应字节结构，以及 59 02 09 C1 40 41 09 的字段拆分。青色为状态掩码/状态字节，红色为 DTC 故障码 3 字节。图中 B 表示字节（Byte），b 表示二进制位（bit）。"
+        },
+        {
+          "type": "h4",
+          "text": "实战：如何根据一串返回数据解读"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "场景：诊断仪发 19 02 08（读已确认故障，mask=0x08），ECU 返回：\n\n  59 02 08 │ 04 20 00 08 │ 52 34 00 08\n  ├─头 3B─┤─DTC#1 4B─┤─DTC#2 4B─┤\n\n  逐字节划分与含义：\n  59        → $19 正响应（SID + 0x40，表示成功；若回 7F 则是负响应+NRC）\n  02        → 子服务回显（确认响应的是 $19 02）\n  08        → AvailabilityMask：ECU 支持的状态位（bit3=Confirmed 为 1）\n  04 20 00 08 → DTC #1：High 04 + Middle 20 + FaultType 00 + 状态 08\n             · 编号 High+Middle = 0x0420，按 16bit→5字符规则 解码为 P0420（催化器效率低）\n             · 状态 0x08 = bit3 Confirmed → 已确认故障（已存 NVM）\n  52 34 00 08 → DTC #2：High 52 + Middle 34 + FaultType 00 + 状态 08\n             · 编号 0x5234 解码为 C1234（转向角传感器）\n             · 状态 0x08 = bit3 Confirmed → 已确认故障\n\n  结论：该 ECU 当前有 2 个已确认故障 —— P0420 与 C1234。（FaultType 字节不进 5 字符码）"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "字节位置",
+            "值",
+            "字段",
+            "解读"
+          ],
+          "rows": [
+            [
+              "[0]",
+              "59",
+              "正响应 SID",
+              "$19 成功响应（SID+0x40）"
+            ],
+            [
+              "[1]",
+              "02",
+              "子服务回显",
+              "对应请求的子服务 $19 02"
+            ],
+            [
+              "[2]",
+              "08",
+              "AvailabilityMask",
+              "ECU 支持 Confirmed(bit3) 等状态位"
+            ],
+            [
+              "[3-6]",
+              "04 20 00 08",
+              "DTC #1",
+              "High04+Middle20+FaultType00，标识 0x0420=P0420，状态 0x08=Confirmed"
+            ],
+            [
+              "[7-10]",
+              "52 34 00 08",
+              "DTC #2",
+              "High52+Middle34+FaultType00，标识 0x5234=C1234，状态 0x08=Confirmed"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "解读一串 $19 返回，固定三步：① 看首字节是 59 还是 7F——7F 是负响应，后面跟 NRC（如 0x31 请求越界、0x22 条件不满足）；② 按子服务确定字段边界（02/0A/0C 是 4B/DTC，04 是 DID 流，06 是扩展数据）；③ 每个 DTC 段用 16bit→5字符规则解码标识、用状态字节位图解读状态。DTC 数组长度 = (响应总长 - 头长) / 4。"
+        },
+        {
+          "type": "h4",
+          "text": "$19 04 报文：字节级拆解（快照 / 冻结帧）"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "场景：诊断仪发 19 04 80 00 02 FF（读 B0002 全部快照），ECU 返回：\n\n  59 04 80 00 02 09 01 02 01 07 7C 32 01 08 00 00 00 00\n  ├─头 2B─┤─DTC 3B─┤St│RecNo│#DID│── DID 流（变长）──┤\n\n  逐字节划分与含义：\n  59        → $19 正响应（SID + 0x40）\n  04        → 子服务回显（确认响应的是 $19 04 快照）\n  80 00 02  → DTC：最高 2 位 10 → B 类（车身/SRS），后 22 位序数 2 → B0002\n             （正面气囊 Stage2 短路到电源）；读 80 00 04 则为 B0004（侧面气囊回路开路）\n  09        → 状态字节 0x09 = bit0 testFailed + bit3 confirmed → 当前失败且已确认（硬故障）\n  01        → 快照记录组号（01=首次发生，02=最近一次，FF=全部，与请求 FF 回显一致）\n  02        → 本组快照含 DID 个数 = 2\n  01 07     → DID #1 = 0x0107（制造商自定义，需 CDD 解密）\n  7C 32 01  → DID #1 数据（长度由 CDD 定义，物理含义随车厂不同）\n  08 00     → DID #2 = 0x0800（制造商自定义）\n  00 00 00  → DID #2 数据\n\n  结论：B0002 首次发生时捕获了 2 个 DID 的冻结帧；状态 0x09 = 已确认的硬故障。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "字节",
+            "值",
+            "字段",
+            "解读"
+          ],
+          "rows": [
+            [
+              "1",
+              "59",
+              "正响应 SID",
+              "$19 成功响应（SID+0x40）"
+            ],
+            [
+              "2",
+              "04",
+              "子服务回显",
+              "对应请求的子服务 $19 04"
+            ],
+            [
+              "3-5",
+              "80 00 02",
+              "DTC",
+              "B 类(SRS)，序数 2 → B0002"
+            ],
+            [
+              "6",
+              "09",
+              "状态字节",
+              "bit0+bit3：当前失败且已确认"
+            ],
+            [
+              "7",
+              "01",
+              "快照记录号",
+              "01=首次发生"
+            ],
+            [
+              "8",
+              "02",
+              "DID 个数",
+              "本组含 2 个 DID"
+            ],
+            [
+              "9-10",
+              "01 07",
+              "DID #1",
+              "0x0107（厂商自定义）"
+            ],
+            [
+              "11-13",
+              "7C 32 01",
+              "DID #1 数据",
+              "按 CDD 解码为物理量"
+            ],
+            [
+              "14-15",
+              "08 00",
+              "DID #2",
+              "0x0800（厂商自定义）"
+            ],
+            [
+              "16-18",
+              "00 00 00",
+              "DID #2 数据",
+              "当前值为 0"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "$19 04 响应是「DTC + 状态 + 变长 DID 流」，与 $19 02 的「DTC + 状态」定长数组不同：04 在 DTC 后多一个快照记录号，再跟 #DID 声明的若干（2B DID + 数据）对；每个 DID 数据长度由 CDD 定义，协议本身不带长度。没有 CDD 就只能看原始 Hex——CANoe 必须加载车厂 CDD/ODX，Diagnostic Console 才会把 7C 32 01 自动翻译成电压/车速等物理量。"
+        },
+        {
+          "type": "h4",
+          "text": "DTC 状态字节（1Byte）"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "bit7        bit6              bit5             bit4            bit3       bit2      bit1   bit0\n |          |                |                |               |         |         |      |\nwarningInd- testNotCom-     testFailed-     testNotCom-    confirmed pending  testF  test\nicatorReq   pletedThis       SinceLast-      pletedSince   DTC       DTC      ailed  Failed\nuested      OpCycle           Clear           LastClear              DTC    ThisOp\n\n面试只要记住：\nbit0=testFailed                → 当前循环检测到故障\nbit2=Pending DTC               → 待定故障（首次检出，未确认）\nbit3=Confirmed DTC             → 已确认故障（存NVM）\nbit4=testNotCompletedSinceLastClear → 清码后检测未完成（刚清码常见）\nbit5=testFailedSinceLastClear  → 上次清码后曾失败过（顽固度线索）\nbit7=warningIndicatorRequested → 请求亮故障灯(MIL)，≠bit3！"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "想要的状态",
+            "bit",
+            "二进制",
+            "掩码"
+          ],
+          "rows": [
+            [
+              "当前测试失败",
+              "bit0",
+              "0000 0001",
+              "0x01"
+            ],
+            [
+              "已确认 DTC",
+              "bit3",
+              "0000 1000",
+              "0x08"
+            ],
+            [
+              "待定 DTC",
+              "bit2",
+              "0000 0100",
+              "0x04"
+            ],
+            [
+              "当前 + 已确认",
+              "bit0+bit3",
+              "0000 1001",
+              "0x09"
+            ],
+            [
+              "全部状态",
+              "所有",
+              "1111 1111",
+              "0xFF"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "$19 实战报文拆解：0A / 06 / 04"
+        },
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "下面用三张 CANoe 真实截图，把 $19 三个高频子服务的请求和响应逐字节拆开。读报文时记住固定套路：先确认 SID（59=肯定响应），再看第 2 字节子服务，然后按该子服务的格式分段。"
+        },
+        {
+          "type": "h4",
+          "text": "1) $19 0A：读取 ECU 支持的所有 DTC"
+        },
+        {
+          "type": "paragraph",
+          "text": "子功能 0x0A（reportSupportedDTC）不指定状态掩码，ECU 把支持的所有 DTC 连同当前状态一次性返回。适合在台架测试开始时做“全量扫描”。"
+        },
+        {
+          "type": "diagram",
+          "code": "请求：  19 0A\n响应：  59 0A 00 00 00 01 09 00 00 02 00 80 00 01 00 80 00 02 00 80 00 03 00 80 00 04 00\n        │  │  │  │\n        │  │  │  └── DTC+Status #1..#6（每 4 字节：3B DTC + 1B Status）\n        │  │  │      #1: 0x000001 | 0x09    #2: 0x000002 | 0x00\n        │  │  │      #3: 0x800001 | 0x00    #4: 0x800002 | 0x00\n        │  │  │      #5: 0x800003 | 0x00    #6: 0x800004 | 0x00\n        │  │  │\n        │  │  └── DTCStatusAvailabilityMask = 0x00\n        │  └── sub-function = 0x0A\n        └─────── SID + 0x40 = 0x59",
+          "caption": "示意图"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "字段",
+            "字节",
+            "值",
+            "含义"
+          ],
+          "rows": [
+            [
+              "SID",
+              "0",
+              "59",
+              "肯定响应 SID = 0x19 + 0x40"
+            ],
+            [
+              "Sub-function",
+              "1",
+              "0A",
+              "reportSupportedDTC"
+            ],
+            [
+              "AvailabilityMask",
+              "2",
+              "00",
+              "ECU 支持的状态位掩码（本例为 0）"
+            ],
+            [
+              "DTC #1",
+              "3-5",
+              "00 00 01",
+              "DTC = 0x000001"
+            ],
+            [
+              "Status #1",
+              "6",
+              "09",
+              "bit0+bit3=当前失败且已确认"
+            ],
+            [
+              "DTC #2",
+              "7-9",
+              "00 00 02",
+              "DTC = 0x000002，状态 0x00（未激活）"
+            ],
+            [
+              "DTC #3-#6",
+              "10-25",
+              "80 00 01/02/03/04 ...",
+              "0x80 开头的 DTC 通常为制造商自定义区间"
+            ]
+          ]
+        },
+        {
+          "type": "h4",
+          "text": "2) $19 06：读取 DTC 扩展数据"
+        },
+        {
+          "type": "paragraph",
+          "text": "子功能 0x06（reportDTCExtendedDataRecordByDTCNumber）按指定 DTC 读扩展数据记录，常见记录号 0x01 包含 occurrence counter（发生次数）、0x02 包含 aging counter 等。请求里要给出 3 字节 DTC 和 1 字节记录号。"
+        },
+        {
+          "type": "diagram",
+          "code": "请求：  19 06 00 00 01 01\n        │  │ └────┬────┘ │\n        │  │    DTC      ExtDataRecordNumber\n        │  │  0x000001      0x01\n        │  sub-function = 0x06\n        SID = 0x19\n\n响应：  59 06 00 00 01 09 01 7C 00 00 00 00\n        │  │ └────┬────┘ │ │ └─────┬─────┘\n        │  │   DTC      Status │    扩展数据 (5 bytes)\n        │  │  0x000001   0x09  │   0x7C 00 00 00 00\n        │  │                  RecordNumber=0x01\n        │  sub-function = 0x06\n        SID + 0x40 = 0x59",
+          "caption": "示意图"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "字段",
+            "字节",
+            "值",
+            "含义"
+          ],
+          "rows": [
+            [
+              "SID",
+              "0",
+              "59",
+              "肯定响应 SID"
+            ],
+            [
+              "Sub-function",
+              "1",
+              "06",
+              "reportDTCExtendedDataRecordByDTCNumber"
+            ],
+            [
+              "DTC",
+              "2-4",
+              "00 00 01",
+              "请求的 DTC"
+            ],
+            [
+              "Status",
+              "5",
+              "09",
+              "当前失败 + 已确认"
+            ],
+            [
+              "RecordNumber",
+              "6",
+              "01",
+              "扩展数据记录号"
+            ],
+            [
+              "RecordData",
+              "7-11",
+              "7C 00 00 00 00",
+              "OEM 定义的扩展数据；需结合 CDD/ODX 解码物理量"
+            ]
+          ]
+        },
+        {
+          "type": "h4",
+          "text": "3) $19 04：读取 DTC 快照（冻结帧）"
+        },
+        {
+          "type": "paragraph",
+          "text": "子功能 0x04（reportDTCSnapshotRecordByDTCNumber）读取故障发生瞬间的工况快照。响应是变长 DID 流：先给出本记录里包含多少个 DID，再按「2B DID + N byte 数据」的顺序排列。"
+        },
+        {
+          "type": "diagram",
+          "code": "请求：  19 04 00 00 01 01\n        │  │ └────┬────┘ │\n        │  │    DTC      SnapshotRecordNumber\n        │  │  0x000001      0x01\n        │  sub-function = 0x04\n        SID = 0x19\n\n响应：  59 04 00 00 01 09 01 02 01 07 7C 32 01 08 00 00 00 00\n        │  │ └────┬────┘ │ │ │ └─┬──┘ └────┬────┘ └─┬──┘ └─┬──┘\n        │  │   DTC      Status │ │ │ DID#1    DID#1数据   DID#2  DID#2数据\n        │  │  0x000001   0x09  │ │ │ 0x0107   7C 32 01 08  0x0000  00 00\n        │  │                  Rec# │ NumberOfIdentifiers=2\n        │  │                  0x01  │\n        │  sub-function = 0x04\n        SID + 0x40 = 0x59",
+          "caption": "示意图"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "字段",
+            "字节",
+            "值",
+            "含义"
+          ],
+          "rows": [
+            [
+              "SID",
+              "0",
+              "59",
+              "肯定响应 SID"
+            ],
+            [
+              "Sub-function",
+              "1",
+              "04",
+              "reportDTCSnapshotRecordByDTCNumber"
+            ],
+            [
+              "DTC",
+              "2-4",
+              "00 00 01",
+              "DTC = 0x000001"
+            ],
+            [
+              "Status",
+              "5",
+              "09",
+              "当前失败 + 已确认"
+            ],
+            [
+              "SnapshotRecordNumber",
+              "6",
+              "01",
+              "快照记录号"
+            ],
+            [
+              "NumberOfIdentifiers",
+              "7",
+              "02",
+              "本快照包含 2 个 DID"
+            ],
+            [
+              "DID #1",
+              "8-9",
+              "01 07",
+              "厂商自定义 DID 0x0107"
+            ],
+            [
+              "DID #1 data",
+              "10-13",
+              "7C 32 01 08",
+              "该 DID 的 4 字节原始数据，需 CDD 解码"
+            ],
+            [
+              "DID #2",
+              "14-15",
+              "00 00",
+              "占位/示例 DID 0x0000"
+            ],
+            [
+              "DID #2 data",
+              "16-17",
+              "00 00",
+              "该 DID 的 2 字节数据"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "面试说：看到 $19 响应先数长度。02/0A/0C 是「4 字节一组」的定长 DTC 列表；04 是「DTC + 记录号 + #DID + 变长 DID 流」；06 是「DTC + 记录号 + 变长数据」。状态字节 0x09 表示 bit0（testFailed）和 bit3（confirmedDTC）同时为 1——说明这是当前正在发生、且已写入 NVM 的真实故障。"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h4",
+          "text": "故障码（DTC）本身的字节结构"
+        },
+        {
+          "type": "paragraph",
+          "text": "一个 DTC 在 UDS $19 响应里占 4 字节（本章按 UDS 格式 DTCFormatIdentifier=0x04）：前 3 字节是 DTC 编号（DTC High / DTC Middle / DTC Low，其中 Low 是故障类型 Fault Type），第 4 字节是状态字节。诊断仪显示的 5 字符码（如 P0420）来自 **OBD-II / SAE J2012** 约定，只对前 2 字节（High + Middle）拼出的 16 bit 故障标识做解读——这才是测试时真正要\"读出来并解码\"的对象；第 3 字节 DTC Low（故障类型）不进显示码。OBD-II 与 UDS 的 DTC 形态不同：OBD-II（ISO 15031-6）的 DTC 本身就是 2 字节、直接对应 5 字符码；UDS 的 DTC 是 3 字节（多出 Failure Type 字节），只有前 2 字节参与 5 字符显示。ECU 用 $19 01 响应里的 Format 字节声明格式：0x00=OBD（2B DTC），0x04=UDS（3B DTC）。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/uds-vs-obd-dtc.svg?v=20260808b",
+          "alt": "OBD-II 与 UDS 故障码（DTC）形态对比图",
+          "caption": "OBD-II 的 DTC 为 2 字节直接对应 5 字符码；UDS 的 DTC 为 3 字节（多出 Failure Type），仅前 2 字节参与 5 字符显示。两者前 2 字节按 SAE J2012 解成 P/C/B/U 五位码。"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "DTC 报文布局（每条记录共 4 字节 / 32 bit）：\n\n [     DTC 编号 3 Byte         ]   [ 状态字节 1 Byte ]\n   DTC High │ DTC Middle │ DTC Low     DTC Status\n    0xHB    │   0xMB    │  0xLB        0xStatus\n  (HB=高字节, MB=中字节, LB=低字节=故障类型 Fault Type)\n      └── 16 bit 故障标识 = HB+MB ──┘   （Low 字节不进显示码）\n\n诊断仪把 16 bit 故障标识（HB+MB）拆成 5 字符显示码：\n  第1位  系统      P / C / B / U\n  第2位  0–3       00=0  01=1  10=2  11=3（0/2 多为 SAE 通用，1/3 多为厂定义）\n  第3位  子系统类别（HB 低 4 bit）\n  第4-5位 具体故障序号（MB 整字节）\n  例：P0420   U0100   C1234   B1318"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "首位字母",
+            "系统",
+            "覆盖范围"
+          ],
+          "rows": [
+            [
+              "P",
+              "Powertrain 动力总成",
+              "发动机、变速箱、燃油与排放控制"
+            ],
+            [
+              "C",
+              "Chassis 底盘",
+              "制动、转向、悬挂、ABS / ESP"
+            ],
+            [
+              "B",
+              "Body 车身",
+              "门窗、空调、灯光、安全气囊、座椅"
+            ],
+            [
+              "U",
+              "Network 网络 / 通信",
+              "CAN / LIN / 以太网等车载网络及节点通信"
+            ]
+          ]
+        },
+        {
+          "type": "table",
+          "headers": [
+            "位",
+            "取值含义"
+          ],
+          "rows": [
+            [
+              "第 2 位（0–3）",
+              "由 bit13-bit12 决定：0/2 = SAE 通用码；1/3 = 制造厂自定义码。日常最常见 0/1"
+            ],
+            [
+              "第 3 位（子系统）",
+              "高字节低 4 bit（bit11-bit8），直接读 1 位十六进制数"
+            ],
+            [
+              "第 4–5 位",
+              "中字节 MB（16 bit 标识低 8 bit，bit7-bit0），直接读 2 位十六进制数"
+            ]
+          ]
+        },
+        {
+          "type": "h4",
+          "text": "16 bit 故障标识 → 5 字符显示码的换算方法"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "16 bit 故障标识 = DTC High Byte(HB) + DTC Middle Byte(MB)   （HB+MB 拼成 16 bit 编号；第 3 字节 Low=Fault Type 不在此列）\n\nbit15 bit14 | bit13 bit12 | bit11 bit10 bit9 bit8 | bit7 bit6 bit5 bit4 | bit3 bit2 bit1 bit0\n   系统字母   |   第2位数字   |      第3位十六进制      |     第4位十六进制     |     第5位十六进制\n (HB 高 2bit) (HB 低 2bit)  (HB 低 4bit)            (MB 高 4bit)         (MB 低 4bit)\n\n系统字母（bit15-bit14）：00=P  01=C  10=B  11=U\n第2位数字（bit13-bit12）：00=0  01=1  10=2  11=3\n第3位 = 高字节低 4 bit（bit11-bit8）\n第4位 = 中字节高 4 bit（bit7-bit4）\n第5位 = 中字节低 4 bit（bit3-bit0）"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "16 bit 值",
+            "二进制",
+            "显示码",
+            "拆解"
+          ],
+          "rows": [
+            [
+              "0x0420",
+              "0000 0100 0010 0000",
+              "P0420",
+              "00=P, 00=0, 4, 20"
+            ],
+            [
+              "0xC100",
+              "1100 0001 0000 0000",
+              "U0100",
+              "11=U, 00=0, 1, 00"
+            ],
+            [
+              "0x5234",
+              "0101 0010 0011 0100",
+              "C1234",
+              "01=C, 01=1, 2, 34"
+            ],
+            [
+              "0xB118",
+              "1011 0001 0001 1000",
+              "B1318",
+              "10=B, 11=3, 1, 18"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "换算口诀：把 16 bit 值拆成「2-2-4-4-4」五段，前两段查表得到字母和第 2 位数字，后三段直接写成十六进制就是第 3、4、5 位。报文里若读到 DTC 标识为 0xHB 0xMB（高/中字节，即 DTC 编号的前 2 字节），对应的 5 字符码就是这么来的。"
+        },
+        {
+          "type": "dtc",
+          "title": "故障码 5 位结构 · 交互卡片",
+          "data": {
+            "systems": {
+              "P": "动力总成",
+              "C": "底盘",
+              "B": "车身",
+              "U": "网络/通信"
+            },
+            "subGeneric": {
+              "0": "燃油与空气计量（含喷油器）",
+              "1": "燃油与空气计量",
+              "2": "燃油与空气计量",
+              "3": "点火系统",
+              "4": "辅助排放控制",
+              "5": "车速 / 怠速控制",
+              "6": "计算机输出电路",
+              "7": "变速箱",
+              "8": "变速箱",
+              "9": "混动/电动（SAE 预留）",
+              "A": "混动/电动",
+              "B": "混动/电动",
+              "C": "混动/电动",
+              "D": "混动/电动",
+              "E": "混动/电动",
+              "F": "混动/电动"
+            }
+          }
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "会看码 ≠ 懂故障。P0420 = P(动力总成) + 0(SAE通用) + 4(辅助排放控制) + 20(催化器效率低, Bank1)。码只告诉你\"哪个系统的哪类故障\"，真因要配合 $19 04 快照（工况：水温/空燃比/电压）和 $19 06 扩展数据（发生次数/里程）一起判。UDS 的 3 字节 DTC 前 2 字节按 SAE J2012 解码成 P/C/B/U 五位码（与 OBD-II 显示规则一致），第 3 字节是故障类型（Failure Type）；具体故障含义（P0420 到底指向催化器还是氧传感器）以 OEM DTC 手册为准。"
+        },
+        {
+          "type": "paragraph",
+          "text": "请求参数含 1 字节 DTCStatusMask（状态掩码），决定统计哪类状态位（如 0x08=已确认、0x01=当前失败）。定位故障所属主要靠 0x04（工况）+ 0x06（履历）+ DTC 编码解码 + 网络拓扑。"
+        },
+        {
+          "type": "h4",
+          "text": "故障码分析方法论（从\"看到码\"到\"定真因\"）"
+        },
+        {
+          "type": "paragraph",
+          "text": "拿到一个 5 字符故障码（如 P0420）只是第一步——码只告诉你\"哪个系统的哪类故障\"。要定位真因，需要把\"码面 + 状态字节 + 快照 + 扩展数据 + 网络拓扑\"串成一条链。下面给一套在排障和测试中都可复用的分析流程："
+        },
+        {
+          "type": "list",
+          "style": "ol",
+          "items": [
+            "解码码面：用 16 bit→5 字符规则确认系统字母（P/C/B/U）、子系统类别与故障序号；同时确认该码来自哪个 ECU（$19 02 的 DTC 列表按 ECU 分组）。先从码面判断\"故障落在哪个功能域\"。",
+            "看状态字节判严重度：bit3=confirmed、bit0=testFailed、bit2=pending——confirmed 且当前 testFailed 是真实在发生的故障；pending 仅一次未通过，需复现确认；bit7=warningIndicatorRequested 亮故障灯说明已影响用户。",
+            "读 $19 04 快照定位工况：用 RecordNum（从 $19 03 查，或写 0x00 全读）拉出故障瞬间的冻结帧——水温/空燃比/电压/转速等。真因常藏在\"故障发生时工况是否异常\"里（P0420 伴随长期低负荷→催化器劣化，而非偶发失火）。",
+            "读 $19 06 扩展数据判顽固度：看 occurrence counter（发生次数）、aging counter（老化/行驶周期）、里程/时间。次数少、里程近=偶发/新发；次数多、里程长=顽固故障，优先排查硬件。",
+            "结合网络拓扑定位 ECU：UDS 用功能寻址时多个 ECU 都可能报同一码，需结合 DBC/网络拓扑判断\"真正出问题的节点\"（如 U0100 是\"与 TCM 失去通信\"，要查 TCM 链路而非本节点）。",
+            "查 OEM DTC 手册定真因：5 字符码是 SAE 通用语义，具体指向（P0420 指向催化器还是氧传感器、C1234 是哪一车轮传感器）以车厂 DTC 手册/维修引导为准——码是线索，不是结论。"
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "warning",
+          "text": "一句话记住：故障码 = 线索，不是结论。解析（解码成码）只解决\"是什么\"，这套方法论解决\"为什么、在哪、多严重\"。测试时既要会读码，更要会用 $19 04 / $19 06 把线索坐实。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "子功能 (Hex)",
+            "名称",
+            "说明"
+          ],
+          "rows": [
+            [
+              "0x01",
+              "reportNumberOfDTCByStatusMask",
+              "按状态掩码报告 DTC 数量"
+            ],
+            [
+              "0x02",
+              "reportDTCByStatusMask",
+              "按状态掩码报告 DTC（含 状态字节）"
+            ],
+            [
+              "0x03",
+              "reportDTCSnapshotIdentification",
+              "报告各 DTC 的快照标识（哪些 DTC 存了冻结帧）"
+            ],
+            [
+              "0x04",
+              "reportDTCSnapshotRecordByDTCNumber",
+              "按 DTC 号读冻结帧（工况快照：车速/转速/电压…）"
+            ],
+            [
+              "0x06",
+              "reportDTCExtendedDataRecordByDTCNumber",
+              "按 DTC 号读扩展数据（发生次数/老化计数/里程）"
+            ],
+            [
+              "0x07",
+              "reportNumberOfDTCBySeverityMaskRecord",
+              "按严重度+状态掩码报告数量"
+            ],
+            [
+              "0x08",
+              "reportDTCBySeverityMaskRecord",
+              "按严重度+状态掩码报告 DTC"
+            ],
+            [
+              "0x0A",
+              "reportSupportedDTC",
+              "报告 ECU 支持的所有 DTC（不论是否当前激活）"
+            ],
+            [
+              "0x0B–0x0E",
+              "FirstTestFailed / FirstConfirmed / MostRecentTestFailed / MostRecentConfirmed",
+              "各类“首/最近”DTC 报告，排故定位常用"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "$31 例程控制"
+        },
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "最灵活的UDS服务——让ECU执行任意内部函数。刷写流程的核心步骤都靠它。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "例程ID示例",
+            "作用"
+          ],
+          "rows": [
+            [
+              "$FF00",
+              "擦除内存"
+            ],
+            [
+              "$FF01",
+              "检查编程依赖(确认软件版本兼容)"
+            ],
+            [
+              "$FF02",
+              "CRC32校验(刷写后校验完整性)"
+            ],
+            [
+              "$E002",
+              "OTA后检查更新状态"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "paragraph",
+          "text": "参数 = routineIdentifier（2 字节）+ routineControlOptionRecord（可选）。擦除内存、校验 checksum、自检等均通过 $31 触发。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "子功能 (Hex)",
+            "名称",
+            "说明"
+          ],
+          "rows": [
+            [
+              "0x01",
+              "startRoutine 启动例程",
+              "开始执行指定 routineIdentifier"
+            ],
+            [
+              "0x02",
+              "stopRoutine 停止例程",
+              "中止正在执行的例程"
+            ],
+            [
+              "0x03",
+              "requestRoutineResults 请求例程结果",
+              "读取例程执行结果/输出"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "$11 ECU 复位"
+        },
+        {
+          "type": "paragraph",
+          "text": "日常最常用 0x01/0x03。正响应返回前 ECU 即执行复位；若某复位类型不支持会回 NRC 0x12（子功能不支持）。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "子功能 (Hex)",
+            "名称",
+            "说明"
+          ],
+          "rows": [
+            [
+              "0x01",
+              "hardReset 硬复位",
+              "等效断电重启，清空应用 RAM/运行态"
+            ],
+            [
+              "0x02",
+              "keyOffOnReset 点火关-开复位",
+              "模拟点火钥匙 off→on 循环复位"
+            ],
+            [
+              "0x03",
+              "softReset 软复位",
+              "仅重启应用软件，保留部分 RAM 数据"
+            ],
+            [
+              "0x04",
+              "enableRapidPowerShutDown 使能快速断电",
+              "进入低功耗前快速掉电（针对特定供电）"
+            ],
+            [
+              "0x05",
+              "disableRapidPowerShutDown 禁用快速断电",
+              "取消 0x04 的快速掉电"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "$2F 输入输出控制"
+        },
+        {
+          "type": "paragraph",
+          "text": "参数 = DID + controlState（+ 控制值）。典型用例：点亮故障灯、驱动继电器、强制某传感器输入值，用于台架功能验证。$2F 仅临时控制，断电/复位后失效。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "控制选项 (controlState)",
+            "含义"
+          ],
+          "rows": [
+            [
+              "0x00",
+              "returnControlToECU 控制权交还 ECU"
+            ],
+            [
+              "0x01",
+              "resetToDefault 复位到默认状态"
+            ],
+            [
+              "0x02",
+              "freezeCurrentState 冻结当前状态（维持不变）"
+            ],
+            [
+              "0x03",
+              "shortTermAdjustment 短期调整（主动驱动输出/输入）"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "$28 通信控制"
+        },
+        {
+          "type": "paragraph",
+          "text": "$28 有两部分参数：① 子功能 controlType（见下表，控制 ECU 收发的开关）；② 通信类型参数 communicationType，指定作用哪类报文——0x01=普通应用报文、0x02=网络管理报文、0x03=两者。刷写前常用 `$28 03 01`：controlType=03（禁止收发）+ communicationType=01（仅作用普通应用报文），关闭 ECU 对非诊断应用的收发以降低总线负载，诊断通信不受影响；恢复用 `$28 00 01`。注意 diagnostic 报文不在 communicationType 作用范围内，所以关应用报文不会断诊断。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "子功能 (Hex)",
+            "含义"
+          ],
+          "rows": [
+            [
+              "0x00",
+              "enableRxAndTx 使能接收 + 发送"
+            ],
+            [
+              "0x01",
+              "enableRxAndDisableTx 使能接收、禁止发送"
+            ],
+            [
+              "0x02",
+              "disableRxAndEnableTx 禁止接收、使能发送"
+            ],
+            [
+              "0x03",
+              "disableRxAndTx 禁止接收 + 发送"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "$3E TesterPresent（保活）"
+        },
+        {
+          "type": "paragraph",
+          "text": "周期性（默认 2s）发送以重置 S3server 定时器，保持非默认会话（扩展/编程）不超时。子功能字节最高位可置 1（0x80）抑制正响应（无需 ECU 回 0x3E 50），仅用于保活。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "子功能 (Hex)",
+            "含义"
+          ],
+          "rows": [
+            [
+              "0x00",
+              "zeroSubFunction 零子功能（无实际参数）"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "$85 DTC 设置控制"
+        },
+        {
+          "type": "paragraph",
+          "text": "关闭后 ECU 不再更新 DTC 状态字节（即使故障发生也不记录新 DTC / 不置位），但**已存的 DTC 不会被清除**——清 DTC 要用 $14。刷写/标定前常先 $85 02 暂停记录，避免误报。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "子功能 (Hex)",
+            "含义"
+          ],
+          "rows": [
+            [
+              "0x01",
+              "on 开启 DTC 设置 / 记录"
+            ],
+            [
+              "0x02",
+              "off 关闭 DTC 设置 / 记录"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "$22 按ID读数据（ReadDataByIdentifier）"
+        },
+        {
+          "type": "paragraph",
+          "text": "日常最高频服务之一。诊断仪发 `$22` + 2 字节 DID，ECU 回 `$62` + DID + 数据。常见 DID 见下表。默认会话一般仅能读基础 DID，扩展会话可读更多；部分 DID 受 `$27` 安全等级限制。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "DID",
+            "名称",
+            "说明"
+          ],
+          "rows": [
+            [
+              "**F190**",
+              "VIN 车辆识别号",
+              "17 字节 ASCII，唯一标识车辆"
+            ],
+            [
+              "**F188**",
+              "ECU 软件版本",
+              "厂商自定义长度/格式"
+            ],
+            [
+              "**F189**",
+              "ECU 零件号",
+              "通常用于刷写前版本核对"
+            ],
+            [
+              "**F187**",
+              "ECU 硬件版本",
+              "板级/硬件版本"
+            ],
+            [
+              "**F186**",
+              "当前激活诊断会话",
+              "1 字节（01/02/03…）"
+            ],
+            [
+              "**F195**",
+              "供应商/ECU 标识",
+              "厂商自定义"
+            ],
+            [
+              "**F1A0**",
+              "ECU 序列号",
+              "装配/生产序列号"
+            ],
+            [
+              "**F1A1**",
+              "ECU 制造日期",
+              "如 BCD 编码年月日"
+            ],
+            [
+              "**F17C**",
+              "ECU 编码/配置",
+              "车辆功能配置字"
+            ],
+            [
+              "**F1B0**",
+              "刷写计数器",
+              "累计成功刷写次数"
+            ],
+            [
+              "**F113**",
+              "车辆制造商品牌",
+              "OEM 品牌标识"
+            ],
+            [
+              "**F1F0**",
+              "车辆配置信息",
+              "车身功能选装矩阵"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "否定响应常见 NRC：0x13(长度错误)、0x22(条件不满足)、0x31(DID 不存在)、0x33(安全未解锁)。DID 具体含义以 CDD/ODX 数据库为准。"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "$2E 按ID写数据（WriteDataByIdentifier）"
+        },
+        {
+          "type": "paragraph",
+          "text": "写配置/标定参数（如写 VIN、启用车灯功能）。请求 `$2E` + DID + N 字节数据，正响应 `$6E` + DID（不回数据）。多数可写 DID 受 `$27` 安全访问与会话限制——默认会话下写通常被拒（NRC 0x22 或 0x33）。"
+        },
+        {
+          "type": "table",
+          "header": null,
+          "rows": [
+            [
+              "请求格式",
+              "$2E + 2B DID + N 字节数据",
+              "写目标 DID 的内容"
+            ],
+            [
+              "正响应",
+              "$6E + 2B DID",
+              "仅回显 DID，不回数据"
+            ],
+            [
+              "会话/安全",
+              "默认会话禁用；写 VIN 等通常需先 $27 解锁 + 扩展/编程会话",
+              "防误写关键参数"
+            ],
+            [
+              "常见 NRC",
+              "0x13 / 0x22 / 0x31 / 0x33",
+              "长度错/条件不满足/DID无效/未解锁"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "$14 清除诊断信息（ClearDiagnosticInformation）"
+        },
+        {
+          "type": "paragraph",
+          "text": "清 DTC 用。请求 `$14` + 3 字节 DTC 组掩码，正响应 `$54`（无参数）。`FFFFFF`=清除全部 DTC 与相关数据。注意：$14 只清“已存 DTC 与状态”，不影响 `$85` 的 DTC 设置开关；清后 bit4(testNotCompletedSinceLastClear) 会置位，需跑完一个驾驶循环才复位。"
+        },
+        {
+          "type": "table",
+          "header": null,
+          "rows": [
+            [
+              "**FFFFFF**",
+              "清除全部 DTC 及关联数据",
+              "最常用"
+            ],
+            [
+              "指定组掩码",
+              "仅清除某 DTC 组（按 OEM 定义）",
+              "精确清某系统"
+            ],
+            [
+              "正响应",
+              "$54（无数据）",
+              "SID+0x40"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "$34 / $36 / $37 上传下载（刷写数据传输）"
+        },
+        {
+          "type": "paragraph",
+          "text": "刷写“编程”阶段的核心传输服务（完整流程见第七章）。三者通常按数据块循环：`$34` 请求下载（声明内存地址+长度）→ `$36` 数据传输（CAN-TP 多帧分段）→ `$37` 退出传输（收尾校验）。传输前需先进入编程会话 `$10 02` 并完成 `$27` 安全解锁。"
+        },
+        {
+          "type": "table",
+          "header": null,
+          "rows": [
+            [
+              "**$34**",
+              "RequestDownload 请求下载",
+              "ECU 准备接收，回 0x74 + maxNumberOfBlockLength"
+            ],
+            [
+              "**$36**",
+              "TransferData 数据传输",
+              "分段发刷写数据，回 0x76 + blockSequenceCounter"
+            ],
+            [
+              "**$37**",
+              "RequestTransferExit 退出传输",
+              "结束传输并校验，回 0x77"
+            ],
+            [
+              "**$35 / $38**",
+              "请求上传 / 文件传输",
+              "读大块数据(Flash dump) / 文件方式刷写"
+            ]
+          ]
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "四、请求/响应格式",
+      "icon": "🔬",
+      "content_blocks": [
+        {
+          "type": "code",
+          "language": "",
+          "code": "请求格式：\n┌──────┬──────────┬──────────┐\n│ SID  │ Sub-Func │ 参数...   │\n│1Byte │ (可选)    │          │\n└──────┴──────────┴──────────┘\n\n肯定响应：\n┌───────────┬──────────────────┐\n│ SID+$40   │ 返回数据...       │\n│   1Byte   │                  │\n└───────────┴──────────────────┘\n\n否定响应：\n┌──────┬──────┬──────┐\n│ $7F  │ SID  │ NRC  │\n│1Byte │1Byte │1Byte │\n└──────┴──────┴──────┘"
+        },
+        {
+          "type": "h3",
+          "text": "请求-响应交互时序"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "Tester(诊断仪)                        ECU\n   │                                   │\n   │── $22 F1 90(读VIN) ─────────────→ │  P2(≤50ms)内处理\n   │←─ $62 F1 90 + 17位VIN ───────────│  肯定响应: SID+$40=$62\n   │                                   │\n   │── $2E F1 90 + 新VIN ────────────→ │  默认会话下不允许写\n   │←─ $7F $2E $22 ───────────────────│  否定响应: $7F+原SID+NRC\n   │                                   │  ($22=条件不满足)\n   │── $31 FF02(CRC校验) ────────────→ │  校验耗时长\n   │←─ $7F $31 $78 ───────────────────│  $78=响应待定，继续等\n   │←─ $71 FF02 + 校验结果 ───────────│  P2*(≤5s)内给最终响应"
+        },
+        {
+          "type": "h3",
+          "text": "NRC 速查表"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "NRC",
+            "含义",
+            "触发场景"
+          ],
+          "rows": [
+            [
+              "**$11**",
+              "服务不支持",
+              "发了ECU不认识的SID"
+            ],
+            [
+              "**$12**",
+              "子功能不支持",
+              "子功能不存在"
+            ],
+            [
+              "**$13**",
+              "报文长度错误",
+              "参数多了或少了"
+            ],
+            [
+              "**$22**",
+              "条件不满足",
+              "当前会话/状态下不允许"
+            ],
+            [
+              "**$31**",
+              "请求超出范围",
+              "DID不存在/参数超出有效范围"
+            ],
+            [
+              "**$33**",
+              "安全访问未解锁",
+              "没做$27就想操作安全数据"
+            ],
+            [
+              "**$35**",
+              "密钥无效",
+              "$27 02发错了"
+            ],
+            [
+              "**$36**",
+              "尝试次数超限",
+              "暴力破解被锁"
+            ],
+            [
+              "**$37**",
+              "延迟未到",
+              "解锁失败后等待时间不够"
+            ],
+            [
+              "**$78**",
+              "响应待定",
+              "请求在处理，稍等（P2*超时）"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "五、物理寻址 vs 功能寻址",
+      "icon": "🎯",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "维度",
+            "物理寻址",
+            "功能寻址"
+          ],
+          "rows": [
+            [
+              "范围",
+              "一对一（单个ECU）",
+              "一对多（广播）"
+            ],
+            [
+              "请求CAN ID",
+              "0x7E0~0x7E7(各ECU不同)",
+              "0x7DF(固定广播)"
+            ],
+            [
+              "响应CAN ID",
+              "0x7E8~0x7EF(各ECU不同)",
+              "0x7E8~0x7EF(各ECU各自回)"
+            ],
+            [
+              "使用场景",
+              "$22读数据、$2E写数据",
+              "$10切换会话、$14清DTC、$11复位"
+            ],
+            [
+              "是否有响应",
+              "✅",
+              "✅ (各ECU各自回)"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"功能寻址是发一条让所有ECU都听到。比如功能寻址发$14清DTC——所有ECU的DTC一起清。但如果用功能寻址发$22读VIN，会收到多个ECU的同时回复，总线上就打架了。所以$22必须用物理寻址。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "六、CAN-TP 多帧传输",
+      "icon": "🚀",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "标准",
+          "text": "UDS诊断请求/响应的数据可能超过CAN一帧8字节 → 需要ISO 15765-2分段传输。"
+        },
+        {
+          "type": "h3",
+          "text": "四种帧类型"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "帧类型",
+            "N_PCI(首字节高4位)",
+            "长度",
+            "作用"
+          ],
+          "rows": [
+            [
+              "**单帧(SF)**",
+              "0",
+              "1~7字节数据",
+              "数据≤7字节时直接用"
+            ],
+            [
+              "**首帧(FF)**",
+              "1",
+              "6字节数据+总长度",
+              "数据>7字节时先用此帧声明总长度"
+            ],
+            [
+              "**连续帧(CF)**",
+              "2",
+              "7字节数据",
+              "后续数据分段"
+            ],
+            [
+              "**流控帧(FC)**",
+              "3",
+              "流控参数",
+              "接收方控制发送节奏"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "传输流程"
+        },
+        {
+          "type": "code",
+          "language": "",
+          "code": "发送方                           接收方\n  │                                │\n  │──FF: 总长度=127, Data[0..5]──→ │  \"我要发127字节\"\n  │                                │\n  │←──FC: BS=8, STmin=10ms ──────│  \"每8帧停一下，帧间隔10ms\"\n  │                                │\n  │──CF 01: Data[6..12] ────────→ │\n  │──CF 02: Data[13..19] ───────→ │\n  │──...                           │\n  │──CF 08: Data[...] ──────────→ │  (发了8帧，暂停等)\n  │                                │\n  │←──FC: BS=8, STmin=10ms ──────│  \"继续，同样节奏\"\n  │──CF 09~CF 16 ──────────────→ │\n  │──... 直到127字节全部发完        │"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "名词",
+            "含义",
+            "典型值"
+          ],
+          "rows": [
+            [
+              "**BS**",
+              "Block Size，一次发几帧后等待下一个FC",
+              "8"
+            ],
+            [
+              "**STmin**",
+              "连续帧之间的最小间隔",
+              "10ms"
+            ],
+            [
+              "**P2**",
+              "ECU处理请求的最长时间（默认）",
+              "50ms"
+            ],
+            [
+              "**P2\\***",
+              "ECU处理请求的扩展时间（$78待定时）",
+              "5000ms"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"为什么需要流控帧？因为ECU内存有限，不能无限制收数据。FC帧让接收方控制节奏——'你一次发8帧，间隔10ms，我处理完再让你继续'。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "七、ECU 刷写流程（三阶段）",
+      "icon": "🧩",
+      "content_blocks": [
+        {
+          "type": "code",
+          "code": "┌──────────────────────────────────────────────────┐\n│ 阶段一：预编程（Pre-Programming）                      │\n│                                                     │\n│ $10 03(扩展会话)                                      │\n│ → $22 F1 88/F1 89(读软件版本号/零件号，确认可刷)         │\n│ → $85 02(关闭dDTC记录) → $28 03(关闭非诊断通信)            │\n├───────────────────────────────────────────────────┤\n│ 阶段二：编程（Programming）                           │\n│                                                     │\n│ $10 02(编程会话) → $27 01/02(安全解锁)                │\n│ → $31 FF01(检查编程前提条件：电压/车速/钥匙等)          │\n│ → $31 FF00(擦除内存) → $34(请求下载)                   │\n│ → $36(数据传输，CAN-TP分段) → $37(退出传输)             │\n│ → $31 FF02(CRC校验)                                  │\n│                                                     │\n│ 循环: $34→$36→$36→...→$36→$37  (每块数据一个循环)      │\n├───────────────────────────────────────────────────┤\n│ 阶段三：后编程（Post-Programming）                     │\n│                                                     │\n│ $11 01(硬复位，运行新程序) → $28 00(恢复通信)          │\n│ → $85 01(恢复DTC记录) → $14 FF FF FF(清除DTC)          │\n│ → $22 F1 88(读软件版本确认刷写成功)                     │\n└──────────────────────────────────────────────────┘"
+        },
+        {
+          "type": "paragraph",
+          "text": "说明：预编程阶段必须先确认当前 ECU 里的软件版本号/零件号是否正确，防止刷错软件——这一步用的是 $22 ReadDataByIdentifier（常见版本号/零件号 DID 见下表）。注意它和阶段二的 $31 FF01 不是一回事：$31 FF01 是执行 OEM 预置例程，检查编程前提条件（蓄电池电压、车速为零、点火钥匙状态等），并不比对版本号或零件号。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "检查点",
+            "服务",
+            "阶段 / 时机",
+            "作用"
+          ],
+          "rows": [
+            [
+              "版本号·零件号",
+              "$22 读 DID（F188 软件 / F189 零件 / F187 硬件）",
+              "阶段一（预编程）最前",
+              "确认目标软件/零件匹配，防刷错"
+            ],
+            [
+              "编程前提条件",
+              "$31 FF01",
+              "阶段二（编程）进会话后",
+              "电压/车速/钥匙等满足才允许刷"
+            ],
+            [
+              "擦除内存",
+              "$31 FF00",
+              "阶段二，下载前",
+              "清空目标 Flash 区"
+            ],
+            [
+              "完整性校验",
+              "$31 FF02（CRC）",
+              "阶段二，下载后",
+              "校验写入数据完整，失败拦截"
+            ]
+          ]
+        },
+        {
+          "type": "image",
+          "src": "assets/images/ecu-flash-oem-notes.svg",
+          "alt": "ECU 刷写流程中常被省略但必须知道的 OEM 自定义事项"
+        },
+        {
+          "type": "blockquote",
+          "text": "**测试重点**：实车刷写验证时，不要只测\"能不能刷成功\"，还要测 $3E 超时、$31 FF01 前提条件不满足、刷写中断后 Bootloader 回滚、刷完读 F188 版本不匹配等异常场景。"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "**面试说**：\"刷写的核心风险点：①刷写中途断电→ECU变砖→必须Bootloader双区恢复 ②刷错软件→预编程阶段$22读DID版本号/零件号拦截 ③校验不过→$31 FF02报CRC不匹配 ④CAN-TP丢帧→超时重发机制。\""
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": false,
+      "has_diagram": true,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "八、CDD 诊断描述文件",
+      "icon": "🏥",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "八、CDD（诊断描述文件）是什么"
+        },
+        {
+          "type": "paragraph",
+          "text": "CDD（CANdela Diagnostic Description）是诊断的“字典”，类似CAN的DBC文件。它定义了 ECU 支持的诊断服务、DID、DTC、安全访问、例程、时序等，是测试工程师写用例、定期望值的依据。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "内容",
+            "说明"
+          ],
+          "rows": [
+            [
+              "**DID定义**",
+              "每个DID的ID号、长度、数据类型、安全等级"
+            ],
+            [
+              "**DTC定义**",
+              "支持的DTC列表、状态掩码、快照配置"
+            ],
+            [
+              "**服务支持**",
+              "ECU支持哪些SID、哪些子功能"
+            ],
+            [
+              "**安全访问**",
+              "SeedKey算法等级、延迟时间"
+            ],
+            [
+              "**例程**",
+              "各例程ID和参数"
+            ],
+            [
+              "**时序**",
+              "P2/P2*时间、S3超时"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "九、面试高频考点",
+      "icon": "🎯",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "必会基础"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "回答"
+          ],
+          "rows": [
+            [
+              "**UDS是什么**",
+              "ISO 14229统一诊断服务，6大类26种服务"
+            ],
+            [
+              "**肯定响应vs否定响应**",
+              "肯定=SID+$40，否定=$7F+SID+NRC"
+            ],
+            [
+              "**$10三个会话**",
+              "默认(01)基本读取、扩展(03)诊断操作、编程(02)刷写"
+            ],
+            [
+              "**$27流程**",
+              "请求种子→计算Key→发送Key→ECU校验"
+            ],
+            [
+              "**物理vs功能寻址**",
+              "物理=一对一(0x7E0~)、功能=一对多(0x7DF)"
+            ],
+            [
+              "**DTC状态bit3**",
+              "Confirmed DTC，已确认→存NVM（亮不亮灯看bit7，两者独立）"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "进阶加分项"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "考点",
+            "回答"
+          ],
+          "rows": [
+            [
+              "**CAN-TP流控机制**",
+              "FF声明总长→FC控制节奏→CF分段传"
+            ],
+            [
+              "**刷写三阶段**",
+              "预编程(擦除)→编程(写Flash)→后编程(复位校验)"
+            ],
+            [
+              "**$19与$14区别**",
+              "$19=读DTC(含快照)，$14=清DTC"
+            ],
+            [
+              "**$78什么意思**",
+              "NRC $78=responsePending，ECU忙，等P2*再查"
+            ],
+            [
+              "**刷写断电怎么办**",
+              "Bootloader A/B双区，旧版本保留→回滚恢复"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 0
+    },
+    {
+      "title": "十、测试实战关联",
+      "icon": "🛠️",
+      "content_blocks": [
+        {
+          "type": "h3",
+          "text": "诊断自动化测试"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "用CANoe/DIVA按CDD跑诊断用例：每个SID的正响应、NRC、时序(P2/P2*)逐项验证",
+            "物理寻址+功能寻址都要测：功能寻址发$10 03，确认所有ECU都进扩展会话"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "刷写测试"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "正常流：完整跑三阶段，最后$22 F1 88确认软件版本",
+            "异常流必测：刷写中断电、CAN-TP丢帧重发、$27错Key超限锁定(NRC $36)、CRC校验不匹配拦截"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "故障注入测试"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "拔传感器→$19 02读到预期DTC→$14清除→bit4(清码后未完成)置位→跑完驾驶循环复位"
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "⚠️ 实战中常见严重问题"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "严重度",
+            "现象",
+            "根因+教训"
+          ],
+          "rows": [
+            [
+              "**刷写中途断电→ECU变砖**",
+              "严重",
+              "$34→$36→断电→Bootloader校验失败→ECU无法启动→整车趴窝",
+              "双区A/B设计+异常断电恢复是保命底线；产线刷写必须接UPS"
+            ],
+            [
+              "**$27安全访问被暴力破解**",
+              "严重",
+              "攻击者连续发错Key→不带延迟锁定→穷举成功→可任意刷写ECU",
+              "NRC $36(超限)+延迟时间必须实现且验证"
+            ],
+            [
+              "**$31例程擦除后未校验**",
+              "严重",
+              "$31 FF00擦除内存→未执行$31 FF02 CRC→写了坏块→行驶中ECU死机",
+              "刷写流程必须三步闭环：擦→写→校验，缺一不可"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "⬅ 返回 [[MOC_车载测试]] | 继续 → [[07-OBD-II]]"
+        }
+      ],
+      "has_compare": true,
+      "has_diagram": false,
+      "has_warning": false,
+      "point_count": 5
+    },
+    {
+      "title": "十一、UDS 自动化进阶",
+      "icon": "🤖",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "手动用诊断仪点选验证在单台样件上可行，但到了**回归测试、产线 EOL、刷写验证、DTC 一致性核对**场景，人工方式既不可重复也无法覆盖否定响应边界。UDS 自动化的本质是把「诊断仪的操作序列」沉淀成**可重复、可断言、可并行、可进 CI** 的脚本，让 ECU 在整个生命周期里的诊断行为被持续验证。"
+        },
+        {
+          "type": "h3",
+          "text": "先讲原理：诊断会话状态机"
+        },
+        {
+          "type": "paragraph",
+          "text": "UDS 不是「连上就能读所有数据」。ECU 上电后处于**默认会话（Default Session）**，此时绝大多数写/擦除/扩展读服务被禁用；只有先通过 `$10` 切到**扩展会话（0x03）**或**编程会话（0x02）**，再视情况做 `$27` 安全访问，才能解锁对应能力。自动化脚本的第一个纪律，就是**在每条用例开头显式建立正确的会话与安全态**，否则后续请求会成片返回 `NRC 0x7E/0x7F`（当前会话不支持）。"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "会话类型",
+            "进入方式",
+            "保持机制(S3)",
+            "典型可用服务",
+            "典型场景"
+          ],
+          "rows": [
+            [
+              "默认会话 0x01",
+              "上电/复位默认",
+              "S3 超时自动回退",
+              "$22 读部分 DID、$19 部分、$3E",
+              "正常行驶、基础读"
+            ],
+            [
+              "扩展会话 0x03",
+              "`$10 03`",
+              "需 `$3E` 保活或 S3 内活动",
+              "`$22`/`$2E`/`$19`/`$14` 等",
+              "台架诊断、产线测试"
+            ],
+            [
+              "编程会话 0x02",
+              "`$10 02`",
+              "需 `$3E` 保活",
+              "`$34/$36/$37` 刷写、`$31` 例程",
+              "ECU 刷写、标定"
+            ]
+          ]
+        },
+        {
+          "type": "hr"
+        },
+        {
+          "type": "h3",
+          "text": "主流自动化技术栈"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "方案",
+            "语言/环境",
+            "优势",
+            "典型适用"
+          ],
+          "rows": [
+            [
+              "**CANoe + CAPL**",
+              "CAPL / vTESTStudio",
+              "原生总线仿真、timing 可控、与 DBC/CDD 深度集成",
+              "台架回归、HIL、产线 EOL"
+            ],
+            [
+              "**Python + cantools/python-uds**",
+              "Python",
+              "生态丰富、易做数据驱动与报告、可进 pytest CI",
+              "云化测试、批量参数化、数据分析"
+            ],
+            [
+              "**开源 / 轻量栈**",
+              "Python + udslib / scapy",
+              "无授权成本、跨平台",
+              "早期原型、教学、工具链验证"
+            ],
+            [
+              "**LabVIEW / 自研框架**",
+              "G 语言 / C++",
+              "与现有产线设备强耦合",
+              "老旧产线、专用台体"
+            ]
+          ]
+        },
+        {
+          "type": "h4",
+          "text": "Python 读 VIN 并断言（参数化示例）"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "import uds   # python-uds\nfrom uds.transport import CanTp\n\ntp = CanTp(interface='vector', channel=0, rxid=0x7E8, txid=0x7E0)\ndiag = uds.DiagnosticSession(tp)\n\n# 默认会话即可读 VIN；若需扩展会话/安全访问先解锁\ndiag.tester_present()\nresp = diag.request(0x22, bytes.fromhex('F190'))   # 读 VIN\nassert resp.service_id == 0x62, f'否定响应 NRC={resp.nrc:02X}'\nvin = resp.data.decode('ascii')\nassert len(vin) == 17, 'VIN 必须为 17 字节'\nprint('VIN =', vin)"
+        },
+        {
+          "type": "h4",
+          "text": "CAPL 诊断序列片段（含否定响应处理）"
+        },
+        {
+          "type": "code",
+          "language": "capl",
+          "code": "void ReadDID_F190()\n{\n  byte req[3] = {0x22, 0xF1, 0x90};\n  dword rid = DiagStartRequest(req, elcount(req), 0);\n  if (DiagWaitForAnswer(rid, 2000) == 0)        // P2 超时 2000ms\n  {\n    if (DiagGetResponseCode(rid) == 0x62)\n      write('VIN=%s', DiagGetRespData(rid, 3, 17));\n    else\n      testStepFail('UDS', 'NRC=%02X', DiagGetNrc(rid));  // 显式断言否定响应\n    DiagEndRequest(rid);\n  }\n  else\n    testStepFail('UDS', 'P2 超时无响应');\n}"
+        },
+        {
+          "type": "h3",
+          "text": "时序模型：P2、P2* 与 S3（超时配错=假阴性）"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "参数",
+            "典型值",
+            "含义",
+            "错配后果",
+            "标准"
+          ],
+          "rows": [
+            [
+              "P2",
+              "50 ms",
+              "请求到收到肯定/否定响应的时限",
+              "设太大→用例 hang；设太小→误判超时",
+              "ISO 14229-2"
+            ],
+            [
+              "P2* (增强)",
+              "5000 ms",
+              "收到 `0x78`(RCRRP) 后改用更长时限等 ECU 忙完",
+              "未启用→长操作(读大 DID/刷写)被判失败",
+              "ISO 14229-2"
+            ],
+            [
+              "S3",
+              "5000 ms",
+              "非默认会话无通信时自动回退默认会话",
+              "用例间间隔过长→会话丢失，后续全失败",
+              "ISO 14229-2"
+            ],
+            [
+              "N_Bs / N_Cr",
+              "~1000 ms",
+              "CAN-TP 多帧 流控/连续帧 等待时限",
+              "长报文分帧超时→传输中断",
+              "ISO 15765-2"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "实战中最常见的「玄学失败」就是超时配置错了：把 P2 设成默认 50ms 去读一个需要 ECU 先查 Flash 的大 DID，ECU 会先回 `0x78`（请求已收到-响应 pending），随后才给真正响应；若脚本仍按 P2 等，就会误判超时。正确做法是收到 `0x78` 后切换到 P2* 时限继续等。"
+        },
+        {
+          "type": "h4",
+          "text": "安全访问 $27：挑战-响应是如何对抗重放的"
+        },
+        {
+          "type": "paragraph",
+          "text": "`$27` 用「种子-密钥」机制保护写/擦除类服务：Tester 发 `$27 01` 向 ECU 要 **seed**，ECU 返回一个随机种子；Tester 用约定算法 `key = f(seed)` 算出 key，发 `$27 02 <key>`；ECU 比对 `f(seed)` 是否一致。因为 **seed 每次随机**，截获的旧 key 无法复用，这就对抗了重放攻击。算法通常驻留在 ECU 端与授权诊断仪端（XOR / 查表 / 轻量加密），且配套 `NRC 0x36`(超过尝试次数)、`0x37`(时间延迟未到) 做暴力防护。"
+        },
+        {
+          "type": "diagram",
+          "caption": "P2 与 P2* 时序（收到 RCRRP 0x78 后切换）",
+          "code": "t0      Tester ──── $22 F190 ────► ECU\n        │\nt0+P2   │◄── 肯定/否定响应  ✓ 正常返回\n        │\n        │ (若 ECU 需先查 Flash / 忙)\nt0+..   │◄── 0x78 RCRRP (请求已收到-响应 pending)\n        │     Tester 切换到 P2* 时限继续等\n        │\nt0+P2*  │◄── 真正的肯定/否定响应  ✓"
+        },
+        {
+          "type": "h3",
+          "text": "典型自动化用例"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "**会话与安全访问序列**：默认→扩展会话切换、`$27` seed/key 解锁，断言每个过渡态",
+            "**DTC 批量核对**：循环 `$19 02` 读所有 DTC，`$19 0A` 校验状态掩码，对比基线集",
+            "**参数化读 DID**：从 CSV/Excel 驱动 `$22` 批量读 F190/F188/F186…，断言格式与值域",
+            "**写 DID 持久化**：`$2E` 写后复位再读，验证写入生效且掉电不丢",
+            "**刷写后诊断可用性**：`$34/$36/$37` 刷写完成，重新进会话确认 `$22/$19` 仍可服务",
+            "**否定响应覆盖**：对每条服务注入错误参数，断言返回预期 NRC（`$12/$13/$22/$31/$33`…）"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "实战案例一：产线 EOL 全量 DID 一键校验"
+        },
+        {
+          "type": "paragraph",
+          "text": "产线节拍要求单个 ECU 在数秒内完成「读全部关键 DID + 校验格式/值域 + 出报告」。手写脚本无法应对成百上千个 DID 与多车型变体，必须用**数据驱动 + pytest 参数化**：DID 表外置，脚本只写一次断言逻辑。"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "import pytest\nfrom uds import DiagnosticSession\nfrom uds.transport import CanTp\n\n# DID 表外置：did, 名称, 期望长度(0=不限), 校验类型\nDID_TABLE = [\n    (0xF190, \"VIN\",         17, \"ascii\"),\n    (0xF188, \"ECU硬件版本\",  0, \"hex\"),\n    (0xF186, \"整车诊断ID\",   1, \"int\"),\n    (0xF187, \"ECU序列号\",    0, \"hex\"),\n]\n\n@pytest.fixture\ndef ecu():\n    tp = CanTp(interface=\"vector\", channel=0, rxid=0x7E8, txid=0x7E0)\n    d = DiagnosticSession(tp)\n    d.diagnostic_session_control(0x03)   # 进扩展会话，解锁更多 DID\n    yield d\n    d.ecu_reset(0x01)                     # tear-down：复位回默认会话\n\n@pytest.mark.parametrize(\"did,name,length,kind\", DID_TABLE)\ndef test_read_did(ecu, did, name, length, kind):\n    resp = ecu.read_data_by_identifier(did)\n    assert resp.service_id == 0x62, f\"{name} 否定响应 NRC={resp.nrc:02X}\"\n    data = resp.data\n    if length:\n        assert len(data) == length, f\"{name} 长度 {len(data)}≠{length}\"\n    assert data, f\"{name} 返回空数据\"\n    # 报告由 pytest JUnit/HTML 插件自动归集，红灯即拦截"
+        },
+        {
+          "type": "h3",
+          "text": "实战案例二：否定响应边界批量验证"
+        },
+        {
+          "type": "paragraph",
+          "text": "「只断言肯定响应」是新手最常见的漏洞——ECU 行为是否正确，**否定响应 NRC 才是证据**。资深做法是把 NRC 用例表外置，循环注入错误参数，断言每条都返回**预期**的 NRC，证明 ECU 的输入校验逻辑没退化。"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "# 否定响应矩阵：服务, 异常载荷, 预期 NRC, 说明\nNRC_CASES = [\n    (0x22, b\"\\xFF\\xFF\", 0x31, \"$22 读不存在的 DID → requestOutOfRange\"),\n    (0x10, b\"\\x05\",     0x12, \"$10 子功能 0x05 不支持 → serviceNotSupported\"),\n    (0x2E, b\"\\xF1\\x90\", 0x33, \"未解锁写受保护 DID → securityAccessDenied\"),\n    (0x27, b\"\\x02\\x00\", 0x35, \"未先取 seed 直接发 key → invalidKey\"),\n]\n\n@pytest.mark.parametrize(\"sid,payload,exp_nrc,desc\", NRC_CASES)\ndef test_negative_response(ecu, sid, payload, exp_nrc, desc):\n    resp = ecu.request(sid, payload)\n    assert resp.service_id == 0x7F, \"应返回否定响应(0x7F)\"\n    assert resp.nrc == exp_nrc, f\"{desc}: NRC {resp.nrc:02X}≠预期 {exp_nrc:02X}"
+        },
+        {
+          "type": "h3",
+          "text": "实战案例三：刷写后诊断可用性回归"
+        },
+        {
+          "type": "paragraph",
+          "text": "刷写（$34/$36/$37）是高风险操作，写错可能让 ECU 变砖。回归中必须在刷写完成后**重新进会话、确认诊断栈没坏**：关键 DID 可读、DTC 可读、之前解锁的服务仍可用。这是「刷写成功 ≠ 功能正常」的关键防线。"
+        },
+        {
+          "type": "list",
+          "style": "ol",
+          "items": [
+            "进编程会话 `$10 02`，`$27` 解锁刷写级安全访问",
+            "预条件检查（供电电压 / 未处于驾驶状态）",
+            "`$34` 请求下载（指明地址/长度）→ 断言肯定响应",
+            "`$36` 分块传输数据（带 blockSequenceCounter）→ 逐块断言",
+            "`$37` 请求退出传输 → 断言肯定响应",
+            "`$31` 例程控制做依赖/校验和校验",
+            "`$11 01` 复位 ECU，重新进扩展会话",
+            "`$22`/`$19` 复读关键 DID/DTC，确认诊断栈可用"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "常用函数：把重复逻辑沉淀成工具库"
+        },
+        {
+          "type": "paragraph",
+          "text": "新手常犯的错，是在每条用例里重复写 TP 收发、NRC 解析、断言、重试——既冗余又易漏。资深团队会把这些抽成一个 `uds_helpers` 模块**全员复用**，用例只关心「测什么」，不关心「怎么发」。下面是一套可直接落地的最小工具集。"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "# uds_helpers.py —— 诊断自动化常用工具库（全员复用，用例只写断言）\nfrom functools import wraps\n\nNRC_NAMES = {\n    0x12: \"serviceNotSupported\",\n    0x13: \"incorrectMessageLengthOrInvalidFormat\",\n    0x22: \"conditionsNotCorrect\",\n    0x31: \"requestOutOfRange\",\n    0x33: \"securityAccessDenied\",\n    0x35: \"invalidKey\",\n    0x36: \"exceedNumberOfAttempts\",\n    0x37: \"requiredTimeDelayNotExpired\",\n    0x78: \"requestCorrectlyReceived-ResponsePending\",\n    0x7E: \"subFunctionNotSupportedInActiveSession\",\n    0x7F: \"serviceNotSupportedInActiveSession\",\n}\n\ndef nrc_name(nrc):\n    return NRC_NAMES.get(nrc, f\"unknown(0x{nrc:02X})\")\n\ndef expect_positive(resp, ctx):\n    assert resp.service_id != 0x7F, f\"{ctx}: 预期肯定响应，却得否定 NRC={nrc_name(resp.nrc)}\"\n    return resp.data\n\ndef expect_nrc(resp, nrc, ctx):\n    assert resp.service_id == 0x7F, f\"{ctx}: 预期否定响应(0x7F)，却得肯定响应\"\n    assert resp.nrc == nrc, f\"{ctx}: NRC {nrc_name(resp.nrc)}≠预期 {nrc_name(nrc)}\"\n\ndef retry_on_pending(fn, times=3):\n    \"\"\"ECU 忙时回 0x78(RCRRP)，封装自动重试直到拿到真响应\"\"\"\n    for _ in range(times):\n        resp = fn()\n        if getattr(resp, \"nrc\", None) != 0x78:\n            return resp\n    raise TimeoutError(\"连续收到 RCRRP，ECU 长时间忙\")\n\nclass session_scope:\n    \"\"\"上下文管理器：进入指定会话，退出时复位回默认会话（测试隔离）\"\"\"\n    def __init__(self, ecu, session):\n        self.ecu, self.session = ecu, session\n    def __enter__(self):\n        self.ecu.diagnostic_session_control(self.session)\n        return self.ecu\n    def __exit__(self, *exc):\n        self.ecu.ecu_reset(0x01)   # 复位回默认会话，避免污染后续用例\n\n_did_cache = {}\ndef read_did_cached(ecu, did):\n    \"\"\"相同用例内重复读同一 DID 时，命中缓存避免多余总线请求\"\"\"\n    if did in _did_cache:\n        return _did_cache[did]\n    resp = ecu.read_data_by_identifier(did)\n    data = expect_positive(resp, f\"读DID {did:04X}\")\n    _did_cache[did] = data\n    return data"
+        },
+        {
+          "type": "h3",
+          "text": "项目架构：从单脚本到可维护工程"
+        },
+        {
+          "type": "paragraph",
+          "text": "一个能进 CI、跨车型复用的诊断自动化工程，推荐按「配置/数据外置、协议/传输隔离、用例只写断言」的原则分层组织。下面是经量产项目验证的目录骨架："
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "code": "diag_auto/\n├── config/            # ECU 逻辑地址、会话、超时(P2/P2*/S3)、DID 表（按车型分文件）\n│   ├── ecu_a.json\n│   └── timeouts.yaml\n├── transport/         # 总线收发抽象：CAN / CAN-FD / DoIP 统一 send(req)→resp 接口\n│   └── can_tp.py\n├── protocol/          # UDS 服务封装：$22/$19/$27/$34.. 高层语义 API\n│   └── uds_services.py\n├── helpers/           # 复用工具：NRC 解析、断言、重试、报告\n│   └── uds_helpers.py\n├── cases/             # 参数化测试用例（pytest 自动收集）\n│   ├── test_did_eol.py\n│   └── test_nrc_matrix.py\n├── data/              # 外置数据：DID 清单、预期值、NRC 矩阵\n│   └── did_table.csv\n├── reports/           # JUnit / HTML 报告输出\n├── conftest.py        # fixtures：ecu 连接、会话管理、teardown\n└── pytest.ini         # CI 配置：并行、失败重试、报告路径"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "**config**：ECU 逻辑地址、会话/安全参数、超时（P2/P2*/S3），按车型分文件——改配置不改代码",
+            "**transport**：屏蔽 CAN / CAN-FD / DoIP 差异，向上暴露统一的 `send(req)→resp`",
+            "**protocol**：把原始 `$22`/`$27` 封装成 `read_did()`/`unlock()` 这类语义 API",
+            "**helpers**：断言、NRC 解析、重试、报告，所有用例共享，禁止在用例里重写",
+            "**cases**：纯参数化用例，逻辑来自 helpers/protocol，数据来自 data/，零硬编码",
+            "**conftest + pytest.ini**：连接与会话生命周期 + CI 门禁（回归红灯即拦截合并）"
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "工程化要点（资深经验）"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "**时序与重试**：P2/P2*、S3 必须按 ISO 14229-2 配置，失败用例做有限重试而非直接判错",
+            "**否定响应必须显式断言**：只判 positive 不够，NRC 才是「ECU 行为正确」的证据",
+            "**测试隔离**：每个用例结束复位 ECU 到默认会话，避免上一条的会话/解锁状态污染下一条",
+            "**数据驱动**：DID 清单、预期值、NRC 表外置，用例与数据分离，新增 ECU 只改表不改脚本",
+            "**报告与 CI**：每条用例结果导出 JUnit/HTML，挂进 Jenkins/GitLab CI，回归红灯即拦截",
+            "**多 ECU 并行**：同网段多节点用不同逻辑地址轮询，台架时间利用率翻倍"
+          ]
+        },
+        {
+          "type": "blockquote",
+          "style": "warning",
+          "text": "常见坑：安全访问的 seed/key 算法常依赖 ECU 随机种子，脚本里硬编码 key 必失败；DTC 状态位受实时工况（如当前故障）影响，断言时先用 `$14` 清故障再等稳定；会话超时会让后续所有用例连锁失败，务必在用例 tear-down 里 `$3E` 保活或复位到默认会话。"
+        },
+        {
+          "type": "h3",
+          "text": "面试高频考点（UDS 自动化方向）"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "核心要点",
+            "关联标准"
+          ],
+          "rows": [
+            [
+              "P2 与 P2* 有什么区别？",
+              "P2 是正常响应时限(典型50ms)；收到 `0x78` 后启用 P2*(典型5000ms) 等 ECU 忙完",
+              "ISO 14229-2"
+            ],
+            [
+              "`$27` 为什么能防重放？",
+              "每次 seed 随机，`key=f(seed)`，旧 key 无法复用；配 `0x36/0x37` 防暴力",
+              "ISO 14229-1"
+            ],
+            [
+              "肯定响应 vs 否定响应？",
+              "肯定：`SID+0x40`；否定：`0x7F+SID+NRC`，NRC 才是行为证据",
+              "ISO 14229-1"
+            ],
+            [
+              "为什么诊断自动化要进 CI？",
+              "变更可重复回归、断言 NRC/值域、拦截回归、可追溯报告",
+              "工程实践"
+            ],
+            [
+              "DTC 掩码 0x09 vs 0x0A？",
+              "0x09=已确认且 DTC 已存储；0x0A=已确认且本驾驶循环已检测",
+              "ISO 14229-1($19)"
+            ],
+            [
+              "如何保证用例间隔离？",
+              "tear-down 复位默认会话/清 DTC/重新上电，避免会话与解锁态污染",
+              "工程实践"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "相关标准索引"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "标准",
+            "范围",
+            "与自动化测试的关系"
+          ],
+          "rows": [
+            [
+              "ISO 14229-1",
+              "UDS 应用层（服务定义）",
+              "所有 `$` 服务、NRC、子功能的定义来源"
+            ],
+            [
+              "ISO 14229-2",
+              "会话层（时序 P2/P2*/S3、会话状态）",
+              "自动化超时配置、会话切换逻辑的依据"
+            ],
+            [
+              "ISO 14229-3",
+              "UDS on CAN（原 ISO 15765-3）",
+              "CAN 上 UDS 实现，与 CANoe/CAPL 强相关"
+            ],
+            [
+              "ISO 15765-2",
+              "CAN 传输层（CAN-TP 多帧）",
+              "长报文分帧超时 N_Bs/N_Cr 配置依据"
+            ],
+            [
+              "ISO 13400 (DoIP)",
+              "基于 IP 的诊断传输",
+              "以太网 ECU 自动化测试的传输层"
+            ],
+            [
+              "ISO 17987",
+              "LIN 诊断",
+              "LIN 节点低成本诊断自动化"
+            ]
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "诊断自动化成熟度演进"
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "**L0 手写脚本**：单条用例、手动跑、结果靠肉眼",
+            "**L1 数据驱动**：DID/预期值/NRC 表外置，参数化批量",
+            "**L2 框架化**：vTESTStudio/pytest 管理用例、报告、覆盖率",
+            "**L3 平台化**：CI/CD 接入、多 ECU 并行、云化调度、回归门禁"
+          ]
+        },
+        {
+          "type": "review",
+          "current": "UDS 自动化 = 把诊断仪操作序列脚本化：管理会话状态机、配准 P2/P2*/S3 时序、`$27` 挑战响应对抗重放，并对每条否定响应 NRC 显式断言。",
+          "next": "下一节把思路落到代码——用 pytest 写第一个参数化诊断用例，或回到知识库选下一张章。动手写一遍比看十遍记得牢。"
+        },
+        {
+          "type": "paragraph",
+          "text": "⬅ 返回 [[MOC_车载测试]] | 继续 → [[07-OBD-II]]"
+        }
+      ],
+      "has_compare": false,
+      "has_diagram": false,
+      "has_warning": true,
+      "point_count": 18
+    },
+    {
+      "title": "飞书笔记：UDS 诊断服务全解",
+      "content_blocks": [
+        {
+          "type": "h4",
+          "text": "UDS 的作用"
+        },
+        {
+          "type": "h4",
+          "text": "UDS 寻址模块"
+        },
+        {
+          "type": "paragraph",
+          "text": "UDS 寻址模式分为物理寻址（一对一访问确定的 ECU 节点）、功能寻址（一对多通信访问多个 ECU 节点，即所有 ECU 公用的请求地址）"
+        },
+        {
+          "type": "h4",
+          "text": "UDS 诊断对话"
+        },
+        {
+          "type": "paragraph",
+          "text": "positive：正响应"
+        },
+        {
+          "type": "paragraph",
+          "text": "Negative：负响应"
+        },
+        {
+          "type": "paragraph",
+          "text": "标记的 02 表示返回的有效子节数"
+        },
+        {
+          "type": "h4",
+          "text": "UDS 诊断的请求、响应格式"
+        },
+        {
+          "type": "paragraph",
+          "text": "最高位 bit 抑制正响应，则区间划分为 0000 0000～0111 1111 即可 00～7F（返回正响应），反之 80～FF 为抑制正响应，不返回响应，即根据子服务最高位判断是否抑制正响应"
+        },
+        {
+          "type": "h4",
+          "text": "UDS 诊断大类及服务"
+        },
+        {
+          "type": "h4",
+          "text": "否定响应码"
+        },
+        {
+          "type": "h4",
+          "text": "UDS 诊断和通讯管理功能单元"
+        },
+        {
+          "type": "h4",
+          "text": "1.[0x10]诊断会话控制"
+        },
+        {
+          "type": "paragraph",
+          "text": "注意："
+        },
+        {
+          "type": "paragraph",
+          "text": "1.可从默认会话直接切换到拓展会话；进入编程会话（0x10 02）通常需先进入拓展会话（0x10 03），即 默认→拓展→编程；"
+        },
+        {
+          "type": "paragraph",
+          "text": "2、长时间停留在编程会话或拓展会话时会自动退出到默认会话，UDS 协议推荐是 5 秒（5000 毫秒）；"
+        },
+        {
+          "type": "h4",
+          "text": "2.[0x11]ECU 复位服务"
+        },
+        {
+          "type": "blockquote",
+          "text": "支持的 NRC：0x12/0x13/0x22/0x33"
+        },
+        {
+          "type": "h4",
+          "text": "3.[0x3E]待机握手服务"
+        },
+        {
+          "type": "paragraph",
+          "text": "Tester Present 用于告知 ECU 之前已经激活的诊断服务功能可以仍然保持激活状态。UDS 中最简单的诊断服务，永远只有两个字节组成。"
+        },
+        {
+          "type": "h4",
+          "text": "4.[0x27]安全访问服务"
+        },
+        {
+          "type": "blockquote",
+          "text": "支持的 NRC：0x35、0x36、0x37"
+        },
+        {
+          "type": "h4",
+          "text": "5.[0x28]通讯控制服务"
+        },
+        {
+          "type": "paragraph",
+          "text": "支持的 NRC："
+        },
+        {
+          "type": "h4",
+          "text": "UDS 数据传输功能单元"
+        },
+        {
+          "type": "h4",
+          "text": "【0x22、0x2E】诊断读取及写入"
+        },
+        {
+          "type": "paragraph",
+          "text": "连续帧 ISO15765"
+        },
+        {
+          "type": "h4",
+          "text": "UDS 储存数据传输功能单元"
+        },
+        {
+          "type": "h4",
+          "text": "1.[0x14]清除诊断信息及请求响应"
+        },
+        {
+          "type": "h4",
+          "text": "2.[0x19]读取故障码"
+        },
+        {
+          "type": "h4",
+          "text": "3.0x19 子服务请求响应结构"
+        },
+        {
+          "type": "h4",
+          "text": "4.故障码解析"
+        },
+        {
+          "type": "paragraph",
+          "text": "UDS 协议里的故障码编号（DTC identifier）占 3 个字节（DTC High / Middle / Low，Low 为故障类型 Fault Type）；加上 1 字节状态字节后，每条 DTC 记录在 `$19` 响应中实际占 4 字节。诊断仪显示的 5 字符码只对前 2 字节（High+Middle）拼出的 16 bit 标识做解读，第 3 字节（Low）不进显示码。"
+        },
+        {
+          "type": "h4",
+          "text": "故障码格式解读"
+        },
+        {
+          "type": "paragraph",
+          "text": "故障码第一、二位"
+        },
+        {
+          "type": "paragraph",
+          "text": "故障码第三位"
+        },
+        {
+          "type": "paragraph",
+          "text": "故障码第四、五位"
+        },
+        {
+          "type": "h4",
+          "text": "UDS 刷写"
+        },
+        {
+          "type": "h4",
+          "text": "UDS 刷写工作流"
+        },
+        {
+          "type": "h4",
+          "text": "UDS 报文数据结构（ISO15765）"
+        },
+        {
+          "type": "h4",
+          "text": "单帧"
+        },
+        {
+          "type": "paragraph",
+          "text": "[ 02] 代表数据块的长度是 2 个字节，"
+        },
+        {
+          "type": "h4",
+          "text": "首帧"
+        },
+        {
+          "type": "paragraph",
+          "text": "在单帧字节数不足使用的情况下使用“首帧”"
+        },
+        {
+          "type": "h4",
+          "text": "连续帧"
+        },
+        {
+          "type": "h4",
+          "text": "流控帧"
+        },
+        {
+          "type": "h4",
+          "text": "UDS 刷写流程"
+        },
+        {
+          "type": "h4",
+          "text": "UDS 刷写资料"
+        }
+      ]
+    }
+  ],
+  "summary": "UDS（ISO 14229）是车载诊断的\"通用语言\"——诊断仪发SID+参数，ECU回SID+$40(肯定)或$7F(否定)，能读数据、读清故障码、安全解锁、刷写固件，6大类26种服务覆盖ECU全生命周期",
+  "prev_chapter": {
+    "num": 5,
+    "name": "车载以太网"
+  },
+  "next_chapter": {
+    "num": 7,
+    "name": "OBD-II"
+  }
+}

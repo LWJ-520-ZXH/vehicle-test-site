@@ -1,0 +1,214 @@
+{
+  "num": 23,
+  "slug": "CANoe-TestModule",
+  "title": "CANoe Test Module 自动化测试 ⭐核心",
+  "oneliner": "把零散的 CAPL 脚本升级成「可判定、可报告、可回归」的自动化测试：用 Test Feature Set 组织用例、给出 pass/fail、产出结构化报告。",
+  "sections": [
+    {
+      "title": "一、自动化测试体系总览",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "手动在 Trace 里盯着报文「看对不对」，是不可复现、不可规模化的。CANoe 把测试从「人眼审查」升级为「机器判定」：你用 Test Module 描述「预期是什么」，工具自动比对实际并给出 pass/fail。整套体系由 Test Feature Set（TFS）支撑——它不是独立组件，而是 CANoe 内置的一族测试函数。"
+        },
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "Test Module 的执行语言就是 [[09-CAPL脚本]]。区别在于：零散 CAPL 只「做事」，Test Module 里的 CAPL 还要「下判定、写报告」。所以学 Test Module 的前提是先把 CAPL 事件与 $/@ 语法吃透。"
+        }
+      ]
+    },
+    {
+      "title": "二、Test Setup 结构",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "Test 功能区双击 Test Setup，会出现「Test Setup for Test Modules」——一个文件夹式的测试环境。往里加测试模块即可。测试模块有两种承载形式："
+        },
+        {
+          "type": "table",
+          "headers": [
+            "形式",
+            "编写语言",
+            "说明"
+          ],
+          "rows": [
+            [
+              "Test Module",
+              "CAPL",
+              "经典形式，单机/单工程内运行，最常用"
+            ],
+            [
+              "Test Unit",
+              "CAPL/.NET",
+              "更偏向 vTESTstudio 工程化、跨模块组织"
+            ],
+            [
+              "XML/Test Sequence",
+              "XML",
+              "由 vTESTstudio 等工具生成"
+            ]
+          ]
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-testsetup.svg",
+          "alt": "CANoe Test Setup 与测试报告",
+          "caption": "Test Setup 树（Module→Group→Case→Step）与右侧测试报告一一对应"
+        }
+      ]
+    },
+    {
+      "title": "三、测试架构：Group → Case → Step",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "一个 Test Module 从外到内分三层，对应报告的三级结构："
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "Test Group（测试分组）：用 TestGroupBegin/TestGroupEnd 框定一类场景，如「上下电测试组」",
+            "Test Case（测试用例）：测试的核心单元，含完整测试活动，由 TestCaseDescription 写描述",
+            "Test Step（测试步骤）：Case 内的最小块，用 TestStepPass/TestStepFail 给出该步判定"
+          ]
+        },
+        {
+          "type": "code",
+          "language": "capl",
+          "filename": "PowerOnTest.can",
+          "code": "void MainTest() {\n  TestGroupBegin(\"上下电测试组\", \"验证 KL15 上电后信号初始化\");\n  TestCaseDescription(\"上电后 EngineSpeed 应为 0\");\n\n  // 步骤1：触发上电\n  TestStep(\"发送 KL15 上电\");\n  @Power::KL15 = 1;\n  testWaitForTimeout(300);\n\n  // 步骤2：判定\n  if ($EngineState::EngineSpeed == 0)\n    TestStepPass(\"上电初始转速为 0，符合预期\");\n  else\n    TestStepFail(\"上电初始转速非 0，异常\");\n\n  TestGroupEnd();\n}"
+        }
+      ]
+    },
+    {
+      "title": "四、判定函数（Verdict）",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "函数",
+            "作用"
+          ],
+          "rows": [
+            [
+              "TestStepPass / TestStepFail",
+              "单步通过/失败（最常用）"
+            ],
+            [
+              "TestStepWarning",
+              "警示但不判失败"
+            ],
+            [
+              "TestStepInconclusive",
+              "无法判定通过或失败"
+            ],
+            [
+              "TestCaseFail",
+              "整条用例判 fail"
+            ],
+            [
+              "TestSetVerdict / TestGetVerdictModule",
+              "设定/读取模块级判定"
+            ],
+            [
+              "TestGetVerdictLastTestCase",
+              "读取上一条用例判定"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "五、报告函数族",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "判定之外，报告函数让产出「可读、可审计」。架构类（TestReportAddSetupInfo 记测试环境、TestReportAddSUTInfo 记样品信息、TestCaseComment 加备注、TestInfoTable/Row 建结构化表格）与报告类（TestReportAddEngineerInfo 记测试员、TestReportAddExtendedInfo 嵌 HTML/XML）共同组成一份能直接归档的报告。"
+        },
+        {
+          "type": "blockquote",
+          "style": "warning",
+          "text": "没有元信息的报告等于废纸。真实项目里，TestReportAddSetupInfo/TestReportAddSUTInfo 必须填：硬件版本、软件版本、DBC 版本、样品 SN。否则三个月后没人能说清「这份 pass 报告是在什么环境下跑的」。这也正是 [[45-ASPICE汽车软件过程改进]] 对测试可追溯性的要求。"
+        }
+      ]
+    },
+    {
+      "title": "六、检测函数（Check Descriptions）",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "检测类",
+            "覆盖内容"
+          ],
+          "rows": [
+            [
+              "Signal Evaluation",
+              "信号数值有效性、周期、稳定性"
+            ],
+            [
+              "Message Evaluation",
+              "报文丢失、周期、DLC、错误帧"
+            ],
+            [
+              "Time Evaluation",
+              "连续帧间隔、超时"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "这些检测函数把「人工对比预期」变成「一句断言」。例如检查某信号周期是否稳定，不用自己写定时器计时间差，直接调 Signal Evaluation 即可，它内部已处理采样与容差。"
+        }
+      ]
+    },
+    {
+      "title": "七、与持续集成（CI）",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "Test Module 产出的报告可导出为 XML/HTML，进而接入 Jenkins 等 CI 流水线，实现「代码/标定一更新，夜间自动跑回归、早上看红绿」。CANoe 支持命令行（canoe.exe -r 工程 -t 测试配置）无界面运行，是自动化的关键。回归时可配合 [[08-CANoe]] 的 Replay，把基线日志与当前结果做对比。"
+        }
+      ]
+    },
+    {
+      "title": "八、面试高频考点",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "要点"
+          ],
+          "rows": [
+            [
+              "Test Module 三层结构",
+              "Group→Case→Step"
+            ],
+            [
+              "怎么给判定",
+              "TestStepPass/Fail，模块级 TestSetVerdict"
+            ],
+            [
+              "报告和可追溯性",
+              "AddSetupInfo/AddSUTInfo 记环境样品"
+            ],
+            [
+              "怎么接入 CI",
+              "命令行无界面跑 + 报告导出 + 流水线"
+            ],
+            [
+              "TFS 是什么",
+              "CANoe 内置测试函数族，非独立组件"
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": "CANoe Test Module 把零散 CAPL 升级为可判定、可报告、可回归的自动化测试，底层是内置的 Test Feature Set（TFS）函数族。测试结构分三层：Test Group 分组、Test Case 用例、Test Step 步骤，报告也按此三级呈现。判定用 TestStepPass/Fail（步骤级）与 TestCaseFail/TestSetVerdict（用例/模块级）；报告用 TestReportAddSetupInfo/AddSUTInfo 记录环境与样品、TestCaseComment 加备注，满足可追溯性。检测函数（Signal/Message/Time Evaluation）把人工比对待遇变成一句断言。Test Module 可命令行无界面运行并导出 XML/HTML，接入 Jenkins 等 CI 做夜间回归。学 Test Module 前提是吃透 [[09-CAPL脚本]] 的事件与 $/@ 语法。",
+  "prev_chapter": 22,
+  "next_chapter": 24
+}

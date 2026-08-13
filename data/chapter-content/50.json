@@ -1,0 +1,137 @@
+{
+  "num": 50,
+  "slug": "CANoe入门",
+  "title": "第一次打开 CANoe（零基础）",
+  "oneliner": "从双击安装包到看到第一条 Trace，手把手带你跑通 CANoe 第一次：打开示例工程、认识工具栏、导入 DBC、发出第一帧。",
+  "sections": [
+    {
+      "title": "一、安装与首次启动",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "CANoe 由 Vector 提供，安装后桌面出现 CANoe 图标。首次启动建议先用默认配置，不要一上来就改选项。注意 CANoe 版本众多（11/12/13…），界面大逻辑一致，本篇以通用逻辑为准，你手上的版本按钮位置可能略有差异，但功能区名称是一样的。"
+        },
+        {
+          "type": "blockquote",
+          "style": "warning",
+          "text": "别急着「新建工程」。新手最大的弯路是自己从空白搭，结果卡在数据库和通道配置上。正确姿势：打开安装目录自带的 Sample Configuration（示例工程），在它基础上学、在它基础上改。"
+        }
+      ]
+    },
+    {
+      "title": "二、认识主界面",
+      "content_blocks": [
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "快速访问区（左上）：Start/Stop Measurement、Load/Save Configuration 等一键按钮",
+            "工具栏（顶部）：File / Home / Analysis / Simulation / Test / Diagnostics / Environment / Hardware / Tools / Layout",
+            "工作区：中间放各种窗口（Trace、Graphics、Panel…）",
+            "状态栏：显示测量状态、通道、时间"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "记住这根工具栏，它就是 CANoe 的能力地图：Home 管测量启停，Analysis 管分析窗口，Simulation 管节点，Test 管自动化，Diagnostics 管诊断，Environment 管变量，Hardware 管硬件通道。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-main.svg",
+          "alt": "CANoe 主界面首次打开",
+          "caption": "第一次打开 CANoe：先认主界面——菜单、工具栏、仿真配置树、停靠窗口"
+        }
+      ]
+    },
+    {
+      "title": "三、打开示例工程",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "File → Open，定位到 CANoe 安装目录的 Sample Configuration，挑一个和你要学的网络匹配的工程（如 CAN 的示例）。打开后直接 Start Measurement，你会看到 Trace 窗口开始滚动报文——恭喜，你已经在「听」总线了。"
+        }
+      ]
+    },
+    {
+      "title": "四、第一次看 Trace",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "点 Start Measurement，Trace 窗口实时刷新总线上的所有报文。看 Time（时间）、Channel（通道）、ID（报文标识）、Name（由 DBC 解析出的名字）、Data（数据）。如果 Name 列是空的、只有数字 ID，说明这个工程没加载对应 DBC——那就只看到「原始字节」，看不到语义（见下一步）。"
+        },
+        {
+          "type": "image",
+          "src": "assets/images/canoe-trace.svg",
+          "alt": "CANoe 第一次查看 Trace",
+          "caption": "第一次看 Trace：点 Start 后，报文开始滚动，这就是总线在“说话”"
+        },
+        {
+          "type": "blockquote",
+          "style": "面试说",
+          "text": "「Trace 里只有 ID 没有名字，为什么？」——因为没导入 DBC。DBC 是信号的「翻译字典」，没有它 CANoe 只能显示原始 ID 和十六进制数据，无法解析成「车速=65」。所以 DBC 是看懂总线的前提。"
+        }
+      ]
+    },
+    {
+      "title": "五、导入 DBC 并看信号",
+      "content_blocks": [
+        {
+          "type": "list",
+          "style": "ol",
+          "items": [
+            "Tools → CANdb++ Editor 打开数据库工具，或在新工程里通过 Simulation Setup 添加 DBC",
+            "把 DBC 中的报文/信号「拖」到 Trace 或 Graphics 窗口",
+            "再看 Trace，Name 列出现报文名，Data 列出现信号物理值",
+            "在 Graphics 里选中某个信号，看到它随时间变化的曲线"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "DBC 怎么读、信号字节序怎么算，是下一关，专门讲在 [[51-DBC入门]]。"
+        }
+      ]
+    },
+    {
+      "title": "六、用 Write 窗口与 Panel",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "Home → Write 打开写窗口，CAPL 里的 write() 输出会显示在这里，是脚本调试的「printf」。Home → Panel 打开面板，面板是测试交互 UI——可以在上面放按钮、滑块、指示灯，绑定系统变量，实现「点一下面板，总线发一帧」。"
+        }
+      ]
+    },
+    {
+      "title": "七、发出你的第一帧",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "最快的方式有两种：一是在 Simulation Setup 里加一个 Interactive Generators（交互发生器）手动填 ID 和数据发送；二是挂一小段 CAPL，用 on key 触发发送。下面这段最朴素的 CAPL，按键盘 't' 就发出一帧 0x100："
+        },
+        {
+          "type": "code",
+          "language": "capl",
+          "filename": "FirstFrame.can",
+          "code": "on key 't' {\n  message 0x100 msg;\n  msg.DLC = 2;\n  msg.byte(0) = 0x01;\n  msg.byte(1) = 0x02;\n  output(msg);\n  write(\"已发送 0x100\");\n}"
+        }
+      ]
+    },
+    {
+      "title": "八、下一步学什么",
+      "content_blocks": [
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "[[08-CANoe]]：功能区、运行模式、Filter、Replay 全解",
+            "[[09-CAPL脚本]]：事件驱动、信号/系统变量、TFS 判定",
+            "[[51-DBC入门]]：怎么看懂一份 DBC（零基础）",
+            "[[27-台架搭建与HIL]]：把工程接到真实零部件上"
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": "第一次打开 CANoe，关键是「别从空白建工程，先开 Sample Configuration 示例工程」。主界面由快速访问区（启停测量/开关配置）和顶部工具栏（Home 管测量、Analysis 管分析窗口、Simulation 管节点、Test 管自动化、Diagnostics 管诊断、Environment 管变量、Hardware 管通道）组成。Start Measurement 后 Trace 实时刷报文，但有 ID 无名字说明没加载 DBC——DBC 是信号翻译字典，没有它只能看原始字节。导入 DBC 后 Name/信号物理值才出现，Graphics 能画信号曲线。Write 窗口是 CAPL 脚本的 printf 调试口，Panel 是交互 UI。发第一帧最快用 Interactive Generators 或一小段 on key 的 CAPL（message + output）。下一步学 [[08-CANoe]] 全功能、[[09-CAPL脚本]]、[[51-DBC入门]] 与 [[27-台架搭建与HIL]]。",
+  "prev_chapter": 49,
+  "next_chapter": 51
+}

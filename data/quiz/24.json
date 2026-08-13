@@ -1,0 +1,1624 @@
+[
+  {
+    "id": "Q-24-00-01",
+    "chapterNum": 24,
+    "sectionIndex": 0,
+    "sectionTitle": "一、DBC 文件结构总览",
+    "module": "B",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "DBC",
+      "BO_",
+      "文件结构"
+    ],
+    "stem": "在 DBC 文件中，用于定义「一条 CAN 报文的 ID + 报文名 + DLC + 发送节点」的关键字是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "`BU_:` —— 例如 `BU_: EMS TCU ABS`"
+      },
+      {
+        "key": "B",
+        "text": "`BO_` —— 例如 `BO_ 256 EngineData: 8 EMS`"
+      },
+      {
+        "key": "C",
+        "text": "`SG_` —— 例如 `SG_ EngSpeed : 0|16@1+ ...`"
+      },
+      {
+        "key": "D",
+        "text": "`BA_` —— 例如 `BA_ \"GenMsgCycleTime\" BO_ 256 10;`"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "章节的「DBC 四大块」表格给出了清晰分工：`BU_:` 只做节点声明，列出网络中有哪些 ECU；`BO_` 才是报文定义，`BO_ 256 EngineData: 8 EMS` 这一行同时说明了 CAN ID=256、报文名=EngineData、DLC=8 字节、发送节点=EMS，四个要素齐全；`SG_` 写在 `BO_` 内部，负责单个信号的位布局与换算；`BA_` 是扩展属性，用来挂周期、初始值这类附加信息。记忆技巧：BU=Bus Unit（节点）、BO=Board/Message Object（报文）、SG=Signal（信号）、BA=Attribute（属性）。",
+    "keyPoints": [
+      "BO_ 一行包含四要素：CAN ID、报文名、DLC、发送节点",
+      "SG_ 必须写在 BO_ 内部，是报文的下级",
+      "BU_ 仅声明节点，不含报文信息"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "一、DBC 文件结构总览·「块/关键字/作用/示例」四大块对照表"
+    },
+    "relatedTerms": [
+      "DLC",
+      "CAN ID",
+      "通信矩阵"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-00-02",
+    "chapterNum": 24,
+    "sectionIndex": 0,
+    "sectionTitle": "一、DBC 文件结构总览",
+    "module": "B",
+    "type": "multi",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "DBC",
+      "四大块",
+      "BA_",
+      "VAL_"
+    ],
+    "stem": "关于 DBC 文件四大块（含可选块）的作用，下列描述正确的有：",
+    "options": [
+      {
+        "key": "A",
+        "text": "`BU_:` 用于声明网络中所有 ECU 节点，如 `BU_: EMS TCU ABS IPC`"
+      },
+      {
+        "key": "B",
+        "text": "`SG_` 定义在 `BO_` 内部，包含位布局、换算关系和接收方节点"
+      },
+      {
+        "key": "C",
+        "text": "`VAL_` 是可选块，用于建立枚举信号值与物理含义的对照表"
+      },
+      {
+        "key": "D",
+        "text": "`BA_` 只能作用于报文（BO_），无法为单个信号（SG_）设置属性"
+      },
+      {
+        "key": "E",
+        "text": "DBC 是二进制文件，必须用 CANdb++ 打开才能查看内容"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 都能在四大块对照表中直接找到依据。D 是错的：章节示例里明确写了 `BA_ \"SigType\" SG_ 256 EngineSpeed 1;`，说明 BA_ 的作用域既可以是 BO_ 也可以是 SG_，第七节的属性速查表更是把作用域分成了 BO_ 和 SG_ 两列。E 也是错的：章节开头第一句就说「DBC 文件以纯文本描述 CAN 网络通信矩阵」，用记事本就能打开——这也是 DBC 能进 Git 做版本管理、能被 Excel 脚本自动生成的前提。",
+    "keyPoints": [
+      "DBC 是纯文本文件，可直接阅读、可进版本库",
+      "BA_ 作用域覆盖 BO_ 和 SG_ 两级",
+      "VAL_ 是可选块，不写也不影响 DBC 合法性"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "一、DBC 文件结构总览·「块/关键字/作用/示例」四大块对照表"
+    },
+    "relatedTerms": [
+      "SigType",
+      "通信矩阵",
+      "CANdb++"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-00-03",
+    "chapterNum": 24,
+    "sectionIndex": 0,
+    "sectionTitle": "一、DBC 文件结构总览",
+    "module": "B",
+    "type": "judge",
+    "cat": "标准合规",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "DBC",
+      "维护职责",
+      "评审流程"
+    ],
+    "stem": "判断：DBC 改动会牵连网关路由表、各 ECU 的 CAN 驱动代码和测试脚本的解析逻辑，因此它由网络管理组统一维护，改动必须走评审并做版本号管理。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "T"
+    ],
+    "explanation": "这正是本节「面试说」的原话逻辑：DBC 不是随便写的文本文件，而是整车 CAN 通信矩阵的最终载体。它的下游依赖非常多——网关按它配路由、ECU 软件按它生成 CAN 驱动、测试脚本按它解析信号，所以「改一行、全链路同步变」。因此维护权归网络管理/EE 架构组，测试组是使用者而不是维护者（第十二节面试考点表也重复强调了这一点），任何改动都要评审 + 升版号 + 发布通知。",
+    "keyPoints": [
+      "DBC 是整车 CAN 通信矩阵的最终载体",
+      "下游依赖：网关路由表、ECU CAN 驱动、测试脚本解析",
+      "维护方是网络管理/架构组，测试组只是使用者"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "一、DBC 文件结构总览·「面试说」DBC 不是随便写的文本文件"
+    },
+    "relatedTerms": [
+      "网关路由表",
+      "版本管理",
+      "变更评审"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-01-01",
+    "chapterNum": 24,
+    "sectionIndex": 1,
+    "sectionTitle": "二、信号定义格式详解（SG_）",
+    "module": "B",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "SG_",
+      "Factor",
+      "Offset",
+      "物理值换算"
+    ],
+    "stem": "某 DBC 定义 `SG_ EngineTemp : 16|8@1+ (1,-40) [-40|215] \"degC\" Instrument`。Trace 中抓到该信号所在字节为 0x64（原始值 100），其对应的物理值是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "100 degC"
+      },
+      {
+        "key": "B",
+        "text": "60 degC"
+      },
+      {
+        "key": "C",
+        "text": "140 degC"
+      },
+      {
+        "key": "D",
+        "text": "-40 degC"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "套章节给出的换算公式：物理值 = 原始值 × Factor + Offset。这里 Factor=1、Offset=-40，所以物理值 = 100 × 1 + (-40) = 60 degC，正好落在 [-40, 215] 的有效范围内，是一个合法读数。选 A 是忘了加 Offset（直接把原始值当物理值，这是新人最常犯的错）；选 C 是把减法做成了加法；选 D 是把 Offset 本身当成了结果。顺带记住这条信号的两个边界：原始值 0x00 → -40 degC，原始值 0xFF → 215 degC，章节的 ASCII 图里就是这么标的。",
+    "keyPoints": [
+      "物理值 = 原始值 × Factor + Offset",
+      "Offset=-40 是温度类信号的典型写法，用于表示负温",
+      "换算完还要用 [Min|Max] 做一次有效性检查"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "二、信号定义格式详解（SG_）·信号物理值换算流程与 EngineTemp ASCII 图解"
+    },
+    "relatedTerms": [
+      "raw value",
+      "Min/Max",
+      "Invalid"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-01-02",
+    "chapterNum": 24,
+    "sectionIndex": 1,
+    "sectionTitle": "二、信号定义格式详解（SG_）",
+    "module": "B",
+    "type": "single",
+    "cat": "故障定位",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "SG_",
+      "符号位",
+      "有符号信号"
+    ],
+    "stem": "某车外温度信号在冬天可能为负值，但 DBC 中该信号的符号位被错写成了 `+`（无符号）。按章节说法，最可能出现的现象是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "信号完全解析不出来，Trace 中显示为空"
+      },
+      {
+        "key": "B",
+        "text": "负数信号被当成一个巨大的正数"
+      },
+      {
+        "key": "C",
+        "text": "高低字节发生颠倒，数值前后倒置"
+      },
+      {
+        "key": "D",
+        "text": "信号会自动被判定为 Invalid 并置 0"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "SG_ 参数表里对 `+ / -` 的说明是：+ 表示无符号（车速、转速这类恒为正的量），- 表示有符号（温度这类可为负的量），并直接写明「选错→负数信号被当成巨大正数」。原理很简单：-1 在 8 位补码里是 0xFF，按无符号解析就变成 255。选 C 描述的是字节序（Motorola/Intel）搞反的后果，不要和符号位混淆——这是两个独立的坑，一个管「怎么排字节」，一个管「最高位算不算符号」。选 D 也是错的：DBC 不会自动判 Invalid，Invalid 值需要设计者显式定义（见第九节）。",
+    "keyPoints": [
+      "+ = 无符号，- = 有符号；可为负的物理量必须用 -",
+      "符号位选错的典型现象：负数变成巨大正数（如 -1 → 255）",
+      "符号位错误与字节序错误是两类不同故障，现象不同"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "二、信号定义格式详解（SG_）·SG_ 参数含义表「+ / -」行"
+    },
+    "relatedTerms": [
+      "补码",
+      "Motorola/Intel",
+      "Invalid 值"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-01-03",
+    "chapterNum": 24,
+    "sectionIndex": 1,
+    "sectionTitle": "二、信号定义格式详解（SG_）",
+    "module": "B",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "DBC 解析三要素",
+      "字节序",
+      "Factor"
+    ],
+    "stem": "按照本节「面试说」的观点，拿到一份新的 DBC，必须马上确认的「DBC 解析三要素」包括：",
+    "options": [
+      {
+        "key": "A",
+        "text": "字节序是 Motorola 还是 Intel"
+      },
+      {
+        "key": "B",
+        "text": "Factor 和 Offset"
+      },
+      {
+        "key": "C",
+        "text": "Min/Max 有效范围"
+      },
+      {
+        "key": "D",
+        "text": "报文所使用的 CRC 校验算法类型"
+      },
+      {
+        "key": "E",
+        "text": "该 DBC 文件的创建者姓名与创建日期"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "「面试说」明确列了三件事：①字节序 Motorola 还是 Intel——搞反了所有值全错；②Factor 和 Offset——决定原始值到物理值怎么算；③Min/Max 范围——用于判断信号是不是 Invalid。这三条构成 DBC 解析三要素。D 的 CRC 属于报文级安全机制（E2E/AUTOSAR CRC），不是 SG_ 定义的内容，DBC 里最多把 CRC 当成一个普通信号来描述；E 的作者信息与解析结果无关（真正要核对的是版本号，见第十一节）。",
+    "keyPoints": [
+      "解析三要素：字节序 / Factor+Offset / Min-Max",
+      "字节序决定「对不对」，Factor+Offset 决定「准不准」，Min-Max 决定「有没有效」",
+      "核对 DBC 还需确认版本号与 SUT 匹配"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "二、信号定义格式详解（SG_）·「面试说」拿到新 DBC 三件事"
+    },
+    "relatedTerms": [
+      "Invalid",
+      "CANdb++",
+      "版本号"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-01-04",
+    "chapterNum": 24,
+    "sectionIndex": 1,
+    "sectionTitle": "二、信号定义格式详解（SG_）",
+    "module": "B",
+    "type": "short",
+    "cat": "参数记忆",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "SG_",
+      "语法逐段解析",
+      "边界值"
+    ],
+    "stem": "请逐段解释 `SG_ EngineTemp : 16|8@1+ (1,-40) [-40|215] \"degC\" Instrument` 中每一个字段的含义，并计算该信号原始值为 0xFF 时的物理值，说明该值是否在有效范围内。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题考查 SG_ 通用格式 `SignalName : StartBit|Length@ByteOrder+Sign (Factor,Offset) [Min|Max] \"Unit\" Receiver` 的逐段拆解能力，以及物理值换算公式的实际运用。面试中考官常随手写一行 SG_ 让你现场翻译，能不能一口气讲完是基本功的分水岭。",
+    "keyPoints": [
+      "SG_ 通用格式九段：信号名/起始位/长度/字节序/符号/系数/偏移/范围/单位/接收方",
+      "物理值 = 原始值 × Factor + Offset",
+      "换算结果必须回到 [Min|Max] 做有效性判断"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "二、信号定义格式详解（SG_）·SG_ 通用语法模板与参数含义表"
+    },
+    "relatedTerms": [
+      "StartBit",
+      "DLC",
+      "Receiver"
+    ],
+    "refAnswer": "逐段含义：①`SG_` 关键字，表示这是一条信号定义，必须写在某条 `BO_` 报文之内；②`EngineTemp` 信号名，全局唯一；③`16` 起始位 StartBit（含 0 计数），即该信号在 CAN 数据场中的起始位号；④`8` 信号长度 Length=8 bit，可表示 0~255 共 256 个原始值；⑤`@1` 字节序标记（按本章 SG_ 参数表：@0 = Motorola 大端，@1 = Intel 小端），本信号只占 1 个字节，字节序对结果无影响，但语法上仍必须标注；⑥`+` 无符号，说明原始值按无符号数解释；⑦`(1,-40)` 即 Factor=1、Offset=-40；⑧`[-40|215]` 物理值有效范围 Min=-40、Max=215；⑨`\"degC\"` 单位为摄氏度；⑩`Instrument` 接收节点为仪表。计算：原始值 0xFF = 255，物理值 = 255 × 1 + (-40) = 215 degC。判断：215 恰好等于 Max，落在 [-40, 215] 闭区间内，属于有效值边界点，与章节 ASCII 图中「若原始值 = 0xFF (=255) → 物理值 = 215°C」完全一致。补充：另一端 0x00 → -40 degC 对应 Min，因此这条 8 位信号的原始值空间与物理值范围是一一映射、恰好铺满的，没有剩余码值可以专门留给 Invalid——这在实际设计中需要注意，若要预留 Invalid 值（如 0xFF），应把 Max 相应下调。"
+  },
+  {
+    "id": "Q-24-02-01",
+    "chapterNum": 24,
+    "sectionIndex": 2,
+    "sectionTitle": "三、Motorola vs Intel 字节序（高频考点）",
+    "module": "B",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "字节序",
+      "Motorola",
+      "Intel"
+    ],
+    "stem": "章节示例中，CAN 数据按地址递增为 Byte2=0x12、Byte3=0x34。若按 Motorola（大端）解析得到的 16 位信号值为 0x1234，那么按 Intel（小端）解析的结果是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "0x1234，两种字节序结果相同"
+      },
+      {
+        "key": "B",
+        "text": "0x3412"
+      },
+      {
+        "key": "C",
+        "text": "0x2143"
+      },
+      {
+        "key": "D",
+        "text": "0x4321"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "章节的字节级差异示例写得很直白：Motorola 大端是「低地址 = 高字节」，所以 0x12 是高字节、0x34 是低字节，拼出来 0x1234；Intel 小端是「低地址 = 低字节」，所以 0x12 变成低字节、0x34 变成高字节，拼出来 0x3412。注意字节序交换的是**字节**不是**半字节**，所以 C（半字节互换）和 D（整体位反转）都不对。这个例子的价值在于结论那句话：同一帧数据，字节序不同 → 解析值完全不同，这也是为什么第九节把「Motorola/Intel 搞反」列为严重级设计错误。",
+    "keyPoints": [
+      "大端：低地址存高字节；小端：低地址存低字节",
+      "字节序交换的粒度是字节，不是 bit 也不是半字节",
+      "同一帧数据在两种字节序下解析值完全不同"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "三、Motorola vs Intel 字节序·字节级差异示例（信号值 0x1234）"
+    },
+    "relatedTerms": [
+      "大端",
+      "小端",
+      "StartBit"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-02-02",
+    "chapterNum": 24,
+    "sectionIndex": 2,
+    "sectionTitle": "三、Motorola vs Intel 字节序（高频考点）",
+    "module": "B",
+    "type": "multi",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "字节序",
+      "StartBit",
+      "位布局"
+    ],
+    "stem": "根据本节的 Motorola 与 Intel 对比表，下列描述正确的有：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Motorola 的 StartBit 指信号最高位（MSB）所在的位号，Intel 的 StartBit 指最低位（LSB）所在的位号"
+      },
+      {
+        "key": "B",
+        "text": "Motorola 的 bit 编号方向是从高到低「倒着数」，Intel 是从低到高「正着数」"
+      },
+      {
+        "key": "C",
+        "text": "Motorola 在车载项目中使用率 90%+，属于主流；Intel 多见于部分 BCM、德系 Legacy 等少数 ECU"
+      },
+      {
+        "key": "D",
+        "text": "Motorola 是小端、Intel 是大端"
+      },
+      {
+        "key": "E",
+        "text": "Motorola 的跨字节存储方式是 LSB 在低地址字节、MSB 在高地址字节"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 分别对应对比表的「StartBit 含义」「bit 编号方向」「车载使用率」三行，可以逐条核对。D 把两者说反了——Motorola 是大端（Big-Endian）、Intel 是小端（Little-Endian），这个对应关系源自 Motorola 68k 与 Intel x86 两种 CPU 的存储习惯。E 描述的其实是 Intel 的跨字节存储方式；Motorola 是 MSB 在低地址字节、LSB 在高地址字节。做题时抓住一个总纲就不会乱：Motorola 什么都「先高后低」，Intel 什么都「先低后高」。",
+    "keyPoints": [
+      "Motorola = 大端 = StartBit 指 MSB = bit 倒着数 = MSB 在低地址",
+      "Intel = 小端 = StartBit 指 LSB = bit 正着数 = LSB 在低地址",
+      "车载主流是 Motorola（90%+），但具体以实际 DBC 标注为准"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "三、Motorola vs Intel 字节序·对比维度表（StartBit 含义/bit 编号方向/车载使用率/跨字节存储）"
+    },
+    "relatedTerms": [
+      "MSB",
+      "LSB",
+      "CANdb++ Layout"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-02-03",
+    "chapterNum": 24,
+    "sectionIndex": 2,
+    "sectionTitle": "三、Motorola vs Intel 字节序（高频考点）",
+    "module": "B",
+    "type": "judge",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "字节序",
+      "命名由来",
+      "CAN 协议"
+    ],
+    "stem": "判断：Motorola 与 Intel 两种字节序，是 CAN 协议标准本身规定的两种传输模式，选哪种由 CAN 控制器的波特率配置决定。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误。本节「面试说」讲得很清楚：字节序命名源自 Motorola 68k / Intel x86 的存储习惯，**与 CAN 协议本身无关**。CAN 协议只负责把 8 个字节原封不动地送到对端，至于这些 bit 怎么拼成一个信号，完全由 DBC（通信矩阵）约定，和波特率更是毫无关系。这是个高频陷阱：很多人以为字节序是「协议规定的」，于是不去核对 DBC 标注，结果踩坑。正确做法是拿到 DBC 先在 CANdb++ 的 Layout 视图看布局，再用已知特征值回推验证。",
+    "keyPoints": [
+      "字节序命名来自 CPU 存储习惯，与 CAN 协议无关",
+      "CAN 只保证字节传输，信号如何拼装由 DBC 约定",
+      "字节序与波特率、控制器配置无任何关系"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "三、Motorola vs Intel 字节序·「面试说」字节序命名源自 Motorola 68k / Intel x86"
+    },
+    "relatedTerms": [
+      "68k",
+      "x86",
+      "通信矩阵"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-02-04",
+    "chapterNum": 24,
+    "sectionIndex": 2,
+    "sectionTitle": "三、Motorola vs Intel 字节序（高频考点）",
+    "module": "B",
+    "type": "short",
+    "cat": "故障定位",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "字节序验证",
+      "CANdb++ Layout",
+      "特征值"
+    ],
+    "stem": "拿到一份新版 DBC 后，为什么不能只凭「德系一般用 Motorola」这类经验直接开工？请说明你会用什么方法验证字节序标注是否正确，以及标注错误会导致什么后果。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题把本节「面试说」的方法论与第十三节「实战中常见严重问题」表里的「Motorola/Intel 标注错误」条目串起来考。重点不是背结论，而是形成「先验证、再解析」的工作习惯。",
+    "keyPoints": [
+      "经验只能作参考，一切以实际 DBC 标注 + 实测验证为准",
+      "验证手段：CANdb++ Layout 视图 + 已知特征值回推",
+      "标注错误属于严重级问题，会导致全部解析值失真"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "三、Motorola vs Intel 字节序·「面试说」先看 Layout 视图、用已知特征值回推"
+    },
+    "relatedTerms": [
+      "CANdb++",
+      "Layout 视图",
+      "假 Bug"
+    ],
+    "refAnswer": "一、为什么不能只凭经验：章节明确指出「传统德系项目多用 Motorola，其他体系 Intel 也很常见，以实际 DBC 标注为准」。经验只能作为先验判断，同一个项目里不同供应商的 ECU 完全可能混用字节序；更危险的情况是 DBC 写的是一种、ECU 实际发的是另一种（第十三节把它列为严重级问题：「DBC 写 @1(Motorola) 实际 ECU 发的是 Intel」）。\n二、验证方法（三步）：①静态看——在 CANdb++ 里打开 Layout 视图，逐 byte 观察信号的 bit 布局，确认 MSB/LSB 落在哪个字节的哪一位，同时顺带检查有没有 bit 位重叠；②动态验——让 ECU 或仿真节点发送一个已知特征值（章节建议用 0x1234 这种高低字节明显不同的值，切忌用 0x0000、0xFFFF 或 0x1111 这类对称值，因为字节序颠倒后看不出差别），在 Trace 里用 DBC 解析，看解析结果是否等于预期特征值；③交叉核——同时验证 bit 位置、Factor/Offset 是否一致，用几个跨量程的点（最小值、中值、最大值）回推，确保不是碰巧对上。\n三、标注错误的后果：高低字节颠倒，该报文下所有相关信号的解析值全部失真。危害在于它「错得很像真的」——数值仍在合法范围内，Trace 不会报错，测试人员会把它当成 SUT 的功能缺陷，于是提出一大片假 Bug，浪费研发排查工时，还可能掩盖真实问题。因此章节把它和 bit 位重叠、Invalid 未定义、版本不同步、网关路由漏配并列为「严重」级。"
+  },
+  {
+    "id": "Q-24-03-01",
+    "chapterNum": 24,
+    "sectionIndex": 3,
+    "sectionTitle": "四、值表定义（VAL_）",
+    "module": "B",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "VAL_",
+      "值表",
+      "枚举"
+    ],
+    "stem": "DBC 中写有 `VAL_ 256 GearPos 0 \"P_Park\" 1 \"R_Reverse\" 2 \"N_Neutral\" 3 \"D_Drive\" ;`，这行语句的直接作用是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "限定 GearPos 信号的物理值范围为 0~3，超出即报错"
+      },
+      {
+        "key": "B",
+        "text": "把 GearPos 的离散数值映射为可读字符串，Trace 中直接显示 \"D_Drive\" 而不是 \"3\""
+      },
+      {
+        "key": "C",
+        "text": "声明 GearPos 与其他档位信号必须原子性同步更新"
+      },
+      {
+        "key": "D",
+        "text": "指定报文 256 在档位变化时以事件方式发送"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "VAL_ 是值表定义，作用表里第一条就是「枚举映射：将离散数值映射为可读字符串（档位/开关状态/故障码）」，第二条「报告可读：CANoe Trace 中直接显示 \"D_Drive\" 而非数字 \"3\"」。A 说的是 SG_ 里的 [Min|Max]，那才是范围定义；C 说的是 Signal Group（第六节）的原子更新；D 说的是 BA_ 属性 GenMsgSendType（第七节）。这三个干扰项恰好对应本章另外三个知识点，能区分开说明你把 DBC 的四类描述手段理清楚了。",
+    "keyPoints": [
+      "VAL_ 语法：VAL_ CAN_ID SignalName 值 \"描述\" ... ; 结尾有分号",
+      "核心价值是可读性——Trace 和测试报告里直接用业务语言",
+      "别把 VAL_ 与 Min/Max、Signal Group、BA_ 属性混淆"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "四、值表定义（VAL_）·作用说明表（枚举映射/报告可读/Invalid 判断/vs Signal Group）"
+    },
+    "relatedTerms": [
+      "GearPos",
+      "CANoe Trace",
+      "故障码"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-03-02",
+    "chapterNum": 24,
+    "sectionIndex": 3,
+    "sectionTitle": "四、值表定义（VAL_）",
+    "module": "B",
+    "type": "multi",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "VAL_",
+      "Invalid",
+      "Min/Max"
+    ],
+    "stem": "关于 VAL_ 值表的作用及其与其他机制的关系，下列说法正确的有：",
+    "options": [
+      {
+        "key": "A",
+        "text": "若 GearPos 定义了 0~3 四个枚举值，收到 GearPos=5 时可判定为无效/故障"
+      },
+      {
+        "key": "B",
+        "text": "VAL_ 是值级枚举，Signal Group 是信号级原子更新，二者解决的问题不同"
+      },
+      {
+        "key": "C",
+        "text": "超出 VAL_ 定义值但仍落在 Min/Max 范围内的取值，可能属于 Invalid"
+      },
+      {
+        "key": "D",
+        "text": "定义了 VAL_ 之后就不需要再写 [Min|Max]，值表可以完全替代范围检查"
+      },
+      {
+        "key": "E",
+        "text": "VAL_ 除枚举外还负责定义该信号的报文周期与超时时间"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A 对应作用表的「Invalid 判断：收到未定义值（如 GearPos=5）→ 判定为无效/故障」；B 对应「vs Signal Group：VAL_ 是值级枚举，Signal Group 是信号级原子更新」；C 对应第十二节进阶考点表里的那条问答——VAL_ 定义离散枚举值及语义，Min/Max 定义连续范围，两者是互补关系，落在范围内但没被枚举覆盖的值往往就是 Invalid。D 错在「替代」二字：VAL_ 面向离散量，Min/Max 面向连续量，缺一不可。E 错得更明显：周期与超时属于 BA_ 属性（GenMsgCycleTime、GenSigTimeoutValue），与 VAL_ 无关。",
+    "keyPoints": [
+      "VAL_ 管离散枚举语义，Min/Max 管连续范围，二者互补不可互相替代",
+      "范围内但未被枚举定义的值 → 高度怀疑是 Invalid",
+      "周期/超时属于 BA_ 属性，不在 VAL_ 职责内"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "四、值表定义（VAL_）·作用说明表 + 十二、面试高频考点·进阶加分项「VAL_ 与 Min/Max 的关系」"
+    },
+    "relatedTerms": [
+      "Invalid",
+      "Signal Group",
+      "GenSigTimeoutValue"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-04-01",
+    "chapterNum": 24,
+    "sectionIndex": 4,
+    "sectionTitle": "五、信号多路复用（Multiplexing）",
+    "module": "B",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Multiplexing",
+      "M 选择器",
+      "m0/m1"
+    ],
+    "stem": "章节示例 `BO_ 768 BodyStatus` 中写有 `SG_ MuxSignal M : 0|4@1+ ...`、`SG_ DoorLF_Status m0 : 4|2@1+ ...`、`SG_ LightLowBeam m1 : 4|1@1+ ...`。关于其中的 M 与 m0/m1，正确的说法是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "M 表示多路选择器，一条报文中只能有 1 个；m0/m1 表示只有 MuxSignal 取到对应值时该组信号才被解析"
+      },
+      {
+        "key": "B",
+        "text": "M 表示强制信号（Mandatory），m0/m1 表示可选信号，都会被同时解析"
+      },
+      {
+        "key": "C",
+        "text": "一条报文中可以定义多个 M 选择器，分别控制不同的信号组"
+      },
+      {
+        "key": "D",
+        "text": "m0 与 m1 组的信号会同时生效，因此 DoorLF_Status 与 LightLowBeam 可以并存于同一帧"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "关键字表定义得很明确：M = Multiplexor（多路选择器），「决定当前帧解析为哪一组信号，每条报文只能有 1 个 M」；m0/m1 = 被选中的信号组，「只有 MuxSignal 的值匹配时才解析该组信号」。所以 B 的「Mandatory」是望文生义；C 直接违反「只能有 1 个 M」的规定；D 违反多路复用的互斥本质——注意示例中 DoorLF_Status(m0) 与 LightLowBeam(m1) 的起始位都是 4，它们物理上就是同一片 bit 区域，靠 MuxSignal 的值来区分含义，根本不可能并存。这也是多路复用能节省 CAN ID 的根本原因。",
+    "keyPoints": [
+      "M = Multiplexor 选择器，每条报文有且仅有 1 个",
+      "m0/m1 组之间互斥，同一帧只有一组被解析",
+      "互斥组常复用同一片 bit 区域，这正是节省资源的手段"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "五、信号多路复用（Multiplexing）·BO_ 768 BodyStatus 示例 + 关键字含义表"
+    },
+    "relatedTerms": [
+      "Extended Multiplexing",
+      "CAN ID 资源",
+      "BCM"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-04-02",
+    "chapterNum": 24,
+    "sectionIndex": 4,
+    "sectionTitle": "五、信号多路复用（Multiplexing）",
+    "module": "B",
+    "type": "multi",
+    "cat": "故障定位",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "Multiplexing",
+      "测试要点",
+      "脏数据"
+    ],
+    "stem": "对采用 Multiplexing 的报文做测试时，依据本节「面试说」，下列关注点或结论正确的有：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Multiplexing 的核心价值是节省 CAN ID——一条报文 ID 承载多种互斥含义"
+      },
+      {
+        "key": "B",
+        "text": "要验证 MuxSignal 值切换后，旧组信号是否被正确清零/忽略，不能残留脏数据"
+      },
+      {
+        "key": "C",
+        "text": "要验证收到非预期的 MuxSignal 值时，ECU 不崩溃、不进死循环"
+      },
+      {
+        "key": "D",
+        "text": "要验证组内所有信号是否在同一帧中被同时更新，否则判定为一致性失败"
+      },
+      {
+        "key": "E",
+        "text": "Extended Multiplexing（嵌套复用）是车载项目中最常用的形式，应作为测试重点"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A 是「面试说」的第一句总结；B、C 正是它列出的两个测试注意点——①切换后旧组信号不能留脏数据，②非预期 MuxSignal 值时的健壮性（这是典型的鲁棒性/异常输入测试）。D 描述的是 Signal Group 的一致性检查（第六节），和 Multiplexing 恰好相反：Signal Group 要求组内同时有效，Multiplexing 要求组间互斥择一。E 与关键字表矛盾，表里写 Extended Multiplexing「极少用」，不应作为常规测试重点。",
+    "keyPoints": [
+      "Multiplexing 测试双重点：切换后脏数据 + 非预期 Mux 值健壮性",
+      "Signal Group 是并行全有效，Multiplexing 是互斥择一有效",
+      "Extended Multiplexing 极少用，不是常规重点"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "五、信号多路复用（Multiplexing）·「面试说」测试时特别注意的两点"
+    },
+    "relatedTerms": [
+      "脏数据",
+      "鲁棒性测试",
+      "Signal Group"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-05-01",
+    "chapterNum": 24,
+    "sectionIndex": 5,
+    "sectionTitle": "六、信号组（Signal Group）",
+    "module": "B",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Signal Group",
+      "SIG_GROUP_",
+      "轮速"
+    ],
+    "stem": "章节示例 `SIG_GROUP_ 512 WheelSpeeds 1 : FL_Speed FR_Speed RL_Speed RR_Speed;` 中，紧跟在组名 WheelSpeeds 之后的数字 `1` 表示：",
+    "options": [
+      {
+        "key": "A",
+        "text": "该信号组的优先级等级，数字越小优先级越高"
+      },
+      {
+        "key": "B",
+        "text": "更新间隔，1 表示每次发送都更新"
+      },
+      {
+        "key": "C",
+        "text": "组内信号的数量"
+      },
+      {
+        "key": "D",
+        "text": "该组信号所在报文的 DLC 长度"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "示例下方的注释逐字标出了各段含义：`512` 是报文 ID、`WheelSpeeds` 是组名、`1` 是更新间隔（1 = 每次发送）、冒号后面是组内信号列表。C 是最容易选错的干扰项——组内确实有 4 个信号（FL/FR/RL/RR），但数量不需要显式声明，冒号后列出来即可，`1` 恰好不是 4 也印证了这一点。理解这个字段的意义在于：它约定了「多久必须整体刷新一次」，是后续做一致性检查的时间基准。",
+    "keyPoints": [
+      "SIG_GROUP_ 语法：报文ID + 组名 + 更新间隔 + : + 组内信号列表",
+      "更新间隔 1 = 每次发送都更新",
+      "组内信号数量无需声明，由列表隐含"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "六、信号组（Signal Group）·SIG_GROUP_ 512 WheelSpeeds 示例与逐字段注释"
+    },
+    "relatedTerms": [
+      "原子更新",
+      "ESP",
+      "一致性检查"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-05-02",
+    "chapterNum": 24,
+    "sectionIndex": 5,
+    "sectionTitle": "六、信号组（Signal Group）",
+    "module": "B",
+    "type": "short",
+    "cat": "概念辨析",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "Signal Group",
+      "Multiplexing",
+      "原子更新"
+    ],
+    "stem": "面试官问：「Signal Group 和 Multiplexing 都是把若干信号'成组'管理，它们到底有什么区别？」请分别说明二者的本质、典型应用场景，并解释为什么轮速信号必须用 Signal Group。",
+    "options": [],
+    "answer": [],
+    "explanation": "这是第十二节进阶加分项里点名的高频面试题。两者名字都带「组」，但一个是「必须一起来」，一个是「只能来一个」，方向完全相反，答题时用一句话对仗说清楚最加分。",
+    "keyPoints": [
+      "Signal Group = 并行全部有效，必须原子更新",
+      "Multiplexing = 互斥择一有效，节省 CAN ID",
+      "轮速四轮不同步 → ESP 误判打滑，属于安全风险"
+    ],
+    "sourceRef": {
+      "kind": "blockquote",
+      "label": "六、信号组（Signal Group）·「面试说」轮速四轮信号必须同步 + 用途表「vs Multiplexing」行"
+    },
+    "relatedTerms": [
+      "ESP",
+      "网关转发",
+      "半新半旧"
+    ],
+    "refAnswer": "一、本质区别（一句话对仗）：Signal Group = 组内信号**并行全部有效、必须一起原子更新**；Multiplexing = 组间信号**互斥择一有效、同一帧只解析一组**。前者解决「不能有的新有的旧」，后者解决「CAN ID 不够用」。\n二、Signal Group：用 `SIG_GROUP_` 声明，把多个必须同步更新的信号绑定成一个组做原子性检查。作用有三——①一致性检查：CANoe 检测到组内任一信号更新，就检查组内其他信号是否同步更新；②防止部分更新：网关转发时按原子操作处理，不会出现半新半旧的状态；③典型场景就是四轮轮速 FL/FR/RL/RR。\n三、Multiplexing：用 M 选择器 + m0/m1 信号组实现，同一 CAN ID 下靠 MuxSignal 的取值切换解析方式，一条报文承载多种互斥含义。典型场景是章节示例的 `BO_ 768 BodyStatus`——MuxSignal=0 解析成车门状态，=1 解析成灯光状态，车门和灯光二选一。\n四、轮速为什么必须用 Signal Group：章节「面试说」给了很具体的理由——如果 ESP 读到左前轮速是新值、右前轮速是旧值，四个轮子的速度就出现了本不该有的差异，车辆稳定性控制会**误判为打滑**，进而错误介入制动或降扭，这是直接影响行车安全的后果。所以必须强制校验四轮同步，用 Signal Group 把一致性要求固化进通信矩阵，而不是靠各 ECU 自觉。\n五、一句话记忆：Signal Group 是「缺一不可」，Multiplexing 是「有你没我」。"
+  },
+  {
+    "id": "Q-24-06-01",
+    "chapterNum": 24,
+    "sectionIndex": 6,
+    "sectionTitle": "七、BA_ 属性完整速查",
+    "module": "B",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "BA_",
+      "GenSigInactiveValue",
+      "属性"
+    ],
+    "stem": "在 BA_ 属性速查表中，用于描述「ECU 未激活时该信号的默认值」（典型值 0xFF）的属性是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "`GenSigStartValue`"
+      },
+      {
+        "key": "B",
+        "text": "`GenSigInactiveValue`"
+      },
+      {
+        "key": "C",
+        "text": "`GenSigTimeoutValue`"
+      },
+      {
+        "key": "D",
+        "text": "`GenMsgDelayTime`"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "三个 GenSig 开头的属性很容易混，按「什么时候用」来区分最清楚：`GenSigStartValue` 是信号初始值（典型 0x00），上电刚起来还没算出真值时用；`GenSigInactiveValue` 是 ECU 未激活时的默认值（典型 0xFF），描述的是 ECU 处于非激活状态；`GenSigTimeoutValue` 是信号超时后的默认值（典型 0x00），描述的是接收侧超时兜底。D 的 `GenMsgDelayTime` 作用域是 BO_，指上电后首次发送的延迟（典型 50ms），跟信号默认值没关系。",
+    "keyPoints": [
+      "StartValue = 上电初始值；InactiveValue = ECU 未激活默认值；TimeoutValue = 超时默认值",
+      "三者作用域都是 SG_，触发时机各不相同",
+      "GenMsgDelayTime 作用域是 BO_，指首次发送延迟"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "七、BA_ 属性完整速查·属性/作用域/说明/典型值表"
+    },
+    "relatedTerms": [
+      "Invalid 值",
+      "上电时序",
+      "超时监控"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-06-02",
+    "chapterNum": 24,
+    "sectionIndex": 6,
+    "sectionTitle": "七、BA_ 属性完整速查",
+    "module": "B",
+    "type": "multi",
+    "cat": "参数记忆",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "BA_",
+      "作用域",
+      "SG_"
+    ],
+    "stem": "根据 BA_ 属性速查表，下列属性中作用域为 `SG_`（信号级）的有：",
+    "options": [
+      {
+        "key": "A",
+        "text": "`GenSigStartValue`"
+      },
+      {
+        "key": "B",
+        "text": "`SigType`"
+      },
+      {
+        "key": "C",
+        "text": "`GenSigTimeoutValue`"
+      },
+      {
+        "key": "D",
+        "text": "`GenMsgSendType`"
+      },
+      {
+        "key": "E",
+        "text": "`NmMessage`"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "速查表把作用域单列了一栏，可以直接对照：作用域为 SG_ 的有 `GenSigStartValue`（信号初始值）、`GenSigInactiveValue`、`GenSigTimeoutValue`、`DiagState`、`SigType`（RangeContinuous / RangeDiscrete）、`SystemSignalLongSymbol`；作用域为 BO_ 的有 `GenMsgCycleTime`、`GenMsgCycleTimeFast`、`GenMsgSendType`（Cyclic/Event/Spontaneous）、`GenMsgDelayTime`、`GenMsgStartDelayTime`、`NmMessage`（网络管理报文标记）。有个很好用的记忆法：**属性名里带 Sig 的多是信号级，带 Msg 的都是报文级**；剩下的 SigType/DiagState 看词根也是信号级，NmMessage 带 Message 显然是报文级。",
+    "keyPoints": [
+      "命名规律：GenSig* → SG_ 级，GenMsg* → BO_ 级",
+      "SigType 取值为 RangeContinuous / RangeDiscrete，属信号级",
+      "NmMessage 是报文级标记，1 = 网络管理报文"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "七、BA_ 属性完整速查·属性/作用域/说明/典型值表"
+    },
+    "relatedTerms": [
+      "NM 报文",
+      "RangeContinuous",
+      "DiagState"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-07-01",
+    "chapterNum": 24,
+    "sectionIndex": 7,
+    "sectionTitle": "八、设计 DBC 的 5 步法",
+    "module": "B",
+    "type": "single",
+    "cat": "协议流程",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "DBC 设计",
+      "5 步法",
+      "流程"
+    ],
+    "stem": "按照章节给出的「设计 DBC 的 5 步法」，正确的步骤顺序是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "定报文 → 定节点 → 定属性 → 定信号 → 定换算"
+      },
+      {
+        "key": "B",
+        "text": "定节点 → 定报文 → 定信号 → 定换算 → 定属性"
+      },
+      {
+        "key": "C",
+        "text": "定信号 → 定换算 → 定报文 → 定节点 → 定属性"
+      },
+      {
+        "key": "D",
+        "text": "定属性 → 定节点 → 定报文 → 定换算 → 定信号"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "5 步法的顺序是 BU_ → BO_ → SG_ → 换算 → 属性，正好和 DBC 文件本身的层级结构一致：先有网络里的节点，才谈得上谁发谁收；有了报文框架（ID + DLC），才能往里排信号的 bit 位；bit 排定后再定 Factor/Offset 把原始值变成物理值；最后才挂周期、初始值、Invalid 值这些属性。这个「自顶向下」的顺序不是随意排的——如果先定信号再定报文，很容易出现 DLC 装不下所有信号、或者信号跨越 DLC 边界被截断的问题（第九节列的常见错误之一）。",
+    "keyPoints": [
+      "5 步：定节点 → 定报文 → 定信号 → 定换算 → 定属性",
+      "顺序与 DBC 层级结构一致，自顶向下",
+      "先框架后细节，避免 DLC 装不下或信号被截断"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "八、设计 DBC 的 5 步法·步骤/内容/关键检查点表"
+    },
+    "relatedTerms": [
+      "BU_",
+      "BO_",
+      "SG_"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-07-02",
+    "chapterNum": 24,
+    "sectionIndex": 7,
+    "sectionTitle": "八、设计 DBC 的 5 步法",
+    "module": "B",
+    "type": "multi",
+    "cat": "标准合规",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "DBC 设计",
+      "检查点",
+      "评审"
+    ],
+    "stem": "关于 5 步法各步骤对应的「关键检查点」，下列描述正确的有：",
+    "options": [
+      {
+        "key": "A",
+        "text": "定报文时：CAN ID 不能与已有报文冲突，DLC 必须能容纳所有信号"
+      },
+      {
+        "key": "B",
+        "text": "定信号后：在 CANdb++ 的 Layout 视图中逐 byte 检查，确保无 bit 位重叠"
+      },
+      {
+        "key": "C",
+        "text": "定属性时：安全信号周期 ≤ 10ms，且每个信号都要设 Invalid 值"
+      },
+      {
+        "key": "D",
+        "text": "定节点时：接收节点列表可以先随意填写，与网关路由表是否一致不影响通信"
+      },
+      {
+        "key": "E",
+        "text": "定换算时：只需写上 Factor 和 Offset，不必验证 Min/Max 对应的原始值是否在 bit 范围内"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 逐条对应 5 步法表格第 2、3、5 步的检查点栏。D 与第 1 步的检查点「接收节点是否和网关路由表一致」直接冲突——接收节点填错、和网关路由对不上，跨网信号根本到不了目标 ECU（第十二节还专门有一条「为什么改 DBC 必须同步网关路由表」）。E 与第 4 步检查点「验证 Min/Max 对应的原始值在 bit 范围内」冲突：举个例子，Max=8000、Factor=1 就需要 13 bit 才装得下，如果 Length 只给了 8 bit，物理值根本到不了 8000，这属于设计自相矛盾。",
+    "keyPoints": [
+      "接收节点必须与网关路由表对齐，否则跨网信号收不到",
+      "Min/Max 对应的原始值必须能被 Length 位宽容纳",
+      "定属性阶段要同时兼顾周期分级与 Invalid 值定义"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "八、设计 DBC 的 5 步法·步骤/内容/关键检查点表"
+    },
+    "relatedTerms": [
+      "网关路由表",
+      "Layout 视图",
+      "Invalid 值"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-08-01",
+    "chapterNum": 24,
+    "sectionIndex": 8,
+    "sectionTitle": "九、常见设计错误",
+    "module": "B",
+    "type": "single",
+    "cat": "故障定位",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Invalid 值",
+      "设计错误",
+      "仪表显示"
+    ],
+    "stem": "某车速信号 Factor=0.01，传感器故障时该信号被填成 0xFFFF，结果仪表上显示出 655.35 km/h 的离谱读数。按章节分类，这属于哪一类 DBC 设计错误？",
+    "options": [
+      {
+        "key": "A",
+        "text": "两个信号 bit 位重叠"
+      },
+      {
+        "key": "B",
+        "text": "Motorola/Intel 字节序搞反"
+      },
+      {
+        "key": "C",
+        "text": "Invalid 值未定义"
+      },
+      {
+        "key": "D",
+        "text": "DLC 声明与实际不符"
+      }
+    ],
+    "answer": [
+      "C"
+    ],
+    "explanation": "「常见设计错误」表里这一条写得几乎一模一样：Invalid 值未定义 → 故障时仪表显示异常（如 0xFFFF、Factor=0.01 → 655.35km/h）。算一下就明白：0xFFFF = 65535，65535 × 0.01 = 655.35。问题的根子在于设计时没有约定「哪个码值代表无效」，也没有要求仪表端做 Invalid 处理，于是故障值被当成正常物理值一路显示出来。预防措施有两层：DBC 侧每个信号定义 0xFF/0xFFFF 为 Invalid；仪表侧收到 Invalid 时显示「--」或保持上一有效值，而不是照单全收。第十三节把它列为「严重」级，因为它会直接吓到驾驶员。",
+    "keyPoints": [
+      "0xFFFF × 0.01 = 655.35，典型的 Invalid 值未处理现象",
+      "预防要两端做：DBC 定义 Invalid 码值 + 显示端做 Invalid 处理逻辑",
+      "该问题被列为严重级，可能造成驾驶员误判"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "九、常见设计错误·错误/后果/预防表「Invalid 值未定义」行"
+    },
+    "relatedTerms": [
+      "0xFFFF",
+      "仪表",
+      "GenSigTimeoutValue"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-08-02",
+    "chapterNum": 24,
+    "sectionIndex": 8,
+    "sectionTitle": "九、常见设计错误",
+    "module": "B",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "报文周期",
+      "安全信号",
+      "参数"
+    ],
+    "stem": "章节针对「报文周期过大」给出的预防建议是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "安全信号 ≤ 10ms、显示信号 ≤ 50ms、状态信号 ≤ 100ms"
+      },
+      {
+        "key": "B",
+        "text": "安全信号 ≤ 100ms、显示信号 ≤ 500ms、状态信号 ≤ 1000ms"
+      },
+      {
+        "key": "C",
+        "text": "所有信号统一设为 10ms，保证实时性一致"
+      },
+      {
+        "key": "D",
+        "text": "所有信号统一设为 1000ms，最大限度降低总线负载"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "这组数字在章节里出现了两次（第九节「常见设计错误」的预防栏、第十三节「周期设定不当」的教训栏），属于必须记住的参数：安全信号 ≤ 10ms、显示信号 ≤ 50ms、状态信号 ≤ 100ms，按重要性和实时性分三档。C 的「统一 10ms」看似保险，实则会让总线负载暴涨——几十条报文都跑 10ms，带宽很快撑满，反而影响高优先级报文；D 的「统一 1000ms」正是章节点名的反面教材：重要信号设 1000ms 会导致网关转发延迟叠加，仪表显示明显滞后。周期设计的本质是在**实时性**与**总线负载**之间做分级权衡。",
+    "keyPoints": [
+      "周期三档：安全 ≤10ms / 显示 ≤50ms / 状态 ≤100ms",
+      "统一设小 → 总线负载过高；统一设大 → 延迟超标",
+      "周期设计是实时性与带宽的分级权衡"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "九、常见设计错误·错误/后果/预防表「报文周期过大」行"
+    },
+    "relatedTerms": [
+      "总线负载",
+      "GenMsgCycleTime",
+      "网关转发延迟"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-08-03",
+    "chapterNum": 24,
+    "sectionIndex": 8,
+    "sectionTitle": "九、常见设计错误",
+    "module": "B",
+    "type": "judge",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "DLC",
+      "设计错误",
+      "带宽"
+    ],
+    "stem": "判断：章节给出的 DLC 取值原则是「DLC = 最大信号占用的最高字节索引 + 1」；DLC 声明得比实际需要大会浪费带宽，声明得比实际小则会导致信号跨越 DLC 边界被截断。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "T"
+    ],
+    "explanation": "正确。「常见设计错误」表里「DLC 声明与实际不符」这一行同时给出了两个方向的后果和一条计算公式：后果是「DLC 声明 6 字节但实际只用 4 字节 → 浪费带宽；信号跨越 DLC 边界 → 截断」，预防是「DLC = 最大信号占用的最高字节索引 + 1」。因为字节索引是从 0 开始的，所以要 +1 才是长度——比如信号最高用到 Byte3，DLC 就应该是 4。带宽浪费之所以要在意，是因为 CAN 每多传 1 个字节就多占约 8 bit 的总线时间，几十条报文累加起来对总线负载的影响相当可观。",
+    "keyPoints": [
+      "DLC = 最高占用字节索引 + 1（索引从 0 起算）",
+      "DLC 过大浪费带宽，过小导致信号截断",
+      "DLC 检查属于 5 步法「定报文」阶段的关键检查点"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "九、常见设计错误·错误/后果/预防表「DLC 声明与实际不符」行"
+    },
+    "relatedTerms": [
+      "总线负载",
+      "字节索引",
+      "信号截断"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-09-01",
+    "chapterNum": 24,
+    "sectionIndex": 9,
+    "sectionTitle": "十、DBC 工具链",
+    "module": "B",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "cantools",
+      "工具链",
+      "Python"
+    ],
+    "stem": "在 DBC 工具链中，用于「代码解析 DBC、提取信号值、生成 C 代码」的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "CANdb++（Vector）"
+      },
+      {
+        "key": "B",
+        "text": "CANoe Trace"
+      },
+      {
+        "key": "C",
+        "text": "Python `cantools`"
+      },
+      {
+        "key": "D",
+        "text": "Excel → DBC 脚本"
+      }
+    ],
+    "answer": [
+      "C"
+    ],
+    "explanation": "工具链表格给出了四者的分工：CANdb++ 是创建/编辑 DBC 的标配 GUI 工具，亮点是 Layout 视图可视化 bit 布局；CANoe Trace 是加载 DBC 后实时解析信号显示；Python `cantools` 走的是代码路线——解析 DBC、提取信号值、生成 C 代码，是自动化测试里最常用的库（第十三节提到它可以配合 pytest 自动解码并断言）；Excel → DBC 脚本是车企常见做法，需求在 Excel 里管理再自动生成 DBC，好处是保证源端一致、避免人工录入出错。这四个工具分别覆盖「编辑 / 观测 / 编程 / 生成」四个环节。",
+    "keyPoints": [
+      "CANdb++ 编辑、CANoe Trace 观测、cantools 编程、Excel 脚本生成",
+      "cantools 是自动化测试解析 DBC 的主力库",
+      "Excel→DBC 的核心价值是保证需求源端一致"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "十、DBC 工具链·工具/用途表"
+    },
+    "relatedTerms": [
+      "pytest",
+      "Layout 视图",
+      "代码生成"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-10-01",
+    "chapterNum": 24,
+    "sectionIndex": 10,
+    "sectionTitle": "十一、DBC 版本管理（⚠️ 必知）",
+    "module": "B",
+    "type": "multi",
+    "cat": "标准合规",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "版本管理",
+      "变更评审",
+      "DBC"
+    ],
+    "stem": "关于 DBC 版本管理，下列做法或说法符合章节要求的有：",
+    "options": [
+      {
+        "key": "A",
+        "text": "DBC 由网络管理组 / EE 架构组维护，不是测试组"
+      },
+      {
+        "key": "B",
+        "text": "每次变更必须升版号（如 V2.3 → V2.4），不能直接覆盖旧文件"
+      },
+      {
+        "key": "C",
+        "text": "测试前必须确认 DBC 版本号与 SUT 版本对应，否则会出现满屏假 Bug"
+      },
+      {
+        "key": "D",
+        "text": "测试组发现信号定义不合适时，可自行修改 DBC 后直接用于测试"
+      },
+      {
+        "key": "E",
+        "text": "DBC 新增信号后，网关路由表会自动同步，无需人工处理"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 分别对应版本管理表的「维护方」「版本号」「测试前置」三行。D 违反维护职责划分——测试组是使用者不是维护者，私改 DBC 会造成本地版本与官方版本分叉，后续所有测试结论都不可信；正确做法是把问题反馈给架构组，走变更评审流程。E 与「同步要求」行直接冲突，也和第十二节的进阶考点呼应：新增信号默认是「不路由」的，不加路由规则目标网络的 ECU 就收不到，必须人工同步网关路由表。",
+    "keyPoints": [
+      "维护方是架构组，测试组只提需求不改文件",
+      "升版号不覆盖，变更走评审并通知全组",
+      "新增信号默认不路由，网关路由表必须人工同步"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "十一、DBC 版本管理·环节/说明表（维护方/版本号/变更评审/测试前置/同步要求）"
+    },
+    "relatedTerms": [
+      "SUT",
+      "ALM",
+      "假 Bug"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-10-02",
+    "chapterNum": 24,
+    "sectionIndex": 10,
+    "sectionTitle": "十一、DBC 版本管理（⚠️ 必知）",
+    "module": "B",
+    "type": "judge",
+    "cat": "标准合规",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "版本号",
+      "变更流程",
+      "DBC"
+    ],
+    "stem": "判断：DBC 只是个纯文本文件，如果只是改了一两个信号这类小改动，可以直接覆盖原文件，不必升版号，也不必走评审。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误，而且是很危险的错误认知。章节在版本管理表里明确要求：「每次变更必须升版号（如 V2.3 → V2.4），不能覆盖」，「改 DBC 必须经过评审——新增信号要确认不与其他信号重叠、不影响网关路由」。原因在于 DBC 的变更是有下游传播链的：架构组改 DBC → 网关路由表 → 各 ECU CAN 驱动代码 → 测试脚本解析 → 变更通知。一旦覆盖且不通知，团队里就会同时存在多份「同名但内容不同」的 DBC，测试用旧版解析新版 SUT，所有信号都会错位，产出一大片假 Bug（第十三节把「DBC 版本不同步」列为严重级问题）。「改动小」恰恰是最容易被轻视、也最容易酿成事故的情形。",
+    "keyPoints": [
+      "任何变更都要升版号，禁止原地覆盖",
+      "变更必须评审：查 bit 重叠、查网关路由影响",
+      "版本不同步 → 满屏假 Bug，被列为严重级问题"
+    ],
+    "sourceRef": {
+      "kind": "code",
+      "label": "十一、DBC 版本管理·变更传播链示意（需求变更→架构组改DBC→发布新版本→同步下游）"
+    },
+    "relatedTerms": [
+      "变更通知",
+      "版本分叉",
+      "评审"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-11-01",
+    "chapterNum": 24,
+    "sectionIndex": 11,
+    "sectionTitle": "十二、面试高频考点",
+    "module": "B",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "StartBit",
+      "Motorola",
+      "位布局"
+    ],
+    "stem": "面试题：某信号 StartBit=12、Length=16、Motorola 字节序、无符号。按章节给出的高分回答，该信号的 MSB 和 LSB 分别位于：",
+    "options": [
+      {
+        "key": "A",
+        "text": "MSB 在 Byte1 的 bit4，LSB 在 Byte2 的 bit5"
+      },
+      {
+        "key": "B",
+        "text": "MSB 在 Byte2 的 bit5，LSB 在 Byte1 的 bit4"
+      },
+      {
+        "key": "C",
+        "text": "MSB 在 Byte0 的 bit0，LSB 在 Byte1 的 bit7"
+      },
+      {
+        "key": "D",
+        "text": "MSB 与 LSB 都在 Byte1 内，不跨字节"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "章节「进阶加分项」表里给的标准答案是：MSB 在 Byte1 的 bit4，LSB 在 Byte2 的 bit5，占用 Byte1 后半 + Byte2 全 + Byte3 前半（Motorola 计数递减）。理解要点有两个：①Motorola 的 StartBit 指的是 **MSB 的位号**，所以 bit12 就是最高位起点，按 DBC 的位编号方式 bit12 落在 Byte1 内；②Motorola 的 bit 编号是**向高地址逐位递减**的，所以从 MSB 开始往后数 16 位会越过字节边界继续排。选 B 把 MSB/LSB 说反了（那是 Intel 的排法）；D 忽略了 16 位信号在一个 8 位字节里根本装不下的事实。这类题面试官常让你现场画位布局图，建议照着本节的 ASCII 图多画几遍形成肌肉记忆。",
+    "keyPoints": [
+      "Motorola 的 StartBit = MSB 位号，bit 编号向高地址递减",
+      "StartBit=12/Length=16 → MSB 在 Byte1.bit4，LSB 在 Byte2.bit5",
+      "16 位信号必然跨字节，画图时先定 MSB 再逐位数"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "十二、面试高频考点·进阶加分项「StartBit=12, Length=16 Motorola，信号跨了哪些字节？」"
+    },
+    "relatedTerms": [
+      "位布局",
+      "CANdb++ Layout",
+      "字节边界"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-11-02",
+    "chapterNum": 24,
+    "sectionIndex": 11,
+    "sectionTitle": "十二、面试高频考点",
+    "module": "B",
+    "type": "short",
+    "cat": "故障定位",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "网关路由表",
+      "DBC 变更",
+      "跨网信号"
+    ],
+    "stem": "面试题：为什么改 DBC 新增信号后必须同步网关路由表？如果漏配会出现什么现象？作为测试工程师，你会如何在测试中提前发现这个问题？",
+    "options": [],
+    "answer": [],
+    "explanation": "这题同时命中第十一节的「同步要求」、第十二节进阶加分项和第十三节严重问题表里的「网关路由表漏配」，是 DBC 与网关知识的交汇点，属于典型的加分回答机会。",
+    "keyPoints": [
+      "新增信号默认「不路由」，是网关的默认行为",
+      "漏配现象：源侧总线上有信号，目标侧 ECU 完全收不到",
+      "测试方法：源侧与目的侧双端 Trace 对比"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "十二、面试高频考点·进阶加分项「为什么改 DBC 必须同步网关路由表？」+ 十三、实战中常见严重问题「网关路由表漏配」"
+    },
+    "relatedTerms": [
+      "跨网信号",
+      "Gateway",
+      "信号一致性测试"
+    ],
+    "refAnswer": "一、为什么必须同步：网关对跨网信号的转发是「白名单」机制——只有在路由表里显式配置了的信号才会被转发。章节把这条默认行为总结为「新增信号=空白路由」：DBC 里新增一个信号，网关并不会自动知道要把它从 A 网转到 B 网，默认状态就是**不路由**。所以 DBC 变更和网关路由表配置是两件必须成对完成的事。\n二、漏配的现象：源侧一切正常——发送 ECU 按新 DBC 发出了报文，在源网络的 Trace 里能看到信号、值也对；但目标网络的接收 ECU 完全收不到该信号，表现为仪表/中控没有任何显示，或者一直停留在初始值/超时默认值。这种「发得出、收不到」的现象很有迷惑性：容易被误判为接收 ECU 的软件 Bug，让研发白排查很久。\n三、如何提前发现（测试策略）：①双端 Trace 对比——这正是第十三节「信号一致性测试」的做法：源侧和目的侧分别用**各自网络的 DBC** 解析，对比信号是否存在、值是否一致、周期和延迟是否满足要求；②变更影响面检查——每次拿到新版 DBC，先 diff 出新增/修改的信号清单，凡是接收节点跨网络的，逐条到网关路由表里核对是否已配置；③把「网关路由核对」写进 DBC 变更评审的 checklist，从流程上前移，而不是等集成测试才发现；④顺带验证网关有没有篡改 Factor/Offset——有些网关会做信号重映射，转发后的物理值可能与源侧不一致，这也是章节点名要重点关注的。"
+  },
+  {
+    "id": "Q-24-12-01",
+    "chapterNum": 24,
+    "sectionIndex": 12,
+    "sectionTitle": "十三、测试实战关联",
+    "module": "B",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "测试实战",
+      "cantools",
+      "信号一致性"
+    ],
+    "stem": "关于 DBC 在测试实战中的应用，下列做法正确的有：",
+    "options": [
+      {
+        "key": "A",
+        "text": "加载 DBC 后，CANoe Trace 中可直接看到物理值和信号名，而不是一串 hex 数字"
+      },
+      {
+        "key": "B",
+        "text": "跨网信号测试时，源侧和目的侧分别用各自网络的 DBC 解析，对比值/周期/延迟"
+      },
+      {
+        "key": "C",
+        "text": "用 `cantools` 加载 DBC，在 pytest 用例中自动解码 CAN 报文并断言信号值"
+      },
+      {
+        "key": "D",
+        "text": "网关转发后 Factor/Offset 一定与源侧一致，无需比对"
+      },
+      {
+        "key": "E",
+        "text": "DBC 中的 DID 定义可直接用于验证 $22 服务的返回值"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 分别对应本节「CAN Trace 解析」「信号一致性测试」「DBC 自动化解析」三个小节的要点。D 恰恰说反了——章节专门提醒「重点关注：网关转发后 Factor/Offset 是否被篡改（有些网关会重映射）」，所以两端必须比对物理值而不是只比原始值。E 也是错的：DBC 里根本没有 DID 定义，$22 读 DID 的返回值需要对照 ODX/CDD 诊断数据库验证，DBC 只描述应用报文的信号。补充一个实用技巧：本节还提到 DBC 本身可以当作测试 Oracle——直接从 DBC 提取每个信号的 Min/Max 自动生成边界值用例，省掉手工设计的工作量。",
+    "keyPoints": [
+      "跨网测试要两端各用各的 DBC 解析并比对物理值",
+      "网关可能重映射 Factor/Offset，必须验证",
+      "DBC 可作为测试 Oracle，自动生成边界值用例"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "十三、测试实战关联·CAN Trace 解析 / 信号一致性测试 / DBC 自动化解析 三个列表"
+    },
+    "relatedTerms": [
+      "测试 Oracle",
+      "边界值测试",
+      "重映射"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-24-12-02",
+    "chapterNum": 24,
+    "sectionIndex": 12,
+    "sectionTitle": "十三、测试实战关联",
+    "module": "B",
+    "type": "single",
+    "cat": "概念辨析",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "诊断测试",
+      "ODX/CDD",
+      "DBC 边界"
+    ],
+    "stem": "做诊断测试时，用 $22 服务读取某个 DID 拿到返回值，应当对照什么来验证其正确性？",
+    "options": [
+      {
+        "key": "A",
+        "text": "DBC 文件中对应的 SG_ 信号定义"
+      },
+      {
+        "key": "B",
+        "text": "ODX/CDD 诊断数据库中的 DID 定义"
+      },
+      {
+        "key": "C",
+        "text": "DBC 文件中的 VAL_ 值表"
+      },
+      {
+        "key": "D",
+        "text": "DBC 文件中的 BA_ 属性 DiagState"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "本节「诊断测试」小节把这条边界划得很清楚：$22 读 DID 的返回值需对照 **ODX/CDD 诊断数据库**中的 DID 定义验证，**DBC 只描述应用报文信号**。这是新人常见的越界误用——以为 DBC 是「万能字典」，什么都能查。实际上 DBC 管的是周期性应用报文的信号矩阵，诊断数据（DID、DTC、例程）由 ODX/CDD 管。至于 D 的 `DiagState`，它确实是 DBC 里与诊断沾边的属性，但用途只是「判断 ECU 是否处于诊断会话」这类状态标记，并不能用来解析 DID 的数据内容，属于典型的似是而非干扰项。",
+    "keyPoints": [
+      "DBC 管应用报文信号，ODX/CDD 管诊断 DID/DTC",
+      "DiagState 只标记诊断会话状态，不解析 DID 数据",
+      "分清数据库职责边界，避免用错参照物"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "十三、测试实战关联·诊断测试小节列表（DiagState 与 $22 读 DID 的验证依据）"
+    },
+    "relatedTerms": [
+      "UDS",
+      "DID",
+      "CDD"
+    ],
+    "refAnswer": ""
+  }
+]

@@ -1,0 +1,880 @@
+[
+  {
+    "id": "Q-41-00-01",
+    "chapterNum": 41,
+    "sectionIndex": 0,
+    "sectionTitle": "一、工具总览（按用途）",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "工具总览",
+      "ZCANpro",
+      "工具选型"
+    ],
+    "stem": "按本章「工具总览（按用途）」表，用途为『轻量 CAN 分析』的代表工具与性质是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "CANoe + VN 硬件；商业（Vector）"
+      },
+      {
+        "key": "B",
+        "text": "ZCANpro + USBCAN；商业（周立功，性价比高）"
+      },
+      {
+        "key": "C",
+        "text": "SavvyCAN + CANDapter；开源/免费"
+      },
+      {
+        "key": "D",
+        "text": "Airtest / Appium + ADB；开源/免费"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "总览表按用途逐行给出工具与性质：整车网络仿真用 CANoe + VN（商业）；轻量 CAN 分析用 ZCANpro + USBCAN（周立功，性价比高）；脚本自动化用 CAPL；诊断 UDS 用 CANdela/ODX + CDD；座舱 UI 用 Airtest/Appium + ADB；示波、电源、万用表属硬件采购。故选 B。A 定位是整车级仿真，用来做轻量分析属杀鸡用牛刀；C 的 SavvyCAN 出现在第二节开源平替清单，不是总览表这一行的代表工具；D 属座舱 UI 层面。实际工作中这张表的用处是接到任务后快速判断该领哪套家伙：现场复现故障、外出调试，多数人背的是 USBCAN 加 ZCANpro，便携、开机快、不占 license；只有做整网仿真时才动用 CANoe。",
+    "keyPoints": [
+      "轻量 CAN 分析对应 ZCANpro + USBCAN",
+      "ZCANpro 属周立功商业方案，性价比高",
+      "按用途选工具，不是越贵越合适"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "一、工具总览（按用途）·用途/代表工具/性质表第 2 行"
+    },
+    "relatedTerms": [
+      "CAN",
+      "ZCANpro",
+      "USBCAN"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-41-00-02",
+    "chapterNum": 41,
+    "sectionIndex": 0,
+    "sectionTitle": "一、工具总览（按用途）",
+    "module": "A",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "工具总览",
+      "商业与开源",
+      "CAPL"
+    ],
+    "stem": "关于本章工具总览表中「用途—代表工具—性质」的对应关系，下列说法正确的有：",
+    "options": [
+      {
+        "key": "A",
+        "text": "整车网络仿真/测试对应 CANoe + VN 硬件，性质为商业（Vector）"
+      },
+      {
+        "key": "B",
+        "text": "CAN 脚本/自动化对应 CAPL，随 CANoe 提供，性质为商业"
+      },
+      {
+        "key": "C",
+        "text": "诊断 UDS 对应 CANdela/ODX + CDD，需要 license"
+      },
+      {
+        "key": "D",
+        "text": "座舱 UI 自动化对应 Airtest / Appium + ADB，性质为需付费的商业授权"
+      },
+      {
+        "key": "E",
+        "text": "示波器、电源、万用表在表中被归为开源软件，无需采购成本"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 与总览表逐行一致。D 错在性质：表里 Airtest / Appium + ADB 明确标注开源/免费，第六节也写「座舱 UI：ADB + Airtest/Appium，全免费」。E 错在类别：示波、电源、万用表这一行的性质是硬件采购，它们不是软件，谈不上开源与否。这两个错项正是新人容易混的地方：一是以为凡能做自动化的工具都要买 license，二是把免费的概念从软件误推到硬件。实际做预算时要把这张表拆成两笔账，软件 license 一笔、硬件采购一笔，前者能靠开源替代压缩，后者压不下去。只报软件不报硬件，后面接口卡、示波器申请不下来，环境照样搭不起来。",
+    "keyPoints": [
+      "CAPL 随 CANoe 提供，属商业能力",
+      "座舱 UI 自动化工具链为开源/免费",
+      "示波/电源/万用表属硬件采购"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "一、工具总览（按用途）·六行用途分类表"
+    },
+    "relatedTerms": [
+      "CANoe",
+      "CAPL",
+      "UDS",
+      "ADB"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-41-00-03",
+    "chapterNum": 41,
+    "sectionIndex": 0,
+    "sectionTitle": "一、工具总览（按用途）",
+    "module": "A",
+    "type": "judge",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "座舱 UI 自动化",
+      "开源免费",
+      "工具性质"
+    ],
+    "stem": "判断：按本章工具总览表，座舱 UI 自动化所用的 Airtest / Appium + ADB 属于需要购买 license 的商业工具。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误。总览表中座舱 UI 自动化一行的性质写的是开源/免费。ADB 是 Android 官方调试桥，Airtest 与 Appium 都是开源框架，三者叠起来就能覆盖车机屏的点击、滑动、截图比对与应用安装，不需要授权费用。本章第三节也强调车载座舱 UI 自动化建立在免费的 ADB/Airtest/Appium 之上，第六节同样标注全免费，三处口径一致。之所以要单独判断，是因为很多新人默认车载工具都贵，一提自动化就先去问有没有 license，白等审批。实际上座舱 UI 自动化的真正门槛不在钱，而在设备与权限：能不能 adb 连上车机、拿不拿得到测试包、控件识别稳不稳定。",
+    "keyPoints": [
+      "Airtest/Appium/ADB 性质为开源免费",
+      "门槛在设备权限而非授权费",
+      "本章三处口径一致：全免费"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "一、工具总览（按用途）·座舱 UI 自动化行（性质列）"
+    },
+    "relatedTerms": [
+      "ADB",
+      "Airtest",
+      "Appium"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-41-01-01",
+    "chapterNum": 41,
+    "sectionIndex": 1,
+    "sectionTitle": "二、总线分析：商业 vs 平替",
+    "module": "A",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "cantools",
+      "DBC 解析",
+      "开源平替"
+    ],
+    "stem": "在本章列出的开源方案中，负责「解析 DBC，把原始字节转成物理信号，写脚本分析神器」的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "python-can"
+      },
+      {
+        "key": "B",
+        "text": "cantools"
+      },
+      {
+        "key": "C",
+        "text": "SavvyCAN"
+      },
+      {
+        "key": "D",
+        "text": "can-utils"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "本节开源清单里分工明确：python-can 支持 SocketCAN、PCAN、USB2CAN 等接口，负责收发与记录；cantools 负责解析 DBC，把原始字节转成物理信号；SavvyCAN 是免费可视化软件，需配 CANDapter 等硬件；SocketCAN + can-utils 提供 candump/cansend 命令行收发。故选 B。A、D 都停留在字节层，能收能发但看不懂语义；C 是带界面的工具，不是给脚本调用的库。写自动化脚本时这个分工体现得很直白：python-can 拿到的是一帧 ID 加原始数据，要判断车速是否达到 60，就得用 cantools 按 DBC 解码成信号再断言。少了这一层，脚本里会堆满手写的移位与掩码，DBC 一改版全部返工。",
+    "keyPoints": [
+      "cantools 负责加载 DBC 并解码物理信号",
+      "python-can 负责收发记录，不解语义",
+      "SavvyCAN 是可视化软件而非脚本库"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "二、总线分析：商业 vs 平替·开源方案列表第 2 条"
+    },
+    "relatedTerms": [
+      "DBC",
+      "cantools",
+      "信号"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-41-01-02",
+    "chapterNum": 41,
+    "sectionIndex": 1,
+    "sectionTitle": "二、总线分析：商业 vs 平替",
+    "module": "A",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "开源方案",
+      "SocketCAN",
+      "PCAN-View"
+    ],
+    "stem": "关于本章列出的开源/免费总线分析方案，下列说法正确的有：",
+    "options": [
+      {
+        "key": "A",
+        "text": "python-can 支持 SocketCAN、PCAN、USB2CAN 等多种接口，可收发与记录"
+      },
+      {
+        "key": "B",
+        "text": "SocketCAN + can-utils 在 Linux 下用 candump/cansend 做命令行收发，零成本"
+      },
+      {
+        "key": "C",
+        "text": "PCAN-View 是 PEAK 提供的免费软件，但需要配 PCAN 硬件"
+      },
+      {
+        "key": "D",
+        "text": "SavvyCAN 是收费的可视化 CAN 分析软件，界面接近商业工具"
+      },
+      {
+        "key": "E",
+        "text": "CANalyzer demo 是 Vector 提供的功能完整版本，可直接用于量产项目验收"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 均可在本节开源清单中逐条对上。D 错在性质：原文写的是 SavvyCAN 为免费可视化 CAN 分析软件，配 CANDapter 等硬件，收费的是硬件不是软件。E 错在能力边界：原文写 CANalyzer demo 是 Vector 自带受限版，适合练手，会在报文数量、运行时长、可用功能上做限制，不能拿去做量产验收——验收要的是完整记录与合规工具链，这正是第六节说企业要用 license 成本换效率与合规的原因。这两个错项对应新人最常踩的坑：听到免费就以为一分钱不花，或者拿 demo 跑几十帧就以为够用，等到真做长时间记录时才发现被限死。",
+    "keyPoints": [
+      "SavvyCAN 软件免费，硬件另配 CANDapter",
+      "PCAN-View 免费但绑定 PCAN 硬件",
+      "CANalyzer demo 是受限版，仅适合练手"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "二、总线分析：商业 vs 平替·开源方案六条列表"
+    },
+    "relatedTerms": [
+      "SocketCAN",
+      "python-can",
+      "CAN"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-41-01-03",
+    "chapterNum": 41,
+    "sectionIndex": 1,
+    "sectionTitle": "二、总线分析：商业 vs 平替",
+    "module": "A",
+    "type": "single",
+    "cat": "实战应用",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "无 CANoe",
+      "轻量分析",
+      "千元级"
+    ],
+    "stem": "公司暂时没有采购 CANoe，需要马上开展轻量的 CAN 报文分析工作。按本节建议，最合适的做法是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "停下测试工作，等公司走完 CANoe 采购流程再开始"
+      },
+      {
+        "key": "B",
+        "text": "用千元级的 ZCANpro 做轻量分析；个人学习则走开源方案跑通基础收发与解析"
+      },
+      {
+        "key": "C",
+        "text": "先申请 CANdela 的 license，用诊断工具代替总线分析"
+      },
+      {
+        "key": "D",
+        "text": "直接采购 VN5610 做 CAN 报文的日常抓取与查看"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "本节开篇态度明确：公司没买 CANoe 也不必干等，轻量分析可用千元级的 ZCANpro；个人学习用开源方案完全能跑通基础收发与解析。故选 B。A 违背本节主旨，采购周期动辄数月，等下去项目节点就废了。C 张冠李戴，CANdela/ODX + CDD 解决的是诊断数据库编辑问题，不是拿来看总线报文的。D 里的 VN5610 在第四节的定位是车载以太网商业方案，做 TSN 与服务发现深度仿真，用它看几条 CAN 报文属严重资源错配。实际工作中领导问没工具还能不能干，正确回答不是要么全买要么不干，而是先说清任务档次：只是看报文、验证信号值，开源方案就够；要做剩余总线仿真才必须上 CANoe。",
+    "keyPoints": [
+      "轻量分析用千元级 ZCANpro，不必干等",
+      "个人学习可用开源方案跑通收发解析",
+      "按任务档次选工具，避免资源错配"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "二、总线分析：商业 vs 平替·首段（如果公司没买 CANoe，也不必干等）"
+    },
+    "relatedTerms": [
+      "ZCANpro",
+      "CAN",
+      "报文"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-41-02-01",
+    "chapterNum": 41,
+    "sectionIndex": 2,
+    "sectionTitle": "三、自动化与诊断的免费路线",
+    "module": "A",
+    "type": "single",
+    "cat": "实战应用",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "开源 Test Module",
+      "pytest",
+      "自动化"
+    ],
+    "stem": "本节提出「用 Python 做 CAN 自动化完全可行」，其中相当于一套开源版 Test Module 的组合是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "python-can 发激励 + cantools 解析 + pytest 做判定"
+      },
+      {
+        "key": "B",
+        "text": "CAPL 发激励 + CANoe Test Module 判定 + Excel 出报告"
+      },
+      {
+        "key": "C",
+        "text": "Wireshark 抓包 + Scapy 构包 + ADB 判定"
+      },
+      {
+        "key": "D",
+        "text": "SavvyCAN 录制 + CANdela 解析 + Appium 判定"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "本节原文：CAPL 是 CANoe 专属，但用 Python 做 CAN 自动化完全可行——python-can 发激励、cantools 解析、pytest 做判定，就是一套开源版 Test Module。三段分工正好对应自动化的三个动作：施加激励、把原始字节翻译成物理信号、断言实际值并输出结果。B 描述的是商业链路本身；C 的 Wireshark 与 Scapy 属第四节以太网工具，做不了 CAN 激励与信号判定；D 把诊断工具 CANdela 当解析器，属概念错位。这套链路的实用价值是能接进 CI，pytest 天然出 JUnit 报告；短板是缺剩余总线仿真，被测 ECU 若要求整网环境正常，光发几帧激励可能进不了工作模式。",
+    "keyPoints": [
+      "三件套：python-can、cantools、pytest",
+      "分别对应激励、解析、判定三个动作",
+      "短板是缺少剩余总线仿真能力"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "三、自动化与诊断的免费路线·首段（开源版 Test Module）"
+    },
+    "relatedTerms": [
+      "CAPL",
+      "python-can",
+      "cantools"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-41-02-02",
+    "chapterNum": 41,
+    "sectionIndex": 2,
+    "sectionTitle": "三、自动化与诊断的免费路线",
+    "module": "A",
+    "type": "judge",
+    "cat": "标准合规",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "UDS",
+      "ISO 14229",
+      "CDD/ODX"
+    ],
+    "stem": "判断：UDS 协议本身是公开的（ISO 14229），可以用 python-uds 等库自己组帧，不必非买 CANdela；只有 CDD/ODX 的编辑才需要商业工具。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "T"
+    ],
+    "explanation": "正确，与本节原文一致。要把两件事分开看：一是协议，UDS 由 ISO 14229 定义，服务 ID、子功能、否定响应码都是公开信息，任何人都能照标准自己拼请求帧、解析响应帧，python-uds 这类库做的就是这件事；二是诊断数据库，CDD 是 Vector 的诊断描述文件格式，ODX 是标准化交换格式，正式编辑与发布它们才需要 CANdela 这类商业工具。所以只想验证会话切换、读数据能不能通，开源组帧完全够用。但边界要清楚：一旦要求按 CDD 逐条覆盖诊断服务、生成正式报告或向主机厂交付诊断库，就绕不开商业工具。面试时讲清这层边界，比只说一句免费也能做更有说服力。",
+    "keyPoints": [
+      "UDS 协议公开，标准号 ISO 14229",
+      "python-uds 等库可自行组帧做诊断",
+      "CDD/ODX 编辑才需要商业工具"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "三、自动化与诊断的免费路线·首段（诊断方面，UDS 协议本身公开）"
+    },
+    "relatedTerms": [
+      "UDS",
+      "诊断",
+      "ODX"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-41-02-03",
+    "chapterNum": 41,
+    "sectionIndex": 2,
+    "sectionTitle": "三、自动化与诊断的免费路线",
+    "module": "A",
+    "type": "short",
+    "cat": "实战应用",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "免费不等于零成本",
+      "硬件成本",
+      "选型总账"
+    ],
+    "stem": "本节给出一条重要警示：「免费」常指「软件免费」，硬件不一定免费。请解释这句话的含义，结合本章内容举出至少三个具体例子，并说明选型时应当怎样算总账。",
+    "options": [],
+    "answer": [],
+    "explanation": "本题考查对开源方案成本边界的完整认知。很多人做工具调研只比软件价格，得出开源全免费的结论，等到开工才发现没有接口卡连不上总线，采购又要重走流程，项目节点因此被拖。本节的价值就在于提前把隐性成本摆上台面，并给出一个反直觉却很实在的结论：算完总账，有时周立功套件反而更省心。省的不只是钱，还有搭环境的时间、驱动兼容的排查成本和出问题时有没有厂商技术支持。答题时要覆盖含义、具体例子、算账方法三层，只答一句硬件要钱算不上完整回答。",
+    "keyPoints": [
+      "免费多指软件免费，硬件仍需采购",
+      "SavvyCAN 需配 CANDapter 硬件",
+      "算总账含硬件、时间与维护成本"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "三、自动化与诊断的免费路线·warning 提示框（「免费」常指「软件免费」）"
+    },
+    "relatedTerms": [
+      "SocketCAN",
+      "python-can",
+      "USBCAN"
+    ],
+    "refAnswer": "一、含义：开源省的是软件授权费，但 CAN 是物理总线，软件必须通过接口硬件才能收发，零软件费不等于零成本。\n二、例子：1. SavvyCAN 免费但要配 CANDapter；2. python-can 免费但仍需接口卡；3. SocketCAN 零成本但要带 CAN 的树莓派或 USB-CAN 模块；4. PCAN-View 免费却绑定 PEAK 硬件。\n三、算总账：拆成软件 license、硬件采购、搭建与维护时间三笔；按同一任务口径比钱和工期；把驱动兼容与稳定性风险计入。结论按场景定：个人学习走开源，中小项目选 ZCANpro + USBCAN 更省心，企业用 license 换合规。"
+  },
+  {
+    "id": "Q-41-03-01",
+    "chapterNum": 41,
+    "sectionIndex": 3,
+    "sectionTitle": "四、车载以太网与协议抓包",
+    "module": "A",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "Wireshark",
+      "SOME/IP",
+      "DoIP"
+    ],
+    "stem": "按本节内容，抓取 SOME/IP、DoIP、TCP/UDP 报文时，车载以太网的首选工具是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Wireshark"
+      },
+      {
+        "key": "B",
+        "text": "SavvyCAN"
+      },
+      {
+        "key": "C",
+        "text": "ZCANpro"
+      },
+      {
+        "key": "D",
+        "text": "cantools"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "本节把车载以太网工具分三档：Wireshark 抓 SOME/IP、DoIP、TCP/UDP，是首选；Scapy 构造与解析网络包，做 DoIP 路由激活这类协议级测试；CANoe 以太网模块与 VN5610 属商业方案，做 TSN 与服务发现的深度仿真。故选 A。B、C 是 CAN 侧工具，不解析以太网协议栈；D 的 cantools 只做 DBC 解码。要注意抓包与解析是两件事：Wireshark 抓到的是原始以太网帧，要看懂 SOME/IP 的服务 ID、方法 ID 还得按对应协议解析。实际调试最常见的坑是抓不到包——车载以太网多为点对点或走交换机，不做端口镜像、抓包点选错，电脑压根收不到别人的通信。",
+    "keyPoints": [
+      "Wireshark 是车载以太网抓包首选",
+      "可抓 SOME/IP、DoIP、TCP/UDP",
+      "抓不到包常因未做端口镜像"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "四、车载以太网与协议抓包·列表第 1 条"
+    },
+    "relatedTerms": [
+      "SOME/IP",
+      "DoIP",
+      "车载以太网"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-41-03-02",
+    "chapterNum": 41,
+    "sectionIndex": 3,
+    "sectionTitle": "四、车载以太网与协议抓包",
+    "module": "A",
+    "type": "multi",
+    "cat": "工具操作",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "Scapy",
+      "VN5610",
+      "TSN"
+    ],
+    "stem": "关于本节列出的车载以太网与协议抓包工具，下列说法正确的有：",
+    "options": [
+      {
+        "key": "A",
+        "text": "Scapy 可以构造与解析网络包，用于做 DoIP 路由激活等协议级测试"
+      },
+      {
+        "key": "B",
+        "text": "CANoe 以太网模块与 VN5610 属于商业方案，用于 TSN、服务发现的深度仿真"
+      },
+      {
+        "key": "C",
+        "text": "Wireshark 主要用于抓取与查看以太网侧的协议报文"
+      },
+      {
+        "key": "D",
+        "text": "SocketCAN + can-utils 是车载以太网抓包的首选方案"
+      }
+    ],
+    "answer": [
+      "A",
+      "B",
+      "C"
+    ],
+    "explanation": "A、B、C 与本节三条列表一一对应。D 明显错位：SocketCAN 与 can-utils 是 Linux 下的 CAN 工具，candump/cansend 收发的是 CAN 帧，与以太网协议栈无关，这一条出现在第二节的 CAN 平替清单里。区分 A 与 C 的边界很重要：Wireshark 偏被动观察，负责看；Scapy 偏主动构造，负责发。做 DoIP 路由激活测试的典型流程是先用 Scapy 按标准拼一个激活请求发出去，再用 Wireshark 确认对端响应类型是否正确，两者配合才是闭环。而 B 这一档解决前两者做不到的事：TSN 时间同步与流量调度、服务发现的完整仿真，需要精确时间戳与整网建模能力。",
+    "keyPoints": [
+      "Scapy 主动构包，Wireshark 被动抓包",
+      "VN5610 做 TSN 与服务发现深度仿真",
+      "SocketCAN 属 CAN 工具，不用于以太网"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "四、车载以太网与协议抓包·三条工具列表"
+    },
+    "relatedTerms": [
+      "DoIP",
+      "TSN",
+      "服务发现"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-41-04-01",
+    "chapterNum": 41,
+    "sectionIndex": 4,
+    "sectionTitle": "五、环境搭建硬件清单",
+    "module": "A",
+    "type": "single",
+    "cat": "参数记忆",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "硬件清单",
+      "示波器",
+      "物理层"
+    ],
+    "stem": "按本章「环境搭建硬件清单」，用途为「看波形质量/波特率」、建议用于排查 CAN 物理层问题的物品是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "万用表"
+      },
+      {
+        "key": "B",
+        "text": "示波器"
+      },
+      {
+        "key": "C",
+        "text": "稳定/可调电源"
+      },
+      {
+        "key": "D",
+        "text": "CAN 接口卡"
+      }
+    ],
+    "answer": [
+      "B"
+    ],
+    "explanation": "清单里每件物品的用途都很具体：电脑跑工具与脚本；CAN 接口卡接总线；稳定/可调电源供电，台架必备；万用表测通断、电压、电流；示波器看波形质量与波特率，排 CAN 物理层问题；线材端子负责接线；DBC 与诊断库提供信号语义，要向项目组索取正确版本。故选 B。A 的万用表只能测静态量，看不到高速跳变的波形，判断不了上升沿过缓或振铃；C、D 都不是测量仪器。实际排障顺序通常是先用万用表量终端电阻是否约 60 欧姆、供电是否正常，这一步能筛掉大半接线问题；仍有大量错误帧时再上示波器看差分波形，确认位宽与设定波特率是否相符。",
+    "keyPoints": [
+      "示波器用于看波形质量与波特率",
+      "示波器是排 CAN 物理层问题的仪器",
+      "万用表管通断电压，测不了波形"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "五、环境搭建硬件清单·示波器行（用途/建议列）"
+    },
+    "relatedTerms": [
+      "CAN",
+      "波特率",
+      "总线"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-41-04-02",
+    "chapterNum": 41,
+    "sectionIndex": 4,
+    "sectionTitle": "五、环境搭建硬件清单",
+    "module": "A",
+    "type": "judge",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "反向",
+    "tags": [
+      "电脑选型",
+      "SocketCAN",
+      "操作系统"
+    ],
+    "stem": "判断：按本章硬件清单对电脑的建议，Windows 更适合跑 SocketCAN，Linux 更适合跑 CANoe。",
+    "options": [
+      {
+        "key": "T",
+        "text": "正确"
+      },
+      {
+        "key": "F",
+        "text": "错误"
+      }
+    ],
+    "answer": [
+      "F"
+    ],
+    "explanation": "错误，两者说反了。清单里电脑一行的建议原文是：Win 跑 CANoe，Linux 跑 SocketCAN 更顺。原因很直接：CANoe 是 Vector 面向 Windows 发布的商业软件，驱动与授权都绑在 Windows 生态上；SocketCAN 则是 Linux 内核自带的 CAN 子系统，把 CAN 接口抽象成网络设备，配合 can-utils 使用，天然属于 Linux。方向搞反环境就搭不起来，只能靠虚拟机或兼容层绕，硬件直通经常出问题。实际做环境规划时较稳妥的组合是主力机装 Windows 跑 CANoe，另备一台 Linux 机器或树莓派跑开源链路，两边用同一份 DBC 保持信号口径一致。",
+    "keyPoints": [
+      "清单建议 Win 跑 CANoe",
+      "Linux 跑 SocketCAN 更顺",
+      "系统选错会卡在驱动与硬件直通"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "五、环境搭建硬件清单·电脑行（建议列）"
+    },
+    "relatedTerms": [
+      "SocketCAN",
+      "CANoe",
+      "CAN"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-41-05-01",
+    "chapterNum": 41,
+    "sectionIndex": 5,
+    "sectionTitle": "六、选型建议",
+    "module": "A",
+    "type": "single",
+    "cat": "实战应用",
+    "difficulty": "进阶",
+    "direction": "正向",
+    "tags": [
+      "选型建议",
+      "个人学习",
+      "零软件费"
+    ],
+    "stem": "按本节选型建议，「个人学习/预算紧」这一场景推荐的组合是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "CANoe + VN，用 license 成本换效率与合规"
+      },
+      {
+        "key": "B",
+        "text": "ZCANpro + USBCAN，性价比首选"
+      },
+      {
+        "key": "C",
+        "text": "python-can + cantools + SavvyCAN + SocketCAN，零软件费"
+      },
+      {
+        "key": "D",
+        "text": "CANdela + CDD，先把诊断库编辑能力补齐"
+      }
+    ],
+    "answer": [
+      "C"
+    ],
+    "explanation": "本节按场景给了五条建议：企业研发或全流程上 CANoe + VN，用 license 成本换效率与合规；中小项目、现场、教学用 ZCANpro + USBCAN；个人学习、预算紧用 python-can + cantools + SavvyCAN + SocketCAN，零软件费；座舱 UI 用 ADB + Airtest/Appium；诊断先用开源 UDS 库组帧。故选 C。A 对应企业场景，个人承担不起；B 虽是千元级，对纯自学者仍是支出；D 完全跑偏，诊断库编辑是最后才考虑的环节。这条建议的现实意义是给自学者一条能真正跑通的路径：一块几十到几百元的 USB-CAN 模块，配 SocketCAN 收发、cantools 解码、SavvyCAN 看界面，就能把报文与信号概念全部动手验证一遍。",
+    "keyPoints": [
+      "个人学习走开源四件套，零软件费",
+      "企业全流程用 CANoe+VN 换合规",
+      "中小项目与教学选 ZCANpro+USBCAN"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "六、选型建议·列表第 3 条（个人学习/预算紧）"
+    },
+    "relatedTerms": [
+      "python-can",
+      "cantools",
+      "SocketCAN"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-41-05-02",
+    "chapterNum": 41,
+    "sectionIndex": 5,
+    "sectionTitle": "六、选型建议",
+    "module": "A",
+    "type": "multi",
+    "cat": "实战应用",
+    "difficulty": "挑战",
+    "direction": "反向",
+    "tags": [
+      "选型建议",
+      "场景匹配",
+      "反向辨析"
+    ],
+    "stem": "下列选型建议中，与本节给出的原则不符的有：",
+    "options": [
+      {
+        "key": "A",
+        "text": "企业研发/全流程：直接上 CANoe + VN，用 license 成本换效率与合规"
+      },
+      {
+        "key": "B",
+        "text": "中小项目/现场/教学：优先采购 CANoe + VN 硬件，一步到位"
+      },
+      {
+        "key": "C",
+        "text": "座舱 UI 自动化：应当采购商业 UI 测试工具，开源框架不适用于车机"
+      },
+      {
+        "key": "D",
+        "text": "诊断：先用开源 UDS 库组帧，需要编辑 CDD 时再考虑商业工具"
+      },
+      {
+        "key": "E",
+        "text": "个人学习/预算紧：建议先购买 CANdela license 打好基础"
+      }
+    ],
+    "answer": [
+      "B",
+      "C",
+      "E"
+    ],
+    "explanation": "A、D 与原文一致，符合原则。B 不符：中小项目、现场与教学，本节推荐 ZCANpro + USBCAN 作性价比首选，一上来买 CANoe + VN 属超配，成本和学习曲线都压不住。C 不符：座舱 UI 建议 ADB + Airtest/Appium 全免费，说开源框架不适用于车机与原文直接冲突。E 不符：个人学习应走零软件费的开源路线，CANdela 是诊断库编辑工具，本节把它排在最后一档，让自学者先买它本末倒置。这题模拟的是真实的工具申请评审：场景与配置不匹配，要么超配被驳回，要么欠配导致返工。判断标准只有一条——先看任务要不要整网仿真与合规交付，再决定花不花钱。",
+    "keyPoints": [
+      "中小项目与教学应选 ZCANpro+USBCAN",
+      "座舱 UI 用免费的 ADB+Airtest/Appium",
+      "CANdela 仅在编辑 CDD 时才考虑"
+    ],
+    "sourceRef": {
+      "kind": "section",
+      "label": "六、选型建议·五条场景建议列表"
+    },
+    "relatedTerms": [
+      "CANoe",
+      "ZCANpro",
+      "UDS"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-41-06-01",
+    "chapterNum": 41,
+    "sectionIndex": 6,
+    "sectionTitle": "七、面试高频考点",
+    "module": "A",
+    "type": "single",
+    "cat": "工具操作",
+    "difficulty": "基础",
+    "direction": "正向",
+    "tags": [
+      "面试考点",
+      "DBC 解析",
+      "开源"
+    ],
+    "stem": "面试高频考点表中，问题「DBC 解析开源怎么做」对应的要点是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "cantools 加载 DBC 转信号"
+      },
+      {
+        "key": "B",
+        "text": "Wireshark 加载 DBC 后自动解析"
+      },
+      {
+        "key": "C",
+        "text": "用 CANdela 打开 DBC 生成解析代码"
+      },
+      {
+        "key": "D",
+        "text": "SocketCAN 的 candump 自带 DBC 解析能力"
+      }
+    ],
+    "answer": [
+      "A"
+    ],
+    "explanation": "面试考点表给出五组问答：没 CANoe 怎么测 CAN，答 ZCANpro 或 python-can 加 cantools；免费 CAN 工具举例，答 SavvyCAN、SocketCAN、PCAN-View、CANalyzer demo；DBC 解析开源怎么做，答 cantools 加载 DBC 转信号；车载以太网抓包答 Wireshark 或 Scapy；环境搭建要备接口卡、电源、万用表、示波器、线材与 DBC。故选 A。B 混淆边界，Wireshark 面向以太网，不吃 DBC；C 的 CANdela 处理的是 CDD；D 的 candump 只打印原始帧。回答这类题最好补一句落地细节，比如用 cantools 按 ID 解码成信号字典后直接断言，比只报工具名更能证明你真写过。",
+    "keyPoints": [
+      "开源解析 DBC 的答案是 cantools",
+      "candump 只打印原始帧，不解语义",
+      "CANdela 处理 CDD，与 DBC 不同"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "七、面试高频考点·问题「DBC 解析开源怎么做」行"
+    },
+    "relatedTerms": [
+      "DBC",
+      "cantools",
+      "信号"
+    ],
+    "refAnswer": ""
+  },
+  {
+    "id": "Q-41-06-02",
+    "chapterNum": 41,
+    "sectionIndex": 6,
+    "sectionTitle": "七、面试高频考点",
+    "module": "A",
+    "type": "short",
+    "cat": "实战应用",
+    "difficulty": "挑战",
+    "direction": "正向",
+    "tags": [
+      "面试作答",
+      "无 CANoe",
+      "能力边界"
+    ],
+    "stem": "面试官问：「我们公司暂时没有 CANoe，你打算怎么开展 CAN 测试？」请按本章要点组织一段完整回答，要求覆盖可选方案、所需硬件，以及这些替代方案的能力边界。",
+    "options": [],
+    "answer": [],
+    "explanation": "这是本章面试考点表的第一道题，也最能体现工程判断力。面试官想听的不是你会背几个工具名，而是三层能力：知不知道有替代方案、清不清楚这些方案要配什么硬件、能不能说明白它们做不了什么。前两层决定你能不能干活，第三层决定你会不会在关键节点上翻车。按场景分层、给出组合、点明边界的结构展开，比罗列工具名有说服力。实际工作中这也是向领导汇报工具需求的标准结构：先说明没有 CANoe 时项目能推进到什么程度，再说明哪些工作必须等工具到位，采购申请才有依据。",
+    "keyPoints": [
+      "先给方案：ZCANpro 或开源链路",
+      "再说硬件：接口卡、电源、仪表、DBC",
+      "最后点边界：整网仿真仍需 CANoe"
+    ],
+    "sourceRef": {
+      "kind": "table",
+      "label": "七、面试高频考点·问题「没 CANoe 怎么测 CAN」行"
+    },
+    "relatedTerms": [
+      "CANoe",
+      "ZCANpro",
+      "DBC",
+      "报文"
+    ],
+    "refAnswer": "一、可选方案：1. 轻量分析用 ZCANpro + USBCAN，千元级，适合现场排查；2. 自动化用 python-can 发激励、cantools 解析、pytest 判定，相当于开源版 Test Module，可接 CI；3. 免费工具还有 SavvyCAN、SocketCAN 的 candump/cansend、PCAN-View、CANalyzer demo；4. 诊断可用 python-uds 按 ISO 14229 自己组帧。\n二、所需硬件：电脑（Win 跑 CANoe、Linux 跑 SocketCAN 更顺）、CAN 接口卡、稳定电源、万用表、示波器、线材端子，以及向项目组索取正确版本的 DBC。免费指软件免费，硬件仍要算钱。\n三、能力边界：CAPL 为 CANoe 专属，开源链路缺剩余总线仿真；CANalyzer demo 是受限版只能练手；CDD/ODX 编辑与合规交付仍需商业工具。"
+  }
+]

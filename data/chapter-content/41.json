@@ -1,0 +1,308 @@
+{
+  "num": 41,
+  "slug": "工具免费替代",
+  "title": "工具准备与免费替代方案 ⭐工具",
+  "oneliner": "入行要备哪些工具？商业方案（CANoe/ZCANpro）与免费/开源平替（python-can、SavvyCAN、SocketCAN、cantools）怎么选？一张清单讲清。",
+  "sections": [
+    {
+      "title": "一、工具总览（按用途）",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "用途",
+            "代表工具",
+            "性质"
+          ],
+          "rows": [
+            [
+              "整车网络仿真/测试",
+              "CANoe + VN 硬件",
+              "商业（Vector）"
+            ],
+            [
+              "轻量 CAN 分析",
+              "ZCANpro + USBCAN",
+              "商业（周立功，性价比高）"
+            ],
+            [
+              "CAN 脚本/自动化",
+              "CAPL（随 CANoe）",
+              "商业"
+            ],
+            [
+              "诊断 UDS",
+              "CANdela/ODX + CDD",
+              "商业（需 license）"
+            ],
+            [
+              "座舱 UI 自动化",
+              "Airtest / Appium + ADB",
+              "开源/免费"
+            ],
+            [
+              "示波/电源/万用表",
+              "是德/固纬/优利德等",
+              "硬件采购"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "二、总线分析：商业 vs 平替",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "如果公司没买 CANoe，也不必干等。轻量分析可用 [[11-ZCANpro]]（千元级）；若是个人学习，开源方案完全能跑通基础收发与解析："
+        },
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "python-can：Python CAN 库，支持 SocketCAN、PCAN、USB2CAN 等多种接口，可收发/记录",
+            "cantools：解析 DBC，把原始字节转成物理信号，写脚本分析神器",
+            "SavvyCAN：免费可视化 CAN 分析软件（配 CANDapter 等硬件），界面接近商业工具",
+            "SocketCAN + can-utils（Linux）：candump/cansend 命令行收发，零成本",
+            "PCAN-View：PEAK 提供的免费软件（需配 PCAN 硬件）",
+            "CANalyzer demo：Vector 自带受限版，适合练手"
+          ]
+        },
+        {
+          "type": "image",
+          "src": "assets/images/wireshark.svg",
+          "alt": "Wireshark 抓取 CAN/CAN FD 报文",
+          "caption": "Wireshark 抓包：开源平替方案，可解析 CAN / CAN FD 报文并下钻数据字段"
+        }
+      ]
+    },
+    {
+      "title": "三、自动化与诊断的免费路线",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "CAPL 是 CANoe 专属，但「用 Python 做 CAN 自动化」完全可行：python-can 发激励 + cantools 解析 + pytest 做判定，就是一套开源版 Test Module。诊断方面，UDS 协议本身公开（ISO 14229），可用 python-uds 等库自己组帧，不必非买 CANdela；CDD/ODX 编辑才需要商业工具。车载座舱 UI 自动化本来就建立在免费的 ADB/Airtest/Appium 之上（见 [[25-车载自动化框架]]）。"
+        },
+        {
+          "type": "blockquote",
+          "style": "warning",
+          "text": "「免费」常指「软件免费」，硬件不一定免费。SavvyCAN 要 CANDapter、python-can 要接口卡、SocketCAN 要带 CAN 的树莓派或 USB-CAN 模块。算总账时把硬件成本一起算进去，有时周立功套件反而更省心。"
+        }
+      ]
+    },
+    {
+      "title": "四、车载以太网与协议抓包",
+      "content_blocks": [
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "Wireshark：抓 SOME/IP、DoIP、TCP/UDP，车载以太网首选",
+            "Scapy：构造/解析网络包，做 DoIP 路由激活等协议级测试",
+            "canoe 以太网模块 / VN5610：商业方案，做 TSN、服务发现的深度仿真"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "五、环境搭建硬件清单",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "物品",
+            "用途",
+            "建议"
+          ],
+          "rows": [
+            [
+              "电脑",
+              "跑工具/脚本",
+              "Win 跑 CANoe，Linux 跑 SocketCAN 更顺"
+            ],
+            [
+              "CAN 接口卡",
+              "接总线",
+              "商业 VN/USBCAN，或开源 USB-CAN 模块"
+            ],
+            [
+              "稳定/可调电源",
+              "供电",
+              "台架必备，见 [[27-台架搭建与HIL]]"
+            ],
+            [
+              "万用表",
+              "通断/电压/电流",
+              "必备基础仪表"
+            ],
+            [
+              "示波器",
+              "看波形质量/波特率",
+              "排 CAN 物理层问题"
+            ],
+            [
+              "线材/端子",
+              "接线",
+              "双绞线、DB9、香蕉头、标签纸"
+            ],
+            [
+              "DBC/诊断库",
+              "信号语义",
+              "向项目组索取正确版本"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "六、选型建议",
+      "content_blocks": [
+        {
+          "type": "list",
+          "style": "ul",
+          "items": [
+            "企业研发/全流程：直接上 CANoe + VN，license 成本换效率与合规",
+            "中小项目/现场/教学：ZCANpro + USBCAN，性价比首选",
+            "个人学习/预算紧：python-can + cantools + SavvyCAN + SocketCAN，零软件费",
+            "座舱 UI：ADB + Airtest/Appium，全免费",
+            "诊断：先用开源 UDS 库组帧，CDD 编辑再考虑商业工具"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "七、面试高频考点",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "问题",
+            "要点"
+          ],
+          "rows": [
+            [
+              "没 CANoe 怎么测 CAN",
+              "ZCANpro 或 python-can+cantools 开源方案"
+            ],
+            [
+              "免费 CAN 工具举例",
+              "SavvyCAN、SocketCAN、PCAN-View、CANalyzer demo"
+            ],
+            [
+              "DBC 解析开源怎么做",
+              "cantools 加载 DBC 转信号"
+            ],
+            [
+              "车载以太网抓包",
+              "Wireshark / Scapy"
+            ],
+            [
+              "环境搭建要备什么",
+              "接口卡+电源+万用表+示波器+线材+DBC"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "飞书笔记：测试工具一览",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "CANoe"
+        },
+        {
+          "type": "paragraph",
+          "text": "ZCANPro"
+        },
+        {
+          "type": "paragraph",
+          "text": "模块七、设备"
+        },
+        {
+          "type": "paragraph",
+          "text": "电源"
+        },
+        {
+          "type": "paragraph",
+          "text": "种类：开关电源/可调电源/数字（程控）电源（一般工作中使用数字电源）"
+        },
+        {
+          "type": "paragraph",
+          "text": "万用表"
+        },
+        {
+          "type": "paragraph",
+          "text": "数字式使用性更高"
+        },
+        {
+          "type": "paragraph",
+          "text": "注意：使用“蜂鸣档”测通断时，若电阻大于 50 欧时，则不会出现响声"
+        },
+        {
+          "type": "paragraph",
+          "text": "使用教程："
+        },
+        {
+          "type": "paragraph",
+          "text": "蜂鸣档"
+        },
+        {
+          "type": "paragraph",
+          "text": "测电压"
+        },
+        {
+          "type": "paragraph",
+          "text": "车载测试里的直流电压"
+        },
+        {
+          "type": "paragraph",
+          "text": "使用场景："
+        },
+        {
+          "type": "paragraph",
+          "text": "1.仪表盘或其他零部件/整车环节供电"
+        },
+        {
+          "type": "paragraph",
+          "text": "2.当我们需要找出 CAN 线的时候，可以使用万用表（1.5～4v 之间的电压）"
+        },
+        {
+          "type": "paragraph",
+          "text": "测电流"
+        },
+        {
+          "type": "paragraph",
+          "text": "1.把万用表串联到电路中，需破坏已有链接；"
+        },
+        {
+          "type": "paragraph",
+          "text": "2.使用钳流表（不需破坏已有连接）"
+        },
+        {
+          "type": "paragraph",
+          "text": "示波器"
+        },
+        {
+          "type": "paragraph",
+          "text": "使用教程："
+        },
+        {
+          "type": "paragraph",
+          "text": "常见电子元器件"
+        },
+        {
+          "type": "paragraph",
+          "text": "二极管仅支持单向导通"
+        },
+        {
+          "type": "paragraph",
+          "text": "三极管：功率放大作用"
+        }
+      ]
+    }
+  ],
+  "summary": "入行车载测试，工具按用途分：网络仿真测试用 CANoe（商业）、轻量分析用 ZCANpro（周立功，性价比高）、CAN 脚本靠 CAPL（随 CANoe）、诊断用 CANdela/ODX+CDD（商业 license）、座舱 UI 自动化用免费的 ADB/Airtest/Appium、示波/电源/万用表为硬件采购。没预算也有完整开源路线：python-can 收发、cantools 解析 DBC、SavvyCAN 可视化、SocketCAN+can-utils 命令行、Wireshark/Scapy 抓车载以太网、python-uds 组 UDS 帧——基本等于一套开源版 Test Module。注意「软件免费≠零成本」，多数仍要接口卡硬件，有时周立功套件反而省心。环境搭建硬件清单：电脑+接口卡+稳定/可调电源+万用表+示波器+线材+DBC。选型原则：企业全流程上 CANoe，中小/教学用 ZCANpro，个人学习走开源，座舱 UI 全免费。",
+  "prev_chapter": 40,
+  "next_chapter": 42
+}

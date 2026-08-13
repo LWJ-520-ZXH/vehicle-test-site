@@ -1,0 +1,165 @@
+{
+  "num": 51,
+  "kp": 11,
+  "minutes": 15,
+  "slug": "DBC看懂",
+  "title": "如何看懂一份 DBC（零基础）",
+  "oneliner": "DBC 是 CAN 的“通信字典”：它告诉工具和 ECU，某个 ID 的报文里，第几位到第几位是哪个信号、怎么换算成真实物理量。看不懂 DBC，你就只能对着 16 进制发呆。这一章把 DBC 拆开讲透。",
+  "tags": [
+    "DBC",
+    "信号",
+    "字节序",
+    "Intel",
+    "Motorola",
+    "零基础"
+  ],
+  "sections": [
+    {
+      "title": "一、DBC 是什么",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "DBC（Database CAN）是一个文本格式文件，描述整车的 CAN 通信矩阵：有哪些报文（Message）、每条报文里有哪些信号（Signal）、信号在字节里的位置、怎么换算成真实值（如 km/h）。CANoe、CANalyzer、甚至很多 ECU 配置工具都吃 DBC。"
+        },
+        {
+          "type": "paragraph",
+          "text": "没有 DBC，总线上的数据就是一堆 16 进制；有了 DBC，工具能直接显示“车速=65.3 km/h”。"
+        }
+      ]
+    },
+    {
+      "title": "二、报文 Message",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "字段",
+            "含义",
+            "例子"
+          ],
+          "rows": [
+            [
+              "ID",
+              "报文标识符（决定优先级）",
+              "0x17C"
+            ],
+            [
+              "DLC",
+              "数据长度（字节）",
+              "8"
+            ],
+            [
+              "周期",
+              "发送间隔（ms）",
+              "10ms / 100ms"
+            ],
+            [
+              "发送节点",
+              "哪个 ECU 发出",
+              "EMS"
+            ],
+            [
+              "信号列表",
+              "该报文携带的信号",
+              "车速/转速/油门…"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "周期报文（如车速 10ms 一帧）vs 事件报文（如开门触发一帧）。测功能前先搞清楚被测信号在哪个 ID、什么周期。"
+        }
+      ]
+    },
+    {
+      "title": "三、信号 Signal 的关键参数",
+      "content_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "参数",
+            "含义"
+          ],
+          "rows": [
+            [
+              "起始位 StartBit",
+              "信号在第几个 bit 开始"
+            ],
+            [
+              "长度 Length",
+              "占多少 bit"
+            ],
+            [
+              "字节序 ByteOrder",
+              "Intel(小端) / Motorola(大端)"
+            ],
+            [
+              "精度 Factor",
+              "每 bit 代表多少物理量"
+            ],
+            [
+              "偏移 Offset",
+              "物理值 = 原始值×Factor + Offset"
+            ],
+            [
+              "最小值/最大值",
+              "信号取值范围"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "换算公式：物理值 = 原始值(raw) × Factor + Offset。例如车速 raw=653，Factor=0.1，Offset=0 → 65.3 km/h。注意 raw 是“已经按字节序拼好的整数”，不是直接看字节。"
+        }
+      ]
+    },
+    {
+      "title": "四、字节序：Intel vs Motorola（最易错）",
+      "content_blocks": [
+        {
+          "type": "paragraph",
+          "text": "同一个 16 位信号，放在字节流里有两种排法：Intel（小端，低字节在前）和 Motorola（大端，高字节在前）。DBC 里 ByteOrder 标错，工具算出的物理值就完全不对——这是新手最常见的坑。"
+        },
+        {
+          "type": "paragraph",
+          "text": "判断口诀：看 DBC 里信号的 StartBit 和“是否跨字节”。Motorola 用“MSB0 位编号”（从字节 0 的最高位开始数），Intel 用“LSB0”（从字节 0 的最低位开始数）。不确定就用 CANoe 的 DBC 编辑器切到图形视图，对照数据字节验证。"
+        },
+        {
+          "type": "blockquote",
+          "style": "lab",
+          "text": "🧪 动手实验：找一个含 16 位以上信号的报文，分别在 CANoe 里把 ByteOrder 切成 Intel 和 Motorola，发同一个原始数据，看物理值差多少——直观感受字节序的影响。"
+        }
+      ]
+    },
+    {
+      "title": "五、实操：看一份真实 DBC",
+      "content_blocks": [
+        {
+          "type": "list",
+          "items": [
+            "用 CANoe 的 DBC Editor 或免费工具（如 Vector 的 CANdb++ Demo）打开一份 DBC。",
+            "展开 Messages → 选一条 → 看 Signals 列表与每个信号的 StartBit/Length/ByteOrder。",
+            "切到“图形/位图”视图，直观看到信号在 8 字节里的位置。",
+            "在 Trace 里加载该 DBC，发/收一帧，确认信号能正确解码。"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "六、动手：自己定义一条车速信号",
+      "content_blocks": [
+        {
+          "type": "blockquote",
+          "style": "lab",
+          "text": "🧪 动手实验：在 DBC 编辑器里新建一条 Message（ID=0x200，DLC=8，周期=20ms）\n在其中新建 Signal：名称 VehicleSpeed，StartBit=0，Length=12，ByteOrder=Intel，Factor=0.1，Offset=0，单位 km/h\n保存后加载到 CANoe，用 IG 发 raw=653 的一帧，看 Trace 是否显示 65.3 km/h\n目标：亲手走一遍“信号定义 → 加载 → 解码”全流程。"
+        },
+        {
+          "type": "blockquote",
+          "style": "承上",
+          "text": "🔗 读懂 DBC 后，去 [[2-CAN总线]] 理解报文怎么在总线上跑，再到 [[24-DBC设计详解]] 做信号定义练习；想亲手发帧看 [[50-CANoe入门]]。三者串起来，你就具备“读信号—发报文—搭环境”的完整动手能力。"
+        }
+      ]
+    }
+  ],
+  "summary": "DBC 是车载信号的“字典”。本章从 Message/Signal 的结构讲起，重点攻克最容易错的字节序（Intel vs Motorola），并带你读一份真实 DBC、自己定义一条车速信号。读懂 DBC，你才真正能在 CANoe / 上位机里“看见”数据，而不是面对一堆十六进制发懵。"
+}

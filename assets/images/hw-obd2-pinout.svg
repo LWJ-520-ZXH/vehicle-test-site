@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif">
+  <rect x="0" y="0" width="480" height="400" rx="14" fill="#f8fafc"/>
+  <text x="240" y="34" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">OBD-II 16 针 — 诊断接口脚位</text>
+  <text x="240" y="56" text-anchor="middle" font-size="12" fill="#475569">SAE J1962 标准；上排 A1–A8 / 下排 B1–B8</text>
+
+  <!-- connector body (D-shape, trapezoid wider at top) -->
+  <path d="M70 96 L410 96 L392 210 L88 210 Z" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+  <path d="M82 108 L398 108 L382 198 L98 198 Z" fill="#cbd5e1"/>
+
+  <!-- top row A1-A8 (y=140) x: 110,150,190,230,270,310,350,390 -->
+  <g font-size="11" font-weight="700" text-anchor="middle">
+    <circle cx="110" cy="140" r="11" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/><text x="110" y="144" fill="#334155">1</text>
+    <circle cx="150" cy="140" r="11" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/><text x="150" y="144" fill="#334155">2</text>
+    <circle cx="190" cy="140" r="11" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/><text x="190" y="144" fill="#334155">3</text>
+    <circle cx="230" cy="140" r="11" fill="#e2e8f0" stroke="#64748b" stroke-width="1.5"/><text x="230" y="144" fill="#334155">4</text>
+    <circle cx="270" cy="140" r="11" fill="#e2e8f0" stroke="#64748b" stroke-width="1.5"/><text x="270" y="144" fill="#334155">5</text>
+    <circle cx="310" cy="140" r="11" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/><text x="310" y="144" fill="#1e3a8a">6</text>
+    <circle cx="350" cy="140" r="11" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/><text x="350" y="144" fill="#713f12">7</text>
+    <circle cx="390" cy="140" r="11" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/><text x="390" y="144" fill="#334155">8</text>
+    <!-- bottom row B1-B8 (y=178) x same -->
+    <circle cx="110" cy="178" r="11" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/><text x="110" y="182" fill="#334155">9</text>
+    <circle cx="150" cy="178" r="11" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/><text x="150" y="182" fill="#334155">10</text>
+    <circle cx="190" cy="178" r="11" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/><text x="190" y="182" fill="#334155">11</text>
+    <circle cx="230" cy="178" r="11" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/><text x="230" y="182" fill="#334155">12</text>
+    <circle cx="270" cy="178" r="11" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/><text x="270" y="182" fill="#334155">13</text>
+    <circle cx="310" cy="178" r="11" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/><text x="310" y="182" fill="#14532d">14</text>
+    <circle cx="350" cy="178" r="11" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/><text x="350" y="182" fill="#713f12">15</text>
+    <circle cx="390" cy="178" r="11" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/><text x="390" y="182" fill="#7f1d1d">16</text>
+  </g>
+
+  <!-- legend -->
+  <g font-size="12.5" fill="#334155">
+    <text x="70" y="252" font-weight="700" fill="#0f172a">关键脚位</text>
+    <text x="70" y="276">4 — <tspan fill="#64748b" font-weight="700">底盘地</tspan>（Chassis GND）</text>
+    <text x="70" y="298">5 — <tspan fill="#64748b" font-weight="700">信号地</tspan>（Signal GND）</text>
+    <text x="70" y="320">6 — <tspan fill="#2563eb" font-weight="700">CAN_H</tspan>（ISO 15765 / CAN FD）</text>
+    <text x="70" y="342">7 — <tspan fill="#ca8a04" font-weight="700">K-Line</tspan>（KWP2000 / ISO9141）</text>
+    <text x="70" y="364">14 — <tspan fill="#16a34a" font-weight="700">CAN_L</tspan></text>
+    <text x="70" y="386">15 — <tspan fill="#ca8a04" font-weight="700">L-Line</tspan>　16 — <tspan fill="#dc2626" font-weight="700">常电 +12V</tspan></text>
+  </g>
+</svg>

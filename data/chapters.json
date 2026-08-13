@@ -65,7 +65,7 @@
         "八、测试实战关联"
       ],
       "summary": "车上的几十上百个 ECU（电子控制单元）通过不同总线网络连接，网关负责协议转换和信号路由，域控制器按功能集中调度——这就是整车的\"神经系统\"",
-      "access_level": "public"
+      "access_level": "restricted"
     },
     {
       "num": 2,
@@ -541,7 +541,7 @@
         "六、学完能干什么：岗位对标",
         "飞书笔记：学习路径建议"
       ],
-      "access_level": "public"
+      "access_level": "restricted"
     },
     {
       "num": 17,
@@ -1283,7 +1283,7 @@
         "飞书笔记：测试工具一览"
       ],
       "summary": "工欲善其事，本章给出从零起步的工具清单与完全免费的替代方案（CANoe→CANalyzer Demo / python-can、示波器→等），以及一条零成本上手路线和常见踩坑。目标是让你在还没动用公司授权工具前，就能在自己电脑上跑通第一条报文。",
-      "access_level": "restricted"
+      "access_level": "public"
     },
     {
       "num": 42,
@@ -1547,7 +1547,7 @@
         "八、下一步学什么"
       ],
       "summary": "手把手带你第一次启动 CANoe：认窗口、加载 DBC、连硬件、看懂 Trace，最后用 Demo 工程亲手发一帧。目标不是精通，而是消除“工具恐惧症”——让你下次接到 CANoe 任务时，知道先点哪里、卡住时去哪看。",
-      "access_level": "restricted"
+      "access_level": "public"
     },
     {
       "num": 51,
@@ -1578,7 +1578,7 @@
         "六、动手：自己定义一条车速信号"
       ],
       "summary": "DBC 是车载信号的“字典”。本章从 Message/Signal 的结构讲起，重点攻克最容易错的字节序（Intel vs Motorola），并带你读一份真实 DBC、自己定义一条车速信号。读懂 DBC，你才真正能在 CANoe / 上位机里“看见”数据，而不是面对一堆十六进制发懵。",
-      "access_level": "restricted"
+      "access_level": "public"
     },
     {
       "num": 52,
@@ -1609,7 +1609,7 @@
         "七、面试高频考点"
       ],
       "summary": "用例是测试工程师和“测什么、怎么测、测到什么程度算过”之间的契约。7 大设计方法 + 好用例 5 要素 + 可追溯，决定一个测试工程师的上限，而非会多少工具",
-      "access_level": "public"
+      "access_level": "restricted"
     },
     {
       "num": 53,

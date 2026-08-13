@@ -1,0 +1,10 @@
+name = "vehicle-test-site"
+type = "pages"
+pages_build_output_dir = "."
+compatibility_date = "2024-09-01"
+
+# 说明：
+# 主部署路径 = GitHub 连接 Cloudflare Pages（仓库推送即自动构建+CDN分发）。
+# 备选路径 = 本机安装 wrangler 后执行：
+#   INCLUDE_CONTENT=0 wrangler pages deploy .
+# 需要 CLOUDFLARE_API_TOKEN 环境变量（Cloudflare 账号后台生成，权限 pages:edit）。

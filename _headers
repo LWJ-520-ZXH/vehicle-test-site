@@ -1,0 +1,27 @@
+# Cloudflare Pages 边缘缓存与安全头
+# 说明：站点资源 URL 已带 ?v= 版本戳，可安全设为 immutable 长缓存。
+# CF 在边缘节点自动启用 gzip/br 压缩 + HTTP/2 多路复用，无需手动配置。
+
+# 构建产物 JS / CSS（带 ?v= 戳，永不失效）
+/assets/js/*
+  Cache-Control: public, max-age=31536000, immutable
+/assets/css/*
+  Cache-Control: public, max-age=31536000, immutable
+/*.js
+  Cache-Control: public, max-age=31536000, immutable
+/*.css
+  Cache-Control: public, max-age=31536000, immutable
+
+# 章节 JSON（online 模式按需 fetch，带 ?v= 戳）
+/data/chapter-content/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# 图片资源（带 ?v= 戳，长缓存但允许重验）
+/assets/images/*
+  Cache-Control: public, max-age=2592000
+
+# 全局安全头
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin

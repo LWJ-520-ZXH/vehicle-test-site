@@ -1,0 +1,10 @@
+{
+  "name": "vehicle-test-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "车载测试学堂静态站点 - Cloudflare Pages 部署构建配置",
+  "scripts": {
+    "build:online": "INCLUDE_CONTENT=0 python3 build_data_bundle.py",
+    "build:local": "INCLUDE_CONTENT=1 python3 build_data_bundle.py"
+  }
+}

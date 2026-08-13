@@ -6,7 +6,7 @@
 | 项目 | 内容 |
 |------|------|
 | 文档编号 | VT-SITE-OPS-002 |
-| 版本 | V1.2 |
+| 版本 | V1.3 |
 | 发布日期 | 2026-08-14 |
 | 责任人（Owner） | 车载测试学堂运维组 |
 | 文档状态 | 正式发布（Released） |
@@ -20,6 +20,7 @@
 | V1.0 | 2026-08-10 | 运维组 | 初版发布流程与常见问题 |
 | V1.1 | 2026-08-10 | 运维组 | 按企业对外标准扩写：环境矩阵、pre-flight 清单、缓存机制深挖、多部署形态、回滚、故障分级、安全基线 |
 | V1.2 | 2026-08-14 | 运维组 | 生产环境迁移至 Cloudflare Pages；新增双形态构建（本地内联 vs CI 按需加载）；更新环境矩阵、部署方式、Runbook、FAQ |
+| V1.3 | 2026-08-14 | 运维组 | 新增后端内容中台部署 Runbook（§14）；修订 §1.2 范围、§2 环境矩阵（含 D1/KV/R2）、§12 安全基线（启用后端后的 PII 与鉴权）；同步 README V1.3 |
 
 > **文档同步维护约定（P0）**：本站点任何迭代变动（新增/调整章节、修改数据模型、调整质量门基线、变更部署形态等），都必须同步更新本文件与《产品技术文档 README.md》中的对应数字与章节，保持文档与代码/数据持续一致。当前基线数字：chapters=55、chapterContent=55、glossary=91、quiz=404；质量门 regression 失败=0/警告=32、scan_emoji UI 层=3（豁免）。
 
@@ -33,6 +34,7 @@
 ### 1.2 范围
 - 适用：将 `vehicle-test-site/` 作为静态资源托管到任意环境。
 - 涵盖：构建、质量门、缓存戳、部署形态、验证、回滚、监控、故障排查、安全基线。
+- 含可选**后端内容中台**（P2/P3）：同域 Pages Functions 鉴权 + D1/KV/R2，详见第 14 节。
 
 ### 1.3 部署原则
 - **不可变快照**：线上运行的是某次部署时刻的目录副本，不就地修改。
@@ -51,6 +53,18 @@
 | Prod-Backup | 演示/快照 | CloudStudio 快照 | 每次 `shareLink` | 默认内联 | 构建产物 |
 
 > 本仓库当前**主用 Cloudflare Pages 生产部署**；CloudStudio 快照保留为调试/演示备用。其余静态服务器形态见第 6.2 节。
+
+### 2.1 后端内容中台资源（P2/P3 启用，可选）
+
+| 组件 | 用途 | 绑定 / 密钥 |
+|------|------|-------------|
+| Pages Functions `functions/api/*` | 同域 API 网关（鉴权 / 内容 / 申请 / 通知） | 随仓库部署，无需额外绑定 |
+| D1 `vehicle_site` | 用户 / 申请 / 魔法链接 / 章节 / 术语 / 题库 | `[[d1_databases]]` binding `DB` |
+| KV | 限流计数器（best-effort 最终一致） | `[[kv_namespaces]]` binding `KV` |
+| R2 `d1-backup` | D1 每日备份归档 | `[[r2_buckets]]` binding `R2` |
+| 密钥 | JWT 签名 / 发信 / 飞书通知 | `wrangler pages secret put`（不入库） |
+
+> 前端（P4）尚未接入，当前线上仍是纯静态；后端为「部署前置就绪」状态，待资源就位后启用（详见第 14 节）。
 
 ---
 
@@ -280,16 +294,30 @@ curl -s https://<shareLink>/data/chapter-content/08.json | grep -o "panel-[a-z0-
 
 ## 12. 安全基线
 
+### 12.1 静态态（默认，当前线上）
 - **纯静态、无服务端**：无 RCE/注入面；无需 WAF 规则例外。
 - **无第三方运行时**：不加载外部 JS/CSS/字体，规避供应链攻击。
-- **Cloudflare 已自动添加安全头**：`X-Content-Type-Options: nosniff`、`Referrer-Policy: strict-origin-when-cross-origin`、`Access-Control-Allow-Origin: *`。
-- **建议响应头**（如有网关/CDN 可进一步加固）：
-  ```
-  Content-Security-Policy: default-src 'self'; img-src 'self' data:;
-  X-Content-Type-Options: nosniff
-  Referrer-Policy: strict-origin-when-cross-origin
-  ```
-- **无用户数据**：不涉及 PII 收集与存储。
+- **无用户数据**：静态态不涉及 PII 收集与存储。
+
+### 12.2 启用后端内容中台后
+- **同域 API**：Pages Functions 部署在 `/api/*`，与站点同域，规避跨域 Cookie/CSRF 隐患。
+- **无密码魔法链接登录**：邮箱 → SHA-256 token（单次 + 15 分钟过期）→ JWT（`__Host-jwt`，HttpOnly + Secure + SameSite=Lax + 7d）。
+- **CSRF 防护**：所有状态变更请求须带 `X-Requested-With: fetch`，否则 403（`_middleware.js`）。
+- **限流**：注册/登录按 IP+邮箱、申请按用户限流（KV，best-effort 最终一致，失败放行）。
+- **PII 最小化与合规**：仅存邮箱与申请备注（≤500 字、剥离控制字符）；提供 `DELETE /api/me` 级联删除；2 年不活跃软删；注册即视为同意隐私条款。
+- **熔断开关**：`AUTH_ENABLED="false"` 时 API 不鉴权、直返全部内容（等同原静态开放态），用于后端异常快速降级。
+- **密钥不入库**：JWT_SECRET / EMAIL_API_KEY / EMAIL_FROM / FEISHU_WEBHOOK 均经 `wrangler pages secret put` 注入；`OWNER_EMAIL` 以明文 var 设置（仅通知收件人）。
+- **通用错误响应**：鉴权失败统一返回「请先登录 / 权限不足」，不泄露账户枚举信息。
+
+### 12.3 通用响应头（Cloudflare 已加 + 建议加固）
+Cloudflare 已自动添加：`X-Content-Type-Options: nosniff`、`Referrer-Policy: strict-origin-when-cross-origin`、`Access-Control-Allow-Origin: *`。
+API 额外返回：`Cache-Control: private, no-store`、`X-Frame-Options: DENY`。
+建议（网关/CDN 可进一步加固）：
+```
+Content-Security-Policy: default-src 'self'; img-src 'self' data:;
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+```
 
 ---
 
@@ -300,7 +328,89 @@ curl -s https://<shareLink>/data/chapter-content/08.json | grep -o "panel-[a-z0-
 
 ---
 
-## 14. 常见问题 FAQ
+## 14. 后端内容中台部署 Runbook（P2/P3）
+
+> 本站 V1.2 为纯静态；V1.3 起新增**可选**后端内容中台：无密码魔法链接登录 + 分级内容解锁（registered 看公开章/术语，approved 看全部含题库）。后端 = Cloudflare Pages Functions（同域 `/api/*`）+ D1 + KV + R2。**前端（P4）尚未接入，当前线上仍是纯静态；本 Runbook 为部署前置手册，待你提供资源后执行。**
+
+### 14.1 架构与组件
+详见 §2.1。API 路由一览：
+
+| 路由 | 方法 | 说明 |
+|------|------|------|
+| `/api/auth/register` `/api/auth/login` | POST | 发送魔法链接（统一响应，无枚举） |
+| `/api/auth/verify` | GET `?token=&purpose=` | 校验并签发 JWT Cookie |
+| `/api/auth/me` | GET | 返回当前邮箱/状态 |
+| `/api/auth/logout` | POST | 吊销（token_version++）并清 Cookie |
+| `/api/me` | DELETE | 级联删除账户（PII 删除权） |
+| `/api/chapters/[num]` | GET | 章节正文（分级） |
+| `/api/glossary` | GET | 术语（分级） |
+| `/api/quiz` | GET `?chapterNum=` | 题库（仅 approved） |
+| `/api/apply` | POST | 提交开通申请 + 飞书/邮件通知 |
+
+### 14.2 资源创建（一次性）
+```bash
+wrangler d1 create vehicle_site
+wrangler kv namespace create vehicle-test-site-rl
+wrangler r2 bucket create d1-backup
+```
+把返回值填入 `wrangler.toml` 的 `database_id` / `kv.id` / `r2.bucket_name`。
+
+### 14.3 密钥注入（不入库）
+```bash
+wrangler pages secret put JWT_SECRET      # 高强度随机串，见 14.8 轮换
+wrangler pages secret put EMAIL_API_KEY   # Resend API Key
+wrangler pages secret put EMAIL_FROM      # 已验证域名的发件地址
+wrangler pages secret put FEISHU_WEBHOOK  # 飞书群机器人 webhook
+# OWNER_EMAIL 在 wrangler.toml [vars] 明文设置（仅通知收件人，非密钥）
+```
+
+### 14.4 数据库初始化
+```bash
+# 建表（幂等，可重跑）
+wrangler d1 execute vehicle_site --file=migrations/001_schema.sql
+
+# 灌种子（Git JSON 真源 → D1 派生物）
+python tools/migrate_to_d1.py --out migrations/seed.sql
+wrangler d1 execute vehicle_site --file=migrations/seed.sql
+```
+> `migrations/seed.sql` 由脚本生成，已被 `.gitignore` 排除，不入库。
+
+### 14.5 部署
+后端随仓库推送自动随 Cloudflare Pages 构建生效（Functions 需生产部署，非仅静态托管）。确保 `wrangler.toml` 绑定与 14.3 密钥均已就位，`AUTH_ENABLED="true"`。
+
+### 14.6 权限矩阵验证（上线前必跑）
+| 用户态 | 公开章 | 受限章 | 术语 | 题库 |
+|--------|--------|--------|------|------|
+| 未登录 | 401 | 401 | 401 | 403 |
+| registered | 200 | 403 | 公开 | 403 |
+| approved | 200 | 200 | 全 | 200 |
+| 熔断 `AUTH_ENABLED=false` | 200(全) | 200(全) | 全 | 200(全) |
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" -b cookie.txt https://<site>/api/chapters/8   # registered 应 403
+curl -s -o /dev/null -w "%{http_code}\n" -b cookie.txt https://<site>/api/quiz          # 非 approved 应 403
+```
+
+### 14.7 备份与恢复
+```bash
+wrangler d1 export vehicle_site --output dump.json
+python tools/d1_backup_to_sql.py dump.json -o restore.sql
+wrangler r2 put d1-backup/$(date +%F).sql restore.sql
+# 恢复：wrangler d1 execute vehicle_site --file=restore.sql
+```
+
+### 14.8 密钥轮换 SOP
+- 改 `JWT_SECRET` 会使**所有已签发 JWT 立即失效**（用户需重新登录），属预期行为。
+- 步骤：① `wrangler pages secret put JWT_SECRET`（新值）→ ② 等部署生效 → ③ 旧令牌自然失效。
+- 单用户「登出即吊销」由 `token_version` 实现，与轮换互不冲突。
+
+### 14.9 灰度与回滚
+- **熔断降级**：`wrangler.toml` 的 `AUTH_ENABLED` 改为 `"false"` 并重部署 → API 直返全部内容（等同原静态开放态）。
+- **回滚**：Functions 随 Git 历史回退 + 重部署；D1 数据用 14.7 备份恢复。
+
+---
+
+## 15. 常见问题 FAQ
 
 **Q1：为什么 Git push 后线上还没变？**
 Cloudflare Pages 需要 1–2 分钟完成构建和全球边缘刷新。请在 CF 控制台查看构建日志，或在浏览器中硬刷新（Ctrl/Cmd+Shift+R）。若仍未变，检查是否忘了 `python tools/bump_version.py`。
@@ -316,6 +426,12 @@ Cloudflare Pages 需要 1–2 分钟完成构建和全球边缘刷新。请在 C
 
 **Q5：CloudStudio 快照还要保留吗？**
 保留作为调试/演示备用。主用地址仍是 `https://vehicle-test-site.pages.dev`。
+
+**Q6：开启后端内容中台会收集我的数据吗？**
+启用后仅存储邮箱与申请备注（PII），用于分级解锁。提供 `DELETE /api/me` 级联删除账户，并设 2 年不活跃软删；发信仅用于登录魔法链接与申请通知。静态态（默认）不收集任何数据。
+
+**Q7：`AUTH_ENABLED` 是什么？**
+后端熔断开关。设 `"false"` 时 API 不鉴权、直接返回全部内容（等同原静态开放态），作为后端异常时的快速降级兜底。
 
 ---
 
@@ -334,3 +450,10 @@ Cloudflare Pages 需要 1–2 分钟完成构建和全球边缘刷新。请在 C
 | 题库冒烟 | `node tools/quiz_smoke_test.js` |
 | 生产部署 | Cloudflare Pages：GitHub `LWJ-520-ZXH/vehicle-test-site`，Build=`INCLUDE_CONTENT=0 python3 build_data_bundle.py`，Output=`.` |
 | 快照部署 | CloudStudio 快照部署（directory=`vehicle-test-site`, entry=`index.html`） |
+| 建 D1 | `wrangler d1 create vehicle_site` |
+| 建 KV | `wrangler kv namespace create vehicle-test-site-rl` |
+| 建 R2 | `wrangler r2 bucket create d1-backup` |
+| 注入密钥 | `wrangler pages secret put JWT_SECRET`（同法 EMAIL_API_KEY / EMAIL_FROM / FEISHU_WEBHOOK） |
+| 后端建表 | `wrangler d1 execute vehicle_site --file=migrations/001_schema.sql` |
+| 灌种子 | `python tools/migrate_to_d1.py --out migrations/seed.sql && wrangler d1 execute vehicle_site --file=migrations/seed.sql` |
+| D1 备份 | `wrangler d1 export vehicle_site --output dump.json` |

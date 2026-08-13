@@ -8,3 +8,30 @@ compatibility_date = "2024-09-01"
 # 备选路径 = 本机安装 wrangler 后执行：
 #   INCLUDE_CONTENT=0 wrangler pages deploy .
 # 需要 CLOUDFLARE_API_TOKEN 环境变量（Cloudflare 账号后台生成，权限 pages:edit）。
+
+# ── 后端内容中台绑定（P2/P3 起用）──
+# 创建资源后把 <id> 替换为真实值；密钥用 `wrangler pages secret put` 注入，禁止写入本文件。
+
+[vars]
+AUTH_ENABLED = "true"
+# OWNER_EMAIL = "your-email@example.com"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "vehicle_site"
+database_id = "<your-database-id>"
+
+[[kv_namespaces]]
+binding = "KV"
+id = "<your-kv-id>"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "d1-backup"
+
+# 密钥（Secret）清单：JWT_SECRET / FEISHU_WEBHOOK / EMAIL_API_KEY / EMAIL_FROM
+# 注入方式：
+#   wrangler pages secret put JWT_SECRET
+#   wrangler pages secret put FEISHU_WEBHOOK
+#   wrangler pages secret put EMAIL_API_KEY
+#   wrangler pages secret put EMAIL_FROM

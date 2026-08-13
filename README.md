@@ -6,7 +6,7 @@
 | 项目 | 内容 |
 |------|------|
 | 文档编号 | VT-SITE-RD-001 |
-| 版本 | V1.2 |
+| 版本 | V1.3 |
 | 发布日期 | 2026-08-14 |
 | 责任人（Owner） | 车载测试学堂前端研发组 |
 | 文档状态 | 正式发布（Released） |
@@ -20,6 +20,7 @@
 | V1.0 | 2026-08-10 | 研发组 | 初版，覆盖架构、数据模型、内容规范、质量门 |
 | V1.1 | 2026-08-10 | 研发组 | 按企业对外标准扩写：补充文档信息表、架构图、完整 Schema 参考、内容创作 Runbook、设计规范与安全合规 |
 | V1.2 | 2026-08-14 | 研发组 | 同步部署形态变更：新增 Cloudflare Pages 生产部署、双形态构建（本地内联 / CI 按需加载） |
+| V1.3 | 2026-08-14 | 研发组 | 同步后端内容中台（P2/P3）就绪：修订 §1.3/§4.2/§4.4/§5/§12，标注可选后端与前端接入状态；关联 DEPLOY.md §14 |
 
 > **文档同步维护约定（P0）**：本站点任何迭代变动（新增/调整章节、修改数据模型、调整质量门基线、变更部署形态等），都必须同步更新本文件与《部署运维手册 DEPLOY.md》中的对应数字与章节，保持文档与代码/数据持续一致。当前基线数字：chapters=55、chapterContent=55、glossary=91、quiz=404；质量门 regression 失败=0/警告=32、scan_emoji UI 层=3（豁免）。
 
@@ -36,7 +37,7 @@
 - 不涵盖：线上部署与回滚操作（见《部署运维手册 DEPLOY.md》）。
 
 ### 1.3 非目标
-- 不涉及后端服务、数据库或用户账户系统（本站为纯静态、无服务端）。
+- 静态态为纯前端、无服务端；可选后端内容中台（无密码登录 + 分级解锁）归属《部署运维手册 DEPLOY.md》第 14 节，其前端接入（P4）尚未完成。
 - 不规定具体章节教学内容（由内容团队另行评审）。
 
 ---
@@ -103,7 +104,7 @@
 - **逻辑层**：`app.js`（单文件核心，无框架），负责 SPA 式路由、内容渲染、搜索、主题切换、图标注入、缓存戳校验。
 - **数据层**：`data-bundle.js`（构建产物，内联章节目录 / 术语 / 题库；章节正文根据构建参数选择内联或按需 fetch）；`data/chapter-content/NN.json` 为章节正文权威源。
 - **构建层**：Python 脚本把 `data/` 下的 JSON 聚合并写入 `assets/js/`；Node 脚本做回归与 emoji 校验。支持双形态构建：默认内联（本地 file://）与 `INCLUDE_CONTENT=0`（Cloudflare Pages 生产环境按需加载）。
-- **无服务端**：部署形态为任意静态文件服务，无 API、无数据库。当前生产环境使用 Cloudflare Pages。
+- **无服务端（静态态）**：默认部署形态为任意静态文件服务，无 API、无数据库，当前生产环境使用 Cloudflare Pages。可选后端内容中台（Pages Functions + D1/KV/R2）见《部署运维手册 DEPLOY.md》第 14 节。
 
 ### 4.3 数据驱动渲染流（时序）
 1. 浏览器加载 `index.html`，引入 `data-bundle.js`，得到 `window.__SITE_DATA__`。
@@ -142,12 +143,20 @@ vehicle-test-site/
 │   ├── glossary.json          # 91 条术语
 │   ├── chapter-content/       # 55 个 NN.json 章节正文（权威源）
 │   └── quiz/                  # 每章一题 NN.json，构建为 quiz-bundle.js
-└── tools/                     # 构建 / 校验 / 内容注入脚本
-    ├── build_data_bundle.py    # 数据聚合（日常必须）
-    ├── bump_version.py         # 缓存戳（日常必须）
-    ├── regression_check.js     # 回归校验（质量门）
-    ├── scan_emoji.js           # emoji 扫描（质量门）
-    └── _*.py / *.js            # 一次性内容注入脚本（非门禁）
+├── functions/                 # 后端内容中台 Pages Functions（P2/P3，可选）
+│   └── api/                   # 同域 /api/* 路由（鉴权 / 内容 / 申请）
+├── migrations/                # D1 schema(001) + 生成种子(seed.sql, gitignore)
+│   └── 001_schema.sql         # 幂等建表 SQL
+├── tools/                     # 构建 / 校验 / 内容注入脚本
+│   ├── build_data_bundle.py    # 数据聚合（日常必须）
+│   ├── bump_version.py         # 缓存戳（日常必须）
+│   ├── regression_check.js     # 回归校验（质量门）
+│   ├── scan_emoji.js           # emoji 扫描（质量门）
+│   ├── migrate_to_d1.py        # Git JSON → D1 种子 SQL（工具，gitignore）
+│   ├── d1_backup_to_sql.py     # D1 导出 JSON → 恢复 SQL
+│   └── _*.py / *.js            # 一次性内容注入脚本（非门禁）
+├── wrangler.toml              # Cloudflare Pages/Functions 绑定与密钥说明
+└── README.md / DEPLOY.md      # 文档
 ```
 
 ---
@@ -163,6 +172,7 @@ vehicle-test-site/
 | 图标 | 内联 SVG（`app.js` 的 `ICON(name)`） | 禁止 emoji 作 UI 图标 |
 | 图片 | 本地 PNG / SVG | 禁止外部图片 |
 | 部署 | Cloudflare Pages（主用）/ 任意静态服务器 / CloudStudio 快照 | 无容器编排 |
+| 后端（可选） | Cloudflare Pages Functions + D1 + KV + R2 | 无密码魔法链接登录 + 分级解锁（P2/P3） |
 
 **依赖最小化原则**：不引入前端 CDN、不引入运行时第三方 JS 库，保证离线可用与供应链安全。
 
@@ -374,7 +384,7 @@ UI 图标禁 emoji；`scan_emoji.js` 对代码内正则命中的 `✅/✓/√` �
 ## 12. 安全与合规
 
 - **无外部依赖**：不加载任何第三方 JS/CSS/字体/图片，规避供应链与隐私风险。
-- **无用户数据收集**：纯静态，无埋点、无账户、无服务端存储。
+- **无用户数据收集（静态态）**：默认纯静态，无埋点、无账户、无服务端存储。启用后端内容中台后仅存邮箱与申请备注（PII），提供账户级联删除与留存策略（见 DEPLOY.md §12.2 / §14）。
 - **本地优先**：`data-bundle.js` 默认内联全部章节正文，支持 `file://` 完全离线运行。
 - **内容合规**：车厂 Logo 使用自绘矢量标识，不打包第三方商标位图。
 

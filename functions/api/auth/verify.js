@@ -1,4 +1,4 @@
-import { json, err, serverErr, authEnabled, dbFirst, dbRun, signJWT, setJWTCookie, getJWTSecret } from '../../_shared.js';
+import { json, err, serverErr, authEnabled, dbFirst, dbRun, signJWT, setJWTCookie, getJWTSecret, hashToken } from '../_shared.js';
 
 export async function onRequestGet(context) {
   const { request, env } = context;

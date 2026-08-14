@@ -1,4 +1,4 @@
-import { json, serverErr, authEnabled, requireAuth } from '../../_shared.js';
+import { json, serverErr, authEnabled, requireAuth } from '../_shared.js';
 
 export async function onRequestGet(context) {
   const { request, env } = context;

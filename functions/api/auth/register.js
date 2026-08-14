@@ -1,4 +1,4 @@
-import { json, serverErr, authEnabled, checkRateLimit, getClientIP, isValidEmail, dbFirst, dbRun, randomToken, hashToken, sendMagicLinkEmail } from '../../_shared.js';
+import { json, serverErr, authEnabled, checkRateLimit, getClientIP, isValidEmail, dbFirst, dbRun, randomToken, hashToken, sendMagicLinkEmail } from '../_shared.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;

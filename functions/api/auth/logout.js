@@ -1,4 +1,4 @@
-import { json, serverErr, authEnabled, requireAuth, clearJWTCookie, dbRun } from '../../_shared.js';
+import { json, serverErr, authEnabled, requireAuth, clearJWTCookie, dbRun } from '../_shared.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;

@@ -1,4 +1,4 @@
-import { json, err, serverErr, requireAuth, authEnabled, dbFirst, serveStaticJSON } from '../../_shared.js';
+import { json, err, serverErr, requireAuth, authEnabled, dbFirst, serveStaticJSON } from '../_shared.js';
 
 export async function onRequestGet(context) {
   const { request, env, params } = context;

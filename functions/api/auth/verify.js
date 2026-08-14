@@ -1,4 +1,4 @@
-import { json, err, serverErr, authEnabled, dbFirst, dbRun, signJWT, setJWTCookie } from '../../_shared.js';
+import { json, err, serverErr, authEnabled, dbFirst, dbRun, signJWT, setJWTCookie, getJWTSecret } from '../../_shared.js';
 
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -35,7 +35,7 @@ export async function onRequestGet(context) {
       iat: now,
       exp: now + 7 * 24 * 3600, // 7 天
     };
-    const jwt = await signJWT(payload, env.JWT_SECRET);
+    const jwt = await signJWT(payload, getJWTSecret(env));
 
     return json({ email: user.email, status: user.status }, 200, {
       'Set-Cookie': setJWTCookie(jwt),

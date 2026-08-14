@@ -30,9 +30,11 @@ export async function onRequestPost(context) {
     await dbRun(env, 'INSERT INTO magic_tokens (user_id, token_hash, purpose, expires_at, created_at) VALUES (?, ?, ?, ?, ?)', [user.id, tokenHash, 'login', expires, now]);
 
     const link = `${new URL(request.url).origin}/api/auth/verify?token=${token}&purpose=login`;
-    await sendMagicLinkEmail(env, email, link);
+    const mail = await sendMagicLinkEmail(env, email, link);
 
-    return json({ message: '若邮箱有效，登录链接已发送' });
+    const resp = { message: '若邮箱有效，登录链接已发送' };
+    if (mail && !mail.ok && mail.reason === 'not_configured') resp.dev_magic_link = link;
+    return json(resp);
   } catch (e) {
     console.error('login error', reqId, e);
     return serverErr(reqId);

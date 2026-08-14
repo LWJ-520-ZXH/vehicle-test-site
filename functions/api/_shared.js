@@ -65,6 +65,19 @@ async function importKey(secret) {
   return crypto.subtle.importKey('raw', encoder.encode(secret), JWT_ALG, false, ['sign', 'verify']);
 }
 
+// JWT 密钥解析：生产必须设 JWT_SECRET；缺失时降级为进程内临时密钥（仅本地/演示可用，重启即失效，显式告警）。
+let _devSecret = null;
+export function getJWTSecret(env) {
+  if (env && env.JWT_SECRET) return env.JWT_SECRET;
+  if (!_devSecret) {
+    const a = randomToken(32);
+    const b = randomToken(32);
+    _devSecret = a + b;
+    console.warn('[SECURITY] JWT_SECRET 未设置，使用进程内临时密钥（重启失效）。生产环境务必执行 wrangler pages secret put JWT_SECRET');
+  }
+  return _devSecret;
+}
+
 export async function signJWT(payload, secret) {
   const header = base64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
   const body = base64url(JSON.stringify(payload));
@@ -193,7 +206,7 @@ export async function requireAuth(request, env) {
   const cookie = parseCookie(request.headers.get('Cookie'));
   const token = cookie[COOKIE_NAME];
   if (!token) return { anonymous: true, user: null, missing: true };
-  const payload = await verifyJWT(token, env.JWT_SECRET);
+  const payload = await verifyJWT(token, getJWTSecret(env));
   if (!payload) return { anonymous: true, user: null, invalid: true };
   const row = await dbFirst(env, 'SELECT id, email, status, token_version, deleted_at FROM users WHERE id = ?', [payload.sub]);
   if (!row || row.deleted_at) return { anonymous: true, user: null, invalid: true };

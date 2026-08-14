@@ -37,9 +37,12 @@ export async function onRequestPost(context) {
     await dbRun(env, 'INSERT INTO magic_tokens (user_id, token_hash, purpose, expires_at, created_at) VALUES (?, ?, ?, ?, ?)', [user.id, tokenHash, 'register', expires, now]);
 
     const link = `${new URL(request.url).origin}/api/auth/verify?token=${token}&purpose=register`;
-    await sendMagicLinkEmail(env, email, link);
+    const mail = await sendMagicLinkEmail(env, email, link);
 
-    return json({ message: '若邮箱有效，登录链接已发送' });
+    // 最优默认：未配置邮件（本地/演示）时，直接将链接回给前端，无需真实邮箱即可走完流程
+    const resp = { message: '若邮箱有效，登录链接已发送' };
+    if (mail && !mail.ok && mail.reason === 'not_configured') resp.dev_magic_link = link;
+    return json(resp);
   } catch (e) {
     console.error('register error', reqId, e);
     return serverErr(reqId);

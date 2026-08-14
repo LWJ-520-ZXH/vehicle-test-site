@@ -380,6 +380,14 @@ wrangler d1 execute vehicle_site --file=migrations/seed.sql
 - **休眠态（当前默认）**：`wrangler.toml` 中 `AUTH_ENABLED="false"` 且绑定为注释态 → Functions 直返静态内容、不依赖 D1/KV/R2，静态站点不受影响（详见 §14.6 熔断列）。
 - **激活步骤**：① `wrangler d1 create` / `kv namespace create` / `r2 bucket create` 并填 id；② 取消注释 `wrangler.toml` 的 `[[d1_databases]]`/`[[kv_namespaces]]`/`[[r2_buckets]]`；③ `wrangler pages secret put` 注入密钥（§14.3）；④ 将 `AUTH_ENABLED` 改为 `"true"`；⑤ 重部署；⑥ 跑 §14.6 权限矩阵验证。
 
+### 14.5.1 最优默认决策（外部资源缺失即优雅降级，不阻塞）
+按"你来决定"授权，以下默认值已锁定，无需再确认；缺任意外部凭据时系统自动降级而非报错：
+- **发信方式 = Resend**（事务邮件首选，API 简洁、免费档够用）。`EMAIL_API_KEY`/`EMAIL_FROM` 缺失时 `sendMagicLinkEmail`/`sendOwnerEmail` 返回 `not_configured` 不抛错；注册/登录接口会把魔法链接直接回写响应 `dev_magic_link` 字段，本地/演示无需真实邮箱即可走完登录流。
+- **站长通知 = 飞书群机器人 + Resend 站长邮件双通道**。`FEISHU_WEBHOOK` 缺失时 `sendFeishu` 返回 `not_configured` 跳过；`apply.js` 用 `Promise.allSettled` 通知失败不阻断申请入库。
+- **JWT 密钥**：生产必须 `wrangler pages secret put JWT_SECRET`。缺失时 `getJWTSecret()` 降级为进程内随机临时密钥并显式 `console.warn`（仅单次部署有效、重启失效），保证本地/演示可签发校验令牌。
+- **D1/KV/R2**：缺失即休眠态（见上），内容直出静态、鉴权返 503，静态站零影响。
+- 综上：**除 Cloudflare 资源需站长创建外，其余全部"填上也即生效、不填不崩"**。
+
 ### 14.6 权限矩阵验证（上线前必跑）
 | 用户态 | 公开章 | 受限章 | 术语 | 题库 |
 |--------|--------|--------|------|------|

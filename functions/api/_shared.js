@@ -193,9 +193,13 @@ export async function serveAllQuizStatic(env, chapterNum) {
   if (!env.ASSETS) return [];
   const nums = chapterNum ? [chapterNum] : Array.from({ length: 55 }, (_, i) => i + 1);
   const out = await Promise.all(nums.map(async (n) => {
-    const resp = await env.ASSETS.fetch(new Request('https://assets.local/data/quiz/' + String(n).padStart(2, '0') + '.json'));
-    if (!resp || !resp.ok) return null;
-    try { return await resp.json(); } catch { return null; }
+    try {
+      const resp = await env.ASSETS.fetch(new Request('https://assets.local/data/quiz/' + String(n).padStart(2, '0') + '.json'));
+      if (!resp || !resp.ok) return null;
+      return await resp.json();
+    } catch {
+      return null; // 缺失的章节题库：静默跳过，不阻断整体
+    }
   }));
   return out.filter(Boolean).flat();
 }

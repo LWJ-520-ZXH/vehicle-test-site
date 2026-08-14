@@ -1,5 +1,5 @@
 /* ========== 内容版本戳：章节 JSON 缓存失效与 fetch 防缓存用 ========== */
-const __CONTENT_VERSION__ = '20260813215827';
+const __CONTENT_VERSION__ = '20260814103123';
 
 /* 启动即清理旧版本会话缓存，避免残留旧内容（CDN 忽略 ?v，浏览器可能长期缓存旧 app.js） */
 (function () {

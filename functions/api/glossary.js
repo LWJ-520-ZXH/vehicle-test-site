@@ -1,12 +1,12 @@
-import { json, serverErr, requireAuth, authEnabled, dbAll } from './_shared.js';
+import { json, serverErr, requireAuth, authEnabled, dbAll, serveStaticJSON } from './_shared.js';
 
 export async function onRequestGet(context) {
   const { request, env } = context;
   const reqId = crypto.randomUUID();
   try {
     if (!authEnabled(env)) {
-      const rows = await dbAll(env, 'SELECT content_json FROM glossary ORDER BY id');
-      return json({ glossary: (rows.results || []).map(r => JSON.parse(r.content_json)) });
+      const data = await serveStaticJSON(env, '/data/glossary.json');
+      return data ? json({ glossary: data }) : serverErr(reqId);
     }
 
     const auth = await requireAuth(request, env);

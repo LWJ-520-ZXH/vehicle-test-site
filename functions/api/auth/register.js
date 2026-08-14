@@ -1,7 +1,8 @@
-import { json, serverErr, checkRateLimit, getClientIP, isValidEmail, dbFirst, dbRun, randomToken, hashToken, sendMagicLinkEmail } from '../../_shared.js';
+import { json, serverErr, authEnabled, checkRateLimit, getClientIP, isValidEmail, dbFirst, dbRun, randomToken, hashToken, sendMagicLinkEmail } from '../../_shared.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
+  if (!authEnabled(env)) return json({ error: '后端未启用' }, 503);
   const reqId = crypto.randomUUID();
   try {
     const body = await request.json().catch(() => ({}));

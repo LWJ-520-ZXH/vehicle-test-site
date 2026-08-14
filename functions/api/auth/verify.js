@@ -1,7 +1,8 @@
-import { json, err, serverErr, dbFirst, dbRun, signJWT, setJWTCookie } from '../../_shared.js';
+import { json, err, serverErr, authEnabled, dbFirst, dbRun, signJWT, setJWTCookie } from '../../_shared.js';
 
 export async function onRequestGet(context) {
   const { request, env } = context;
+  if (!authEnabled(env)) return json({ error: '后端未启用' }, 503);
   const reqId = crypto.randomUUID();
   try {
     const url = new URL(request.url);

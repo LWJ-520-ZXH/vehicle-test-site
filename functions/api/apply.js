@@ -1,7 +1,8 @@
-import { json, serverErr, requireAuth, checkRateLimit, sanitizeNote, dbFirst, dbRun, sendFeishu, sendOwnerEmail } from './_shared.js';
+import { json, serverErr, authEnabled, requireAuth, checkRateLimit, sanitizeNote, dbFirst, dbRun, sendFeishu, sendOwnerEmail } from './_shared.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
+  if (!authEnabled(env)) return json({ error: '后端未启用' }, 503);
   const reqId = crypto.randomUUID();
   try {
     const auth = await requireAuth(request, env);

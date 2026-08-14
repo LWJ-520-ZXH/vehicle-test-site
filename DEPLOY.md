@@ -375,8 +375,10 @@ wrangler d1 execute vehicle_site --file=migrations/seed.sql
 ```
 > `migrations/seed.sql` 由脚本生成，已被 `.gitignore` 排除，不入库。
 
-### 14.5 部署
-后端随仓库推送自动随 Cloudflare Pages 构建生效（Functions 需生产部署，非仅静态托管）。确保 `wrangler.toml` 绑定与 14.3 密钥均已就位，`AUTH_ENABLED="true"`。
+### 14.5 部署与激活
+后端随仓库推送自动随 Cloudflare Pages 构建生效（Functions 需生产部署，非仅静态托管）。
+- **休眠态（当前默认）**：`wrangler.toml` 中 `AUTH_ENABLED="false"` 且绑定为注释态 → Functions 直返静态内容、不依赖 D1/KV/R2，静态站点不受影响（详见 §14.6 熔断列）。
+- **激活步骤**：① `wrangler d1 create` / `kv namespace create` / `r2 bucket create` 并填 id；② 取消注释 `wrangler.toml` 的 `[[d1_databases]]`/`[[kv_namespaces]]`/`[[r2_buckets]]`；③ `wrangler pages secret put` 注入密钥（§14.3）；④ 将 `AUTH_ENABLED` 改为 `"true"`；⑤ 重部署；⑥ 跑 §14.6 权限矩阵验证。
 
 ### 14.6 权限矩阵验证（上线前必跑）
 | 用户态 | 公开章 | 受限章 | 术语 | 题库 |

@@ -162,6 +162,31 @@ export async function checkRateLimit(env, key, limit, windowSeconds) {
   }
 }
 
+// --- static asset serving (circuit-breaker / dormant mode) ---
+// 休眠态下后端不依赖 D1，直接读部署产物里的静态 JSON（同域 ASSETS 绑定）。
+export async function serveStaticJSON(env, path) {
+  if (!env.ASSETS) return null;
+  try {
+    const resp = await env.ASSETS.fetch(new Request('https://assets.local' + path));
+    if (!resp || !resp.ok) return null;
+    return await resp.json();
+  } catch (e) {
+    console.error('serveStaticJSON error', e.message, path);
+    return null;
+  }
+}
+
+export async function serveAllQuizStatic(env, chapterNum) {
+  if (!env.ASSETS) return [];
+  const nums = chapterNum ? [chapterNum] : Array.from({ length: 55 }, (_, i) => i + 1);
+  const out = await Promise.all(nums.map(async (n) => {
+    const resp = await env.ASSETS.fetch(new Request('https://assets.local/data/quiz/' + String(n).padStart(2, '0') + '.json'));
+    if (!resp || !resp.ok) return null;
+    try { return await resp.json(); } catch { return null; }
+  }));
+  return out.filter(Boolean).flat();
+}
+
 // --- auth context ---
 export async function requireAuth(request, env) {
   if (!authEnabled(env)) return { anonymous: true, user: null };

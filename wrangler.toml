@@ -13,24 +13,29 @@ compatibility_date = "2024-09-01"
 # 创建资源后把 <id> 替换为真实值；密钥用 `wrangler pages secret put` 注入，禁止写入本文件。
 
 [vars]
-AUTH_ENABLED = "true"
+# 熔断开关：后端未激活（资源/前端未就绪）时设为 "false"，Functions 直返静态内容、不依赖 D1/KV/R2。
+# 待 D1/KV/R2 创建并绑定、密钥注入后，改为 "true" 启用鉴权（见 DEPLOY.md §14.5）。
+AUTH_ENABLED = "false"
 # OWNER_EMAIL = "your-email@example.com"
 
-[[d1_databases]]
-binding = "DB"
-database_name = "vehicle_site"
-database_id = "<your-database-id>"
-
-[[kv_namespaces]]
-binding = "KV"
-id = "<your-kv-id>"
-
-[[r2_buckets]]
-binding = "R2"
-bucket_name = "d1-backup"
+# ── 后端绑定（按需启用：创建资源后取消注释并填真实 id）──
+# Cloudflare Pages 的绑定亦可在 Dashboard（设置 > Functions > D1/KV/R2）配置；
+# 此处注释态可避免部署时绑定不存在的资源导致构建失败。
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "vehicle_site"
+# database_id = "<your-database-id>"
+#
+# [[kv_namespaces]]
+# binding = "KV"
+# id = "<your-kv-id>"
+#
+# [[r2_buckets]]
+# binding = "R2"
+# bucket_name = "d1-backup"
 
 # 密钥（Secret）清单：JWT_SECRET / FEISHU_WEBHOOK / EMAIL_API_KEY / EMAIL_FROM
-# 注入方式：
+# 注入方式（不写入本文件）：
 #   wrangler pages secret put JWT_SECRET
 #   wrangler pages secret put FEISHU_WEBHOOK
 #   wrangler pages secret put EMAIL_API_KEY
